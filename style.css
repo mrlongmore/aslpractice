@@ -1,0 +1,42 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#name-modal {
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+}
+#name-modal.active {
+    opacity: 1;
+}
+#topic-modal {
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+}
+#topic-modal.active {
+    opacity: 1;
+}
+#quiz-modal {
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+}
+#quiz-modal.active {
+    opacity: 1;
+}
+#certificate-modal {
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+}
+#certificate-modal.active {
+    opacity: 1;
+}
+.modal {
+    height: 100%;
+    width: 100%;
+    border-radius: 10px;
+}
