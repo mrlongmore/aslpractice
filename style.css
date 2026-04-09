@@ -47,7 +47,7 @@ img {
     font-size: 16px;
     cursor: pointer;
 }
-#results-area {
+#result-area {
     display: flex;
     flex-direction: column;
     gap: 10px;
