@@ -2,6 +2,9 @@
 <html>
     <head>
         <link rel = "stylesheet" href = "style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
     </head>
     <body>
         <div id = "name-modal" class = "modal">
@@ -9,7 +12,7 @@
                 <h1>What is your name?</h1>
             </div>
             <div class = "input-area">
-                <input type = "text">
+                <input id="name-input" type = "text" placeholder="Your name here">
                 <button id = "name-button">Submit</button>
             </div>
         </div>
@@ -20,8 +23,15 @@
             <div id = "topic-container">
                 <!--Topics populate here-->
             </div>
+            <button id = "topic-button">Submit</button>
         </div>
         <div id = "quiz-modal" class = "modal">
+            <div class = "questions-remaining">
+                <!--Questions remaining populates here-->
+            </div>
+            <div class = "modal-header">
+                <h1>Identify the following sign:</h1>
+            </div>
             <div id = "gif-modal">
                 <!--Gif populates here-->
             </div>
@@ -29,14 +39,17 @@
                 <!--Answers populate here-->
             </div>
         </div>
-        <div id = "certificate-modal" class = modal>
-            <div class = "modal-header">
-                <h1>Great work, name!</h1>
+        <div id = "certificate-modal" class = "modal">
+            <div id = "certificate-header" class = "modal-header">
+                <!--Certificate header populates here-->
             </div>
             <div id = "result-area">
-                <h2>Your score is: x</h2>
-                <p>Take a screenshot of your results and upload them to Google Classroom!</p>
+                <!--Results populate here-->
             </div>
+            <button id = "certificate-button">Want to practice a different topic?</button>
+        </div>
+        <div id = "mini-game">
+            <canvas></canvas>
         </div>
         <script src = "script.js"></script>
     </body>
