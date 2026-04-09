@@ -93,6 +93,8 @@ document.querySelector('#topic-button').addEventListener('click', () => {
 // This is how we start the quiz
 function startQuiz(questions) {
     let current_question = 0;
+    questions_correct = 0;
+    questions_incorrect = 0;
     questions_total = questions.length;
     function displayQuestion() {
         const question = questions[current_question];
