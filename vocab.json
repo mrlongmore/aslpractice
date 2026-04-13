@@ -2185,6 +2185,136 @@
         }
     ]
 },
+"Clothing": {
+    "title": "Clothes",
+    "questions": [
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384932/ozcqsitkryhbpgvakgo2.gif",
+      "options": ["Pants", "Shirt", "Dress", "Skirt"],
+      "answer": 0
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384667/hd4hcjiafesr6exn2urb.gif",
+      "options": ["Pants", "Shirt", "Dress", "Skirt"],
+      "answer": 1
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384862/h991bklzodziovfgchkn.gif",
+      "options": ["Pants", "Shirt", "Dress", "Skirt"],
+      "answer": 2
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359446/k39vjrei98c8s3kexncv.gif",
+      "options": ["Pants", "Shirt", "Dress", "Skirt"],
+      "answer": 3
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714355261/mkhqx8uf6lxbynfwzacl.gif",
+      "options": ["Shorts", "Pants", "Socks", "Belt"],
+      "answer": 0
+    }
+  ]
+},
+"Accessories": {
+    "title": "Accessories",
+    "questions": [
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359222/iopxdtjceqg3gafznkj4.gif",
+      "options": ["Shoes", "Sandals", "High-Heels", "Socks"],
+      "answer": 1
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384778/yyzi49jvofoctsjohdf3.gif",
+      "options": ["Shoes", "Sandals", "High-Heels", "Socks"],
+      "answer": 3
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384725/kdu7u6g3r8xt3of8rrmb.gif",
+      "options": ["Shoes", "Sandals", "High-Heels", "Socks"],
+      "answer": 0
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359070/vd7bvhfrzx1vqkkf5j80.gif",
+      "options": ["Shoes", "Sandals", "High-Heels", "Socks"],
+      "answer": 2
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714358901/czftnqemdmwox47a5rto.gif",
+      "options": ["Glasses", "Watch", "Necklace", "Bracelet"],
+      "answer": 0
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714358497/rnpxv5bttdekurixqaci.gif",
+      "options": ["Glasses", "Watch", "Necklace", "Bracelet"],
+      "answer": 1
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/v1714354434/jztnwvaboxhnioouvfvh.gif",
+      "options": ["Glasses", "Watch", "Necklace", "Bracelet"],
+      "answer": 2
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/v1714321226/ux9ofkcuufqsreiumuig.gif",
+      "options": ["Glasses", "Watch", "Necklace", "Bracelet"],
+      "answer": 3
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902645/kua7trefubxstqendqqe.gif",
+      "options": ["Tie", "Bowtie", "Belt", "Scarf"],
+      "answer": 0
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902679/pr4oxz2rnhqr6upbhvsv.gif",
+      "options": ["Tie", "Bowtie", "Belt", "Scarf"],
+      "answer": 1
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714358663/hlbs7jd4si66xbklofxo.gif",
+      "options": ["Tie", "Bowtie", "Belt", "Scarf"],
+      "answer": 2
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714354958/srwp1fq2cbozkmt71ft3.gif",
+      "options": ["Tie", "Bowtie", "Belt", "Scarf"],
+      "answer": 3
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359001/e4tjs1cue3ucikcnnwj6.gif",
+      "options": ["Hat", "Purse", "Socks", "Tie"],
+      "answer": 0
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359119/cq3yy2cbvtqm7jjwkr52.gif",
+      "options": ["Hat", "Purse", "Socks", "Tie"],
+      "answer": 1
+    }
+  ]
+},
+"General_and_Patterns": {
+    "title": "General and Patterns",
+    "questions": [
+      {
+        "question": "https://media.gimkit.com/image/upload/v1704384606/kl6skympwmaqz5ar9whs.gif",
+        "options": ["Clothes", "Wear", "Stripes", "Polka-Dots"],
+        "answer": 0
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/v1714359607/ai9jh7ntn7zxkwqhubiq.gif",
+      "options": ["Clothes", "Wear", "Stripes", "Polka-Dots"],
+      "answer": 1
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714355853/femmcpxhigz3fjdjp5s3.gif",
+      "options": ["Clothes", "Wear", "Stripes", "Polka-Dots"],
+      "answer": 2
+    },
+    {
+      "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714354890/jyeyi5p6ef2j5iwqm23m.gif",
+      "options": ["Clothes", "Wear", "Stripes", "Polka-Dots"],
+      "answer": 3
+    }
+  ]
+},
     "Directional Verbs": {
         "title": "Directional Verbs",
         "questions": [
