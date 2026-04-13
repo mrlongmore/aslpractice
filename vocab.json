@@ -291,7 +291,7 @@
         ]
     },
     "fingerspelling_numbers": {
-        "title": "🤟 ASL Numbers (1-20)",
+        "title": "🔢 ASL Numbers (1-20)",
         "questions": [
             {
                 "question": "What number is being signed?",
@@ -1410,7 +1410,7 @@
   ]
 },
     "Classes": {
-        "title": "Classes",
+        "title": "🧑‍🏫 Classes",
         "questions": [
             {
                 "question": "What is being signed?",
@@ -1701,7 +1701,7 @@
         ]
     },
     "Sports": {
-        "title": "Sports",
+        "title": "🥎 Sports",
         "questions": [
             {
                 "question": "What is being signed?",
@@ -1915,7 +1915,7 @@
         ]
     },
     "Location": {
-        "title": "Location",
+        "title": "🏪 Location",
         "questions": [
             {
                 "question": "What is being signed?",
@@ -2085,7 +2085,7 @@
         ]
     },
 "colors": {
-    "title": "ASL Colors",
+    "title": "🎨 ASL Colors",
     "questions": [
         {
             "question": "What color is being signed?",
@@ -2186,7 +2186,7 @@
     ]
 },
 "Clothing": {
-    "title": "Clothes",
+    "title": "👕 Clothing",
     "questions": [
     {
       "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384932/ozcqsitkryhbpgvakgo2.gif",
@@ -2216,7 +2216,7 @@
   ]
 },
 "Accessories": {
-    "title": "Accessories",
+    "title": "🧣 Accessories",
     "questions": [
     {
       "question": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359222/iopxdtjceqg3gafznkj4.gif",
@@ -2291,7 +2291,7 @@
   ]
 },
 "General_and_Patterns": {
-    "title": "General and Patterns",
+    "title": "💈 General Clothing and Patterns",
     "questions": [
       {
         "question": "https://media.gimkit.com/image/upload/v1704384606/kl6skympwmaqz5ar9whs.gif",
@@ -2316,7 +2316,7 @@
   ]
 },
     "Directional Verbs": {
-        "title": "Directional Verbs",
+        "title": "↗️ Directional Verbs",
         "questions": [
             {
                 "question": "What is being signed?",
@@ -2519,7 +2519,7 @@
         ]
     },
     "Weather": {
-        "title": "Weather",
+        "title": "⛅ Weather",
         "questions": [
             {
                 "question": "What is the weather?",
@@ -2623,7 +2623,7 @@
         ]
     },
     "Days of the Week": {
-        "title": "Days of the Week",
+        "title": "📅 Days of the Week",
         "questions": [
             {
                 "question": "What day is it?",
@@ -2705,7 +2705,7 @@
         ]
     },
     "Conversational Words": {
-        "title": "Conversational Words",
+        "title": "💬 Conversational Words",
         "questions": [
             {
                 "question": "What is being signed?",
@@ -2864,7 +2864,7 @@
         ]
     },
     "Time": {
-        "title": "Time",
+        "title": "⏰ Time",
         "questions": [
             {
                 "question": "What time is it?",
@@ -3188,7 +3188,7 @@
         ]
     },
     "Classifiers": {
-        "title": "Classifiers",
+        "title": "🫶 Classifiers",
         "questions": [
             {
                 "question": "What is being signed?",
@@ -3413,7 +3413,7 @@
         ]
     },
     "Money": {
-        "title": "Money",
+        "title": "💵 Money",
         "questions": [
             {
                 "question": "How much money is this?",
@@ -3704,7 +3704,7 @@
         ]
     },
     "House Part 1": {
-        "title": "House Part 1",
+        "title": "🏠 House Part 1",
         "questions": [
             {
                 "question": "What is being signed?",
@@ -3863,7 +3863,7 @@
         ]
     },
     "House Part 2": {
-        "title": "House Part 2",
+        "title": "🛏️ House Part 2",
         "questions": [
             {
                 "question": "What is being signed?",

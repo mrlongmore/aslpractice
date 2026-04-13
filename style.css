@@ -39,7 +39,7 @@ img {
     flex-direction: row;
     gap: 20px;
 }
-.answer-button {
+button {
     padding: 10px 20px;
     border-radius: 10px;
     border: solid black 2px;
