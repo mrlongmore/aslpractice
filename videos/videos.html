@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Practice</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Video Practice</h1>
+        <button id="startQuiz">Start Practice</button>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="nameInput">
+                <h2>Enter Your Name</h2>
+                <input type="text" id="userName" placeholder="Your Name">
+                <button id="submitName">Next</button>
+            </div>
+            <div id="topicSelection" style="display: none;">
+                <h2>Select a Topic</h2>
+                <div id="topicList" class="topic-list"></div>
+                <p id="topicError" class="error-message" style="display:none;"></p>
+            </div>
+            <div id="quizContent" style="display: none;">
+                <div id="videoContainer">
+                    <video id="quizVideo" controls>
+                        <source id="videoSource">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div id="questionArea">
+                    <h3 id="questionText"></h3>
+                    <div id="options">
+                        <button class="option" data-index="0"></button>
+                        <button class="option" data-index="1"></button>
+                        <button class="option" data-index="2"></button>
+                        <button class="option" data-index="3"></button>
+                    </div>
+                    <div id="textInputArea" style="display: none;">
+                        <div id = "money-input">
+                        <p>$</p><input type="text" id="textAnswer" placeholder="Type your answer here">
+                        <button id="submitAnswer">Submit Answer</button>
+                    </div> 
+                    </div>
+                </div>
+                <div id="certificate" style="display: none;">
+                    <h2>Congratulations, <span id="certName"></span>!</h2>
+                    <p>You answered <span id="correctCount"></span> questions correctly.</p>
+                    <p>You got <span id="incorrectCount"></span> questions incorrect.</p>
+                    <p>Please upload this certificate to Google Classroom. Please screenshot the full certificate along the dotted lines.</p>
+                    <button id="restartQuiz">Restart Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

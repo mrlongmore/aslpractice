@@ -1,0 +1,104 @@
+{
+  "topics": [
+    {
+      "name": "Money 1",
+      "videos": [
+        {
+          "video": "money1.mp4",
+          "questions": [
+            { "question": "Where do I go?", "type": "multiple-choice", "options": ["store", "mall", "shop", "school"], "correct": "store" },
+            { "question": "How much did the chicken cost?", "type": "text", "correct": "10.50" },
+            { "question": "How much did the rice cost?", "type": "text", "correct": "20.25" },
+            { "question": "How much did the carrots cost?", "type": "text", "correct": "7.10" },
+            { "question": "How much was the total?", "type": "text", "correct": "47.85" }
+          ]
+        },
+        {
+          "video": "money2.mp4",
+          "questions": [
+            { "question": "What does the signer say about themself?", "type": "multiple-choice", "options": ["They're broke", "They're wealthy", "They're hurt", "They're sad"], "correct": "They're broke" },
+            { "question": "How much money do they want (add decimal point)?", "type": "text", "correct": "10.00" }
+          ]
+        },
+        {
+          "video": "money4.mp4",
+          "questions": [
+            { "question": "What are video games described as?", "type": "multiple-choice", "options": ["expensive", "cheap", "lousy", "fun"], "correct": "expensive" },
+            { "question": "How much is a PS5?", "type": "text", "correct": "599.99" },
+            { "question": "How much is a Switch 2?", "type": "text", "correct": "449.99" },
+            { "question": "How much is an Xbox Series X?", "type": "text", "correct": "649.99" }
+          ]
+        },
+        {
+          "video": "money5.mp4",
+          "questions": [
+            { "question": "How much is the triple-stack cheeseburger?", "type": "text", "correct": "15.49" },
+            { "question": "How much are the french fries?", "type": "text", "correct": "6.99" },
+            { "question": "How much is a the soda?", "type": "text", "correct": "3.99" },
+            { "question": "How much is the milkshake?", "type": "text", "correct": "8.79" },
+            { "question": "How much is the total with tax?", "type": "text", "correct": "38.79" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Clothing 1",
+      "videos": [
+        {
+          "video": "clothing_4_1.mp4",
+          "questions": [
+            { "question": "Who is being discussed?", "type": "multiple-choice", "options": ["man", "woman", "boy", "girl"], "correct": "man" },
+            { "question": "What is the man's height?", "type": "multiple-choice", "options": ["short", "average", "tall", "unknown"], "correct": "tall" },
+            { "question": "What is the man's body type?", "type": "multiple-choice", "options": ["thin", "average", "chubby", "unknown"], "correct": "thin" },
+            { "question": "What color is his shirt?", "type": "multiple-choice", "options": ["white", "black", "green", "yellow"], "correct": "white" },
+            { "question": "What color is his jacket?", "type": "multiple-choice", "options": ["red", "pink", "green", "yellow"], "correct": "red" },
+            { "question": "What color are his pants?", "type": "multiple-choice", "options": ["blue", "black", "brown", "yellow"], "correct": "blue" },
+            { "question": "What color are his shoes?", "type": "multiple-choice", "options": ["brown", "black", "gray", "white"], "correct": "brown" },
+            { "question": "What color are his socks?", "type": "multiple-choice", "options": ["white", "gray", "black", "blue"], "correct": "white" }
+          ]
+        },
+        {
+          "video": "clothing_4_2.mp4",
+          "questions": [
+            { "question": "Who is being discussed?", "type": "multiple-choice", "options": ["man", "woman", "boy", "girl"], "correct": "woman" },
+            { "question": "What is the woman's height?", "type": "multiple-choice", "options": ["short", "average", "tall", "unknown"], "correct": "short" },
+            { "question": "What is the woman's body type?", "type": "multiple-choice", "options": ["thin", "average", "chubby", "unknown"], "correct": "chubby" },
+            { "question": "What color is her dress?", "type": "multiple-choice", "options": ["pink", "red", "purple", "green"], "correct": "pink" },
+            { "question": "What color are her leggings?", "type": "multiple-choice", "options": ["black", "blue", "brown", "red"], "correct": "black" },
+            { "question": "What color are her earings?", "type": "multiple-choice", "options": ["gold", "silver", "green", "yellow"], "correct": "gold" },
+            { "question": "What color are her high-heels?", "type": "multiple-choice", "options": ["silver", "gold", "seagreen", "gold"], "correct": "silver" },
+            { "question": "What color are her socks?", "type": "multiple-choice", "options": ["black", "blue", "gray", "red"], "correct": "black" }
+          ]
+        },
+        {
+          "video": "clothing_4_3.mp4",
+          "questions": [
+            { "question": "Who is being discussed?", "type": "multiple-choice", "options": ["man", "woman", "boy", "girl"], "correct": "boy" },
+            { "question": "What is the boy's height?", "type": "multiple-choice", "options": ["short", "average", "tall", "unknown"], "correct": "short" },
+            { "question": "What is the boy's body type?", "type": "multiple-choice", "options": ["thin", "average", "chubby", "unknown"], "correct": "average" },
+            { "question": "What is the primary color of his shirt?", "type": "multiple-choice", "options": ["dark yellow", "light yellow", "dark gold", "white"], "correct": "dark yellow" },
+            { "question": "What color are the stripes on his shirt?", "type": "multiple-choice", "options": ["dark green", "light green", "dark gray", "white"], "correct": "white" },
+            { "question": "What color are his shorts?", "type": "multiple-choice", "options": ["dark green", "light green", "gray", "gold"], "correct": "dark green" },
+            { "question": "What color is his hat?", "type": "multiple-choice", "options": ["blue", "black", "brown", "gray"], "correct": "blue" },
+            { "question": "What color are his shoes?", "type": "multiple-choice", "options": ["white", "gray", "black", "red"], "correct": "white" },
+            { "question": "What color are his socks?", "type": "multiple-choice", "options": ["gray", "white", "black", "red"], "correct": "gray" }
+          ]
+        },
+        {
+          "video": "clothing_4_4.mp4",
+          "questions": [
+            { "question": "Who is being discussed?", "type": "multiple-choice", "options": ["man", "woman", "boy", "girl"], "correct": "girl" },
+            { "question": "What is the girl's height?", "type": "multiple-choice", "options": ["short", "average", "tall", "unknown"], "correct": "average" },
+            { "question": "What is the girl's body type?", "type": "multiple-choice", "options": ["thin", "average", "chubby", "unknown"], "correct": "average" },
+            { "question": "What is the primary color of her shirt?", "type": "multiple-choice", "options": ["light purple", "dark purple", "dark orange", "light orange"], "correct": "light purple" },
+            { "question": "What color and style are the stripes on her shirt?", "type": "multiple-choice", "options": ["straight, purple", "squiggly, purple", "straight, orange", "squiggly, orange"], "correct": "squiggly, orange" },
+            { "question": "What color is her skirt?", "type": "multiple-choice", "options": ["orange", "red", "green", "gold"], "correct": "orange" },
+            { "question": "What color are her glasses?", "type": "multiple-choice", "options": ["white", "black", "brown", "gray"], "correct": "white" },
+            { "question": "What color is her watch?", "type": "multiple-choice", "options": ["white", "gray", "black", "red"], "correct": "gray" },
+            { "question": "What color are her sandals?", "type": "multiple-choice", "options": ["dark purple", "light purple", "dark pink", "hot pink"], "correct": "dark purple" }
+          ]
+        }
+      ]
+    }
+  ]
+}
