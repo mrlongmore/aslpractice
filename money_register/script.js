@@ -207,34 +207,54 @@ function create() {
         sprite.setData('stackKey', stack.key);
         sprite.setData('stackX', stack.x);
         sprite.setData('stackY', stack.y);
+        sprite.setData('isPile', true);
     });
 
     register.setInteractive({ useHandCursor: true });
     register.setData('isRegister', true);
 
-    this.input.on('gameobjectdown', (pointer, gameObject) => {
-        if (!canSpawn) {
+    this.input.on('pointerdown', (pointer) => {
+        const hitObjects = this.input.hitTestPointer(pointer);
+        if (!hitObjects || hitObjects.length === 0) {
             return;
         }
 
-        if (gameObject === selectedPiece) {
+        const target = hitObjects.find((item) => item.getData('isRegister') || item.getData('isPile') || item.getData('dropped'));
+        if (!target) {
             return;
         }
 
-        if (gameObject.getData('isRegister')) {
+        if (target.getData('isRegister')) {
             if (selectedPiece) {
                 dropOnRegister(selectedPiece);
             }
             return;
         }
 
-        const value = gameObject.getData('moneyValue');
+        if (target.getData('dropped')) {
+            removeDroppedPiece(target);
+            return;
+        }
+
+        if (!canSpawn) {
+            return;
+        }
+
+        const clickedStackKey = target.getData('stackKey');
+        const value = target.getData('moneyValue');
         if (typeof value === 'number') {
+            if (selectedPiece && clickedStackKey && selectedPiece.getData('stackKey') === clickedStackKey) {
+                selectedPiece.destroy();
+                selectedPiece = null;
+                updateStatusMessage('Returned that item to the stack. Pick a pile again if you want a different bill or coin.');
+                return;
+            }
+
             if (selectedPiece) {
                 selectedPiece.destroy();
                 selectedPiece = null;
             }
-            spawnMoneyPiece(this, gameObject.getData('stackKey'), value, pointer);
+            spawnMoneyPiece(this, clickedStackKey, value, pointer);
         }
     });
 
@@ -255,7 +275,8 @@ function update() {
 function spawnMoneyPiece(scene, key, value, pointer) {
     const x = pointer?.worldX || 150;
     const y = pointer?.worldY || 300;
-    selectedPiece = scene.add.image(x, y, key).setInteractive({ useHandCursor: true });
+    selectedPiece = scene.add.image(x, y, key).setInteractive({ useHandCursor: true, draggable: false });
+    selectedPiece.disableInteractive();
     selectedPiece.setData('moneyValue', value);
     selectedPiece.setData('stackKey', key);
     selectedPiece.setDepth(100);
@@ -268,8 +289,8 @@ function dropOnRegister(object) {
         return;
     }
 
-    object.setInteractive(false);
     object.setData('dropped', true);
+    object.setInteractive({ useHandCursor: true });
     object.setDepth(5);
     droppedGroup.add(object);
     object.x = 700 + Phaser.Math.Between(-30, 30);
@@ -321,7 +342,7 @@ function goToNextQuestion() {
     currentQuestionIndex += 1;
     updateQuestionNumber();
     updateGifQuestion();
-    updateStatusMessage('Click a pile to pick up a bill or coin, then click the register to drop it.');
+    updateStatusMessage('Click a pile to pick up a bill or coin, then click the register to drop it. Click a dropped item to remove it if you change your mind.');
     canSpawn = true;
 }
 
@@ -354,6 +375,19 @@ function formatMoney(cents) {
     const dollars = Math.floor(cents / 100);
     const remainder = cents % 100;
     return `$${dollars}.${remainder.toString().padStart(2, '0')}`;
+}
+
+function removeDroppedPiece(object) {
+    if (!object || !object.getData('dropped')) {
+        return;
+    }
+
+    const amount = object.getData('moneyValue') || 0;
+    currentTotal = Math.max(0, currentTotal - amount);
+    updateGivenAmount();
+    droppedGroup.remove(object, false);
+    object.destroy();
+    updateStatusMessage('Removed that bill or coin. Add more money, or click another dropped item to remove it.');
 }
 
 function destroyDroppedPieces() {
