@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Money Game</title>
+        <link rel="stylesheet" href="money_game.css">
+        <script src="https://cdn.jsdelivr.net/npm/phaser@3.86.0/dist/phaser.min.js"></script>
+    </head>
+    <body>
+        <div id="start-screen" class="overlay">
+            <div class="panel">
+                <h1>Money Game</h1>
+                <label>
+                    Enter your name
+                    <input id="player-name" type="text" placeholder="Type your name" />
+                </label>
+                <button id="start-button">Start Game</button>
+                <div id="start-error" style="color:#b91c1c; margin-top:12px;"></div>
+            </div>
+        </div>
+
+        <div id="status-panel" class="hidden">
+            <div class="status-box">
+                <span class="status-label">Question</span>
+                <div class="status-value" id="question-number">1</div>
+            </div>
+            <div class="status-box">
+                <span class="status-label">Given</span>
+                <div class="status-value" id="given-amount"></div>
+            </div>
+            <div class="status-box">
+                <span class="status-label">Status</span>
+                <div id="status-message">Enter your name to begin.</div>
+                <button id="next-question-button" class="hidden">Next Question</button>
+            </div>
+        </div>
+
+        <div id="content-wrapper" class="hidden">
+            <div id="gif-container">
+                <div id="gif-header">Pay this amount</div>
+                <img id="gif-image" src="" alt="ASL sign gif" />
+                <div id="gif-caption"></div>
+            </div>
+            <div id="game-container"></div>
+        </div>
+
+        <div id="certificate" class="overlay hidden"></div>
+
+        <script src="script.js"></script>
+    </body>
+</html>
