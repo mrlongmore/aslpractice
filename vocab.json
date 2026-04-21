@@ -2338,6 +2338,107 @@
     }
   ]
 },
+"Descriptions": {
+        "title": "👤 Descriptions",
+        "questions": [
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714356960/ibddjczztwozhsfh7jfp.gif",
+                "options": ["THIN", "SMALL", "TALL", "CHUBBY"],
+                "correct": 0
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714355790/bfizgqk2t1l8lhdfuh7c.gif",
+                "options": ["MEDIUM", "SMALL", "THIN", "BALD"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714322296/qoeinb5ol3uuvlr7c7iw.gif",
+                "options": ["TALL", "SMALL", "MEDIUM", "THIN"],
+                "correct": 2
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714356751/xb7mbyukelixgqyoioze.gif",
+                "options": ["SMALL", "MEDIUM", "THIN", "TALL"],
+                "correct": 3
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714321386/fxhn37lxmltcofkhlvuu.gif",
+                "options": ["CHUBBY", "THIN", "HAIR", "BEARD"],
+                "correct": 0
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714321561/igtopycbyscnb2xs4ufi.gif",
+                "options": ["TALL", "CHUBBY", "SMALL", "BALD"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714354380/f4pziuwonbh9jvbndytq.gif",
+                "options": ["BEARD", "HAIR", "MUSTACHE", "BUN"],
+                "correct": 2
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714322154/vvsymkg0pyhzzctzge2v.gif",
+                "options": ["BALD", "BLONDE", "STRAIGHT-HAIR", "HAIR"],
+                "correct": 3
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714272722/fy2gxwr0auax2agxkzm6.gif",
+                "options": ["BALD", "MUSTACHE", "BEARD", "CHUBBY"],
+                "correct": 0
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714273261/oae2un2femp6wt95hcde.gif",
+                "options": ["MUSTACHE", "BEARD", "HAIR", "BALD"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902028/xkofxpflhi2tnwlujvnd.gif",
+                "options": ["WAVY-HAIR", "STRAIGHT-HAIR", "CURLY-HAIR", "PONY-TAIL"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902091/zcbreqgh5ytgfxl8rvp9.gif",
+                "options": ["CURLY-HAIR", "STRAIGHT-HAIR", "WAVY-HAIR", "BUN"],
+                "correct": 2
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902151/wfwlasy4meyrfeu3vdd8.gif",
+                "options": ["WAVY-HAIR", "STRAIGHT-HAIR", "BUN", "CURLY-HAIR"],
+                "correct": 3
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902205/fcgh4ddguhzadvtssrve.gif",
+                "options": ["BUN", "PONY-TAIL", "HAIR", "BALD"],
+                "correct": 0
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902308/rohq5t36tkphurvf5lfs.gif",
+                "options": ["BUN", "PONY-TAIL", "STRAIGHT-HAIR", "BLONDE"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1765480307/uj5ugd2ipurwzqc9ls8z.gif",
+                "options": ["HAIR", "BUN", "BLONDE", "SMALL"],
+                "correct": 2
+            }
+        ]
+    },
     "Directional Verbs": {
         "title": "↗️ Directional Verbs",
         "questions": [
