@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Word Search Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #word-search-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            gap: 4px;
+            user-select: none; /* Prevents text selection while dragging */
+        }
+        .grid-cell {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f3f4f6; /* bg-gray-100 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            position: relative;
+        }
+        .dark .grid-cell {
+            background-color: #374151; /* dark:bg-gray-700 */
+        }
+        .grid-cell img {
+            width: 90%;
+            height: 90%;
+            pointer-events: none; /* CRITICAL: Prevents browser's default image drag */
+        }
+        /* The selection highlight is a blue outline */
+        .grid-cell.selected {
+            background-color: #dbeafe; /* bg-blue-100 */
+            box-shadow: 0 0 0 4px #60a5fa; /* Blue outline */
+            transform: scale(1.05);
+        }
+        /* The permanent highlight for found words */
+        .grid-cell.found-permanent {
+            background-color: #dcfce7; /* bg-green-100 */
+            box-shadow: 0 0 0 4px #4ade80; /* Green outline */
+        }
+        .dark .grid-cell.found-permanent {
+             background-color: #166534; /* dark:bg-green-800 */
+        }
+        #word-list li.found {
+            text-decoration: line-through;
+            color: #6b7280; /* text-gray-500 */
+        }
+        .dark #word-list li.found {
+            color: #9ca3af; /* dark:text-gray-400 */
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .certificate-font {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #certificate-container, #certificate-container * { visibility: visible; }
+            #certificate-container { position: absolute; left: 0; top: 0; width: 100%; }
+            #certificate-buttons { display: none; }
+        }
+    </style>
+</head>
+<body class="bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Name Input Modal (Starts Visible) -->
+    <div id="name-modal" class="modal-overlay">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl text-center w-full max-w-md mx-4">
+            <h2 class="text-2xl font-bold mb-4">Welcome to ASL Word Search!</h2>
+            <p class="mb-6 text-gray-600 dark:text-gray-400">Please enter your name to begin.</p>
+            <input type="text" id="player-name-input" placeholder="Your Name" class="w-full text-lg px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none mb-6 bg-white dark:bg-gray-800 text-center">
+            <button id="start-game-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                Start Game
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div id="game-container" class="w-full max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 hidden">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400">ASL Word Search</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Click and drag letters to select a word.</p>
+            <p id="round-counter" class="text-gray-600 dark:text-gray-400 mt-2 font-semibold text-lg"></p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="w-full lg:w-2/3">
+                 <div id="word-search-grid" class="shadow-lg p-2 bg-white dark:bg-gray-800 rounded-xl"></div>
+            </div>
+           
+            <div class="w-full lg:w-1/3">
+                <div class="bg-gray-100 dark:bg-gray-700 p-6 rounded-xl h-full flex flex-col">
+                    <h2 class="text-2xl font-bold mb-4 text-center">Words to Find</h2>
+                    <ul id="word-list" class="text-lg space-y-2 flex-grow"></ul>
+                    <div id="feedback" class="text-center font-semibold text-lg min-h-[2rem] my-4 transition-opacity duration-300"></div>
+                    <button id="next-round-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-transform transform hover:scale-105 hidden">
+                        Next Round
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Certificate Modal -->
+    <div id="certificate-modal" class="modal-overlay hidden">
+        <div id="certificate-container" class="bg-white text-gray-800 p-8 rounded-2xl shadow-2xl text-center w-full max-w-2xl mx-4 border-8 border-yellow-500 relative">
+            <h2 class="text-4xl font-bold text-yellow-700 mb-2">Certificate of Completion</h2>
+            <p class="text-lg mb-4">This certifies that</p>
+            <p id="certificate-name" class="text-5xl certificate-font text-indigo-600 mb-4 border-b-2 border-gray-400 pb-2 mx-auto max-w-lg"></p>
+            <p class="text-lg mb-8">has successfully completed the ASL Word Search Challenge!</p>
+            <div id="certificate-buttons" class="flex flex-col sm:flex-row gap-4 justify-center">
+                 <button onclick="window.print()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Print</button>
+                 <button onclick="location.reload()" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const nameModal = document.getElementById('name-modal');
+        const playerNameInput = document.getElementById('player-name-input');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const gameContainer = document.getElementById('game-container');
+        const gridContainer = document.getElementById('word-search-grid');
+        const wordListElement = document.getElementById('word-list');
+        const feedbackElement = document.getElementById('feedback');
+        const roundCounter = document.getElementById('round-counter');
+        const nextRoundBtn = document.getElementById('next-round-btn');
+        const certificateModal = document.getElementById('certificate-modal');
+        const certificateName = document.getElementById('certificate-name');
+
+        // --- Game Config & State ---
+        const gridSize = 7;
+        const totalRounds = 5;
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const baseWordList = ['HELLO', 'CLASS', 'LEARN', 'HAPPY', 'SMILE', 'MUSIC', 'WATER', 'EARTH', 'BRAVE', 'POWER', 'SMART', 'GAMES', 'APPLE', 'FUNNY', 'QUIET', 'DREAM'];
+        let playerName = '';
+        let currentRound = 0;
+        let grid = [];
+        let placedWords = [];
+        let isDragging = false;
+        let selection = [];
+        let selectionDirection = null; // {dx, dy} object for direction lock
+
+        // --- Event Listeners ---
+        startGameBtn.addEventListener('click', () => {
+            playerName = playerNameInput.value.trim();
+            if (playerName) {
+                nameModal.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                startGame();
+            } else {
+                playerNameInput.classList.add('border-red-500');
+                playerNameInput.focus();
+            }
+        });
+
+        nextRoundBtn.addEventListener('click', startNewRound);
+
+        gridContainer.addEventListener('mousedown', (e) => {
+            const target = e.target.closest('.grid-cell');
+            if (target && !target.classList.contains('found-permanent')) {
+                isDragging = true;
+                selection = [target];
+                selectionDirection = null; 
+                target.classList.add('selected');
+            }
+        });
+
+        gridContainer.addEventListener('mouseover', (e) => {
+            if (!isDragging) return;
+            const targetCell = e.target.closest('.grid-cell');
+            if (!targetCell || selection.includes(targetCell) || targetCell.classList.contains('found-permanent')) return;
+            
+            const startCell = selection[0];
+            const currentX = parseInt(targetCell.dataset.x);
+            const currentY = parseInt(targetCell.dataset.y);
+            const startX = parseInt(startCell.dataset.x);
+            const startY = parseInt(startCell.dataset.y);
+            
+            const dx = Math.sign(currentX - startX);
+            const dy = Math.sign(currentY - startY);
+
+            // If it's the second letter, establish the direction
+            if (selection.length === 1) {
+                // Must be an adjacent cell (including diagonals)
+                if (Math.abs(currentX - startX) <= 1 && Math.abs(currentY - startY) <= 1 && (dx !== 0 || dy !== 0)) {
+                    selectionDirection = { dx, dy };
+                } else {
+                    return; // Not a valid second letter
+                }
+            }
+            
+            // Check if the current cell maintains the established direction
+            if (selectionDirection) {
+                const expectedX = startX + (selection.length * selectionDirection.dx);
+                const expectedY = startY + (selection.length * selectionDirection.dy);
+
+                if (currentX === expectedX && currentY === expectedY) {
+                    selection.push(targetCell);
+                    targetCell.classList.add('selected');
+                }
+            }
+        });
+        
+        // Use a single listener on the document to catch mouseup anywhere
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                handleSelectionEnd();
+            }
+        });
+        
+        // Also handle leaving the window
+         document.addEventListener('mouseleave', () => {
+            if (isDragging) {
+                isDragging = false;
+                handleSelectionEnd();
+            }
+        });
+
+
+        // --- Game Functions ---
+        function startGame() {
+            currentRound = 0;
+            startNewRound();
+        }
+
+        function startNewRound() {
+            currentRound++;
+            roundCounter.textContent = `Round ${currentRound} of ${totalRounds}`;
+            feedbackElement.textContent = '';
+            nextRoundBtn.classList.add('hidden');
+            initializeGrid();
+            placeWords();
+            fillEmptyCells();
+            renderGrid();
+            updateWordList();
+        }
+        
+        function initializeGrid() {
+            grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
+        }
+        
+        function placeWords() {
+            // All 8 directions
+            const directions = [ { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: -1, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: -1, y: -1 }, { x: 1, y: -1 } ];
+            let wordsToPlace = [];
+            const shuffled = [...baseWordList].sort(() => 0.5 - Math.random());
+            for (let i = 0; i < 4; i++) {
+                if (shuffled[i]) wordsToPlace.push(shuffled[i]);
+            }
+            placedWords = [];
+            
+            for (const word of wordsToPlace) {
+                let placed = false;
+                let attempts = 0;
+                while (!placed && attempts < 100) {
+                    attempts++;
+                    const dir = directions[Math.floor(Math.random() * directions.length)];
+                    const startX = Math.floor(Math.random() * gridSize);
+                    const startY = Math.floor(Math.random() * gridSize);
+                    
+                    if (canPlaceWord(word, startX, startY, dir)) {
+                        for (let i = 0; i < word.length; i++) {
+                            grid[startY + i * dir.y][startX + i * dir.x] = word[i];
+                        }
+                        placedWords.push({ word, found: false });
+                        placed = true;
+                    }
+                }
+            }
+        }
+
+        function canPlaceWord(word, startX, startY, dir) {
+            for (let i = 0; i < word.length; i++) {
+                const x = startX + i * dir.x;
+                const y = startY + i * dir.y;
+                if (x < 0 || x >= gridSize || y < 0 || y >= gridSize || grid[y][x] !== null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function fillEmptyCells() {
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    if (grid[y][x] === null) {
+                        grid[y][x] = alphabet[Math.floor(Math.random() * alphabet.length)];
+                    }
+                }
+            }
+        }
+
+        function renderGrid() {
+            gridContainer.innerHTML = '';
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('grid-cell');
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    
+                    const letter = grid[y][x];
+                    const img = document.createElement('img');
+                    img.src = `https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`;
+                    img.alt = `ASL letter ${letter}`;
+                    img.draggable = false; // Prevents the ghost image drag
+                    img.onerror = () => { img.src = `https://placehold.co/80x80/e2e8f0/4a5568?text=${letter}`; };
+                    cell.appendChild(img);
+                    gridContainer.appendChild(cell);
+                }
+            }
+        }
+
+        function updateWordList() {
+            wordListElement.innerHTML = '';
+            const wordsToFind = placedWords.map(p => p.word).sort();
+            for (const word of wordsToFind) {
+                const li = document.createElement('li');
+                li.textContent = word;
+                li.id = `word-${word}`;
+                wordListElement.appendChild(li);
+            }
+        }
+        
+        function handleSelectionEnd() {
+            const selectedString = selection.map(cell => grid[cell.dataset.y][cell.dataset.x]).join('');
+            const reversedSelectedString = [...selectedString].reverse().join('');
+            let matchFound = false;
+
+            for (const placedWord of placedWords) {
+                if (!placedWord.found && (placedWord.word === selectedString || placedWord.word === reversedSelectedString)) {
+                    placedWord.found = true;
+                    matchFound = true;
+                    
+                    const wordListItem = document.getElementById(`word-${placedWord.word}`);
+                    wordListItem.classList.add('found');
+                    
+                    selection.forEach(cell => {
+                        cell.classList.add('found-permanent');
+                    });
+                    
+                    feedbackElement.textContent = `You found "${placedWord.word}"!`;
+                    feedbackElement.classList.add('text-green-500');
+                    setTimeout(() => { 
+                        if(!nextRoundBtn.classList.contains('hidden')) feedbackElement.textContent = 'Round Complete!';
+                        else feedbackElement.textContent = ''; 
+                        feedbackElement.classList.remove('text-green-500');
+                    }, 2000);
+                    
+                    checkWinCondition();
+                    break; 
+                }
+            }
+
+            // Always clear selection styling, regardless of match
+            selection.forEach(cell => cell.classList.remove('selected'));
+            selection = [];
+            selectionDirection = null;
+        }
+
+        function checkWinCondition() {
+            const allFound = placedWords.every(p => p.found);
+            if (allFound) {
+                if (currentRound < totalRounds) {
+                    feedbackElement.textContent = 'Round Complete!';
+                    nextRoundBtn.classList.remove('hidden');
+                } else {
+                    feedbackElement.textContent = 'Challenge Complete!';
+                    setTimeout(showCertificate, 1000);
+                }
+            }
+        }
+        
+        function showCertificate() {
+            certificateName.textContent = playerName;
+            gameContainer.classList.add('hidden');
+            certificateModal.classList.remove('hidden');
+        }
+    });
+    </script>
+</body>
+</html>

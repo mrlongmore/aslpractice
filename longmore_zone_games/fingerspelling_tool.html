@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Fingerspelling Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple animation for correct answer */
+        @keyframes tada {
+            from { transform: scale3d(1, 1, 1); }
+            10%, 20% { transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg); }
+            30%, 50%, 70%, 90% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg); }
+            40%, 60%, 80% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg); }
+            to { transform: scale3d(1, 1, 1); }
+        }
+        .tada-animation {
+            animation: tada 1s;
+        }
+        /* Simple animation for incorrect answer */
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .shake-animation {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 text-center">
+        
+        <!-- Header Section -->
+        <header class="mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-600 dark:text-indigo-400">ASL Fingerspelling Challenge</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Type the word you see signed below!</p>
+        </header>
+
+        <!-- Score Display -->
+        <div class="mb-6">
+            <span class="text-lg font-semibold bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-4 py-2 rounded-full">
+                Score: <span id="score">0</span>
+            </span>
+        </div>
+
+        <!-- ASL Image Container -->
+        <div id="image-container" class="flex justify-center items-center flex-wrap gap-2 md:gap-4 min-h-[120px] bg-gray-100 dark:bg-gray-700 p-4 rounded-xl mb-6">
+            <!-- ASL letter images will be dynamically inserted here -->
+        </div>
+
+        <!-- User Input Section -->
+        <div class="mb-4">
+            <input type="text" id="guess-input" placeholder="Enter your guess..." class="w-full max-w-sm mx-auto text-center text-lg px-4 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition duration-300 bg-white dark:bg-gray-800">
+        </div>
+
+        <!-- Feedback Message -->
+        <div id="feedback" class="min-h-[2rem] mb-4 text-lg font-medium transition-opacity duration-300">
+            <!-- Feedback like "Correct!" or "Try Again!" will appear here -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <button id="submit-btn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                Check Answer
+            </button>
+            <button id="next-btn" class="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1" style="display: none;">
+                Next Word
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element References ---
+            const imageContainer = document.getElementById('image-container');
+            const guessInput = document.getElementById('guess-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const scoreDisplay = document.getElementById('score');
+            const feedbackDisplay = document.getElementById('feedback');
+
+            // --- Game State ---
+            let score = 0;
+            let currentWord = '';
+            // A list of words with a maximum of 5 letters.
+            // You can easily add or remove words here!
+            const wordList = [
+                'HELLO', 'WORLD', 'CLASS', 'LEARN', 'TEACH', 'HAPPY', 'SMILE', 'MUSIC', 
+                'WATER', 'EARTH', 'DREAM', 'BRAVE', 'POWER', 'QUIET', 'FUNNY', 'SMART', 
+                'GAMES', 'VIDEO', 'APPLE'
+            ];
+            let usedWords = [];
+
+            // --- Functions ---
+
+            /**
+             * Selects a new, unique random word from the word list.
+             * Resets the game if all words have been used.
+             */
+            function selectNewWord() {
+                if (usedWords.length === wordList.length) {
+                    usedWords = []; // Reset if all words are used
+                }
+                let newWord;
+                do {
+                    newWord = wordList[Math.floor(Math.random() * wordList.length)];
+                } while (usedWords.includes(newWord));
+                
+                usedWords.push(newWord);
+                return newWord;
+            }
+
+            /**
+             * Displays the ASL images for the current word.
+             */
+            function displayWord() {
+                imageContainer.innerHTML = ''; // Clear previous images
+                imageContainer.classList.remove('tada-animation');
+
+                for (const letter of currentWord) {
+                    const img = document.createElement('img');
+                    // Using a reliable source for ASL alphabet images (GIFs)
+                    img.src = `https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`;
+                    img.alt = `ASL letter ${letter}`;
+                    img.className = 'h-20 md:h-24 rounded-lg bg-white dark:bg-gray-800 shadow-sm';
+                    // Add an error handler for images that might fail to load
+                    img.onerror = () => {
+                        img.alt = `Image for ${letter} not available`;
+                        img.src = `https://placehold.co/100x120/e2e8f0/4a5568?text=${letter}`;
+                    };
+                    imageContainer.appendChild(img);
+                }
+            }
+
+            /**
+             * Checks the user's guess against the current word.
+             */
+            function checkGuess() {
+                const userGuess = guessInput.value.trim().toUpperCase();
+                
+                // Clear previous animations
+                feedbackDisplay.classList.remove('text-green-500', 'text-red-500', 'shake-animation');
+                
+                if (userGuess === currentWord) {
+                    score++;
+                    scoreDisplay.textContent = score;
+                    feedbackDisplay.textContent = 'Correct! Great job!';
+                    feedbackDisplay.classList.add('text-green-500');
+                    imageContainer.classList.add('tada-animation');
+                    
+                    // Switch to "Next Word" button
+                    submitBtn.style.display = 'none';
+                    nextBtn.style.display = 'inline-block';
+                    guessInput.disabled = true;
+                } else {
+                    feedbackDisplay.textContent = 'Not quite, try again!';
+                    feedbackDisplay.classList.add('text-red-500');
+                    feedbackDisplay.classList.add('shake-animation');
+                }
+            }
+
+            /**
+             * Sets up the next round of the game.
+             */
+            function nextRound() {
+                currentWord = selectNewWord();
+                displayWord();
+
+                // Reset UI elements
+                guessInput.value = '';
+                guessInput.disabled = false;
+                feedbackDisplay.textContent = '';
+                feedbackDisplay.classList.remove('text-green-500', 'text-red-500');
+                
+                // Switch back to "Check Answer" button
+                submitBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'none';
+                
+                guessInput.focus();
+            }
+
+            // --- Event Listeners ---
+            submitBtn.addEventListener('click', checkGuess);
+            nextBtn.addEventListener('click', nextRound);
+
+            // Allow submitting with the "Enter" key
+            guessInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && !guessInput.disabled) {
+                    checkGuess();
+                }
+            });
+
+            // --- Initial Game Start ---
+            function init() {
+                score = 0;
+                scoreDisplay.textContent = score;
+                usedWords = [];
+                nextRound();
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Rush</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+            background-color: #1a1a1a;
+        }
+
+        canvas {
+            background-color: #000;
+            display: block;
+            border: 4px solid #fff;
+            box-shadow: 0 0 20px #fff;
+        }
+
+        .modal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 12px;
+            border: 4px solid #fff;
+            box-shadow: 0 0 30px #fff;
+            text-align: center;
+            color: white;
+        }
+
+        .btn {
+            background: #fff;
+            color: #000;
+            padding: 15px 30px;
+            margin: 10px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px #999;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px #999;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px #999;
+        }
+
+        #ui-container {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 4px #000;
+            pointer-events: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        .quiz-btn {
+            background: #444;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px;
+            border: 2px solid #666;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .quiz-btn:hover {
+            background: #555;
+            border-color: #888;
+        }
+
+        .quiz-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quiz-btn.correct {
+            background: #10b981;
+            border-color: #059669;
+        }
+
+        .quiz-btn.incorrect {
+            background: #ef4444;
+            border-color: #dc2626;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 flex items-center justify-center h-screen">
+
+    <div id="game-container" class="relative">
+        <div id="ui-container" class="w-full h-full pointer-events-none">
+            <!-- P1 Info (Top Left) -->
+            <div class="absolute top-4 left-4 flex flex-col items-start">
+                <div class="text-sm font-bold text-white" id="p1-score-display">Score: 0</div>
+                <div class="text-sm font-bold text-yellow-400" id="p1-timer">Time: 1:30</div>
+                <div id="p1-powerups" class="mt-1 text-xs text-white hidden">
+                    <div id="p1-plasma-display"></div>
+                    <div id="p1-wings-display"></div>
+                </div>
+            </div>
+
+            <!-- P2 Info (Top Right) -->
+            <div class="absolute top-4 right-4 flex flex-col items-end">
+                <div class="text-sm font-bold text-white hidden" id="p2-score-display">P2: 0</div>
+                <div class="text-sm font-bold text-yellow-400 hidden" id="p2-timer">Time: 1:30</div>
+                <div id="p2-powerups" class="mt-1 text-xs text-white text-right hidden">
+                    <div id="p2-plasma-display"></div>
+                    <div id="p2-wings-display"></div>
+                </div>
+            </div>
+
+            <!-- Central Timer (Hidden but kept for safety) -->
+            <span id="timer-display" class="hidden"></span>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div id="menu-modal" class="modal-bg">
+        <div class="modal-content">
+            <h1 class="text-5xl mb-4 text-cyan-400">Vertical Rush</h1>
+            <p class="mb-8 text-lg">Race to the top!</p>
+            <div>
+                <button id="one-player-btn" class="btn bg-green-400 hover:bg-green-500">1 Player Time Trial</button>
+                <button id="two-player-btn" class="btn bg-yellow-400 hover:bg-yellow-500">2 Player Race</button>
+            </div>
+            <div class="mt-8 text-left max-w-lg mx-auto">
+                <h2 class="text-2xl mb-4 text-cyan-400">Controls</h2>
+                <p><strong class="text-red-500">Player 1:</strong> A (Left) - D (Right) - W (Jump) - S (Plasma)</p>
+                <p><strong class="text-blue-500">Player 2:</strong> Arrow Keys (Left/Right/Up/Down for Plasma)</p>
+                <p class="mt-2 text-sm text-gray-300">Wings give extra air jumps - just press jump while in the air!</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-game-modal" class="modal-bg hidden">
+        <div class="modal-content">
+            <h1 id="end-game-title" class="text-4xl mb-4"></h1>
+            <p id="end-game-subtitle" class="text-xl mb-8"></p>
+            <button id="restart-btn" class="btn bg-cyan-400 hover:bg-cyan-500">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Topic Selection Modal -->
+    <div id="topic-selection-modal" class="modal-bg hidden">
+        <div class="modal-content">
+            <h2 class="text-3xl mb-6 text-cyan-400">Select Quiz Topics</h2>
+            <p class="mb-8 text-lg">Choose which topics you'd like to be quizzed on.</p>
+            <div id="topic-checkboxes" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <!-- Checkboxes will be dynamically inserted here -->
+            </div>
+            <button id="confirm-topics-btn" class="btn bg-green-400 hover:bg-green-500">Start Quiz</button>
+        </div>
+    </div>
+
+    <!-- Pre-game Quiz Page -->
+    <div id="quiz-page" class="modal-bg hidden">
+        <div class="modal-content max-w-6xl w-full">
+            <h2 class="text-3xl mb-6 text-cyan-400">ASL Quiz - Build Your Stats!</h2>
+            <p class="mb-8 text-lg">Answer questions correctly to boost your speed and jump power!</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Player 1 Section -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="text-center mb-4">
+                        <h3 class="text-2xl text-red-500 font-bold">Player 1</h3>
+                        <p class="text-sm text-gray-300">Use W/A/S/D keys to answer</p>
+                    </div>
+                    <img id="p1-gif" src="" alt="ASL Sign"
+                        class="w-full h-48 object-contain rounded-lg mb-4 bg-gray-200">
+                    <h4 id="p1-question" class="text-xl font-semibold mb-4">What is being signed?</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button class="quiz-btn p1-btn" data-answer="0">W. <span id="p1-answer-0"></span></button>
+                        <button class="quiz-btn p1-btn" data-answer="1">A. <span id="p1-answer-1"></span></button>
+                        <button class="quiz-btn p1-btn" data-answer="2">S. <span id="p1-answer-2"></span></button>
+                        <button class="quiz-btn p1-btn" data-answer="3">D. <span id="p1-answer-3"></span></button>
+                    </div>
+                    <div id="p1-feedback" class="mt-4 text-center hidden">
+                        <p id="p1-feedback-text" class="text-lg"></p>
+                    </div>
+                </div>
+
+                <!-- Player 2 Section -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <div class="text-center mb-4">
+                        <h3 class="text-2xl text-blue-500 font-bold">Player 2</h3>
+                        <p class="text-sm text-gray-300">Use ↑/←/↓/→ keys to answer</p>
+                    </div>
+                    <img id="p2-gif" src="" alt="ASL Sign"
+                        class="w-full h-48 object-contain rounded-lg mb-4 bg-gray-200">
+                    <h4 id="p2-question" class="text-xl font-semibold mb-4">What is being signed?</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button class="quiz-btn p2-btn" data-answer="0">↑. <span id="p2-answer-0"></span></button>
+                        <button class="quiz-btn p2-btn" data-answer="1">←. <span id="p2-answer-1"></span></button>
+                        <button class="quiz-btn p2-btn" data-answer="2">↓. <span id="p2-answer-2"></span></button>
+                        <button class="quiz-btn p2-btn" data-answer="3">→. <span id="p2-answer-3"></span></button>
+                    </div>
+                    <div id="p2-feedback" class="mt-4 text-center hidden">
+                        <p id="p2-feedback-text" class="text-lg"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress and Timer -->
+            <div class="mt-6 text-center">
+                <div class="mb-4">
+                    <p class="text-lg">Question <span id="current-question">1</span> of <span
+                            id="total-questions">5</span></p>
+                    <p class="text-xl text-yellow-400">Time Remaining: <span id="quiz-timer">1:30</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // UI Elements
+        const menuModal = document.getElementById('menu-modal');
+        const endGameModal = document.getElementById('end-game-modal');
+        const onePlayerBtn = document.getElementById('one-player-btn');
+        const twoPlayerBtn = document.getElementById('two-player-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const endGameTitle = document.getElementById('end-game-title');
+        const endGameSubtitle = document.getElementById('end-game-subtitle');
+        const p1ScoreDisplay = document.getElementById('p1-score-display');
+        const p2ScoreDisplay = document.getElementById('p2-score-display');
+        const timerDisplay = document.getElementById('timer-display');
+
+        // Power-up UI Elements
+        const p1Powerups = document.getElementById('p1-powerups');
+        const p2Powerups = document.getElementById('p2-powerups');
+        const p1PlasmaDisplay = document.getElementById('p1-plasma-display');
+        const p1WingsDisplay = document.getElementById('p1-wings-display');
+        const p2PlasmaDisplay = document.getElementById('p2-plasma-display');
+        const p2WingsDisplay = document.getElementById('p2-wings-display');
+
+        let gameMode = null; // '1P' or '2P'
+        let players = [];
+        let platforms = [];
+        let keys = {};
+        let gameActive = false;
+        let timer = 0;
+        let timerInterval;
+        let cameraY = 0; // For 1P mode
+
+        // Quiz variables
+        let quizData;
+        let quizQuestions = [];
+        let p1CurrentQuestion = 0;
+        let p2CurrentQuestion = 0;
+        let p1Score = 0;
+        let p2Score = 0;
+        let p1CorrectAnswers = 0;
+        let p2CorrectAnswers = 0;
+        let quizTimeRemaining = 90; // 1:30 in seconds
+        let quizTimerInterval = null;
+        let selectedTopics = [];
+
+        // Store quiz rewards to apply when game starts
+        let p1QuizRewards = { speedBoost: 0, jumpBoost: 0, plasmaBlasts: 0, wingCharges: 0, extraJumps: 0 };
+        let p2QuizRewards = { speedBoost: 0, jumpBoost: 0, plasmaBlasts: 0, wingCharges: 0, extraJumps: 0 };
+
+        // Plasma blast system
+        let plasmaBlasts = [];
+        let lastBlastTime = { p1: 0, p2: 0 };
+
+        const WIN_SCORE = 10000;
+        const GRAVITY = 0.5;
+        const JUMP_FORCE = -12;
+        const PLAYER_SPEED = 6;
+        const PLATFORM_COUNT = 30;
+        const PLAYER_SIZE = 20;
+        let START_Y;
+
+// Load them jsons
+async function load_data() {
+    try {
+        // Ensure the path is correct relative to where your HTML is served
+        const response = await fetch('../vocab.json'); 
+        if (!response.ok) throw new Error("Network response was not ok");
+        quizData = await response.json();
+        console.log('Data loaded successfully:', quizData);
+    } catch (error) {
+        console.error('Error loading data:', error);
+        // Fallback: alert the user if the JSON failed to load
+        alert("Failed to load quiz data. Please ensure you are running a local server.");
+    }
+}
+load_data();
+
+
+
+        function resizeCanvas() {
+            canvas.width = Math.min(800, window.innerWidth * 0.9);
+            canvas.height = window.innerHeight * 0.9;
+            START_Y = canvas.height - 80;
+        }
+
+        class Player {
+            constructor(x, y, color, controls) {
+                this.x = x;
+                this.y = y;
+                this.width = PLAYER_SIZE;
+                this.height = PLAYER_SIZE;
+                this.color = color;
+                this.dx = 0;
+                this.dy = 0;
+                this.onGround = false;
+                this.score = 0;
+                this.controls = controls;
+                this.cameraY = 0; // Each player gets their own camera for split screen
+                this.cameraX = 0; // Horizontal camera for split screen
+                this.lastSafePlatform = null;
+                // Stat boost properties
+                this.speedBoost = 0;
+                this.jumpBoost = 0;
+                // Power-up properties
+                this.plasmaBlasts = 0;
+                this.wingCharges = 0;
+                this.extraJumps = 0;
+                this.jumpKeyPressed = false; // Track key state for debouncing
+                this.hitTimer = 0; // Timer for hit effect (slow + flicker)
+            }
+
+            draw() {
+                ctx.save();
+                // Handle opacity flicker if hit
+                if (this.hitTimer > 0) {
+                    // Slow flicker: 0.6 to 1.0 opacity
+                    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(Date.now() / 200);
+                }
+
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+
+                // Draw wings if charges available
+                if (this.wingCharges > 0) {
+                    ctx.fillStyle = '#FFD700'; // Gold wings
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y + 10);
+                    ctx.lineTo(this.x - 10, this.y - 5);
+                    ctx.lineTo(this.x, this.y + 5);
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + this.width, this.y + 10);
+                    ctx.lineTo(this.x + this.width + 10, this.y - 5);
+                    ctx.lineTo(this.x + this.width, this.y + 5);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+
+            update() {
+                // Horizontal movement
+                if (keys[this.controls.left]) {
+                    this.dx = -PLAYER_SPEED - this.speedBoost;
+                } else if (keys[this.controls.right]) {
+                    this.dx = PLAYER_SPEED + this.speedBoost;
+                } else {
+                    this.dx = 0;
+                }
+
+                // Apply slow effect if hit
+                if (this.hitTimer > 0) {
+                    this.dx *= 0.5;
+                    this.hitTimer--;
+                }
+
+                this.x += this.dx;
+
+                // Keep within canvas bounds
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
+
+                // Jumping
+                const jumpKeyDown = keys[this.controls.jump];
+
+                if (jumpKeyDown && !this.jumpKeyPressed) {
+                    if (this.onGround) {
+                        this.dy = JUMP_FORCE + this.jumpBoost;
+                        this.onGround = false;
+                    } else if (this.extraJumps > 0) {
+                        this.dy = JUMP_FORCE + this.jumpBoost;
+                        this.extraJumps--;
+                        if (this.wingCharges > 0) this.wingCharges--;
+                        console.log(`Wings used! ${this.extraJumps} extra jumps remaining`);
+                    }
+                }
+
+                this.jumpKeyPressed = jumpKeyDown;
+
+                // Plasma Blast
+                // Assuming 'down' control is defined for P2, and 'KeyS' for P1 if 'KeyW' is jump
+                if (keys[this.controls.down] || (this.controls.jump === 'KeyW' && keys['KeyS'])) {
+                    // Check if player has plasma blasts
+                    if (this.plasmaBlasts > 0) {
+                        firePlasmaBlast(this);
+                        this.plasmaBlasts--;
+                    }
+                }
+
+                // Gravity
+                this.dy += GRAVITY;
+                this.y += this.dy;
+
+                // Update Score based on height
+                const heightClimbed = Math.floor(START_Y - this.y);
+                if (heightClimbed > this.score) {
+                    this.score = heightClimbed;
+                }
+            }
+        }
+
+        class Platform {
+            constructor(x, y, width, type = 'static') {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = 10;
+                this.type = type;
+                this.dx = type === 'moving' ? (Math.random() > 0.5 ? 2 : -2) : 0;
+            }
+
+            update() {
+                if (this.type === 'moving') {
+                    this.x += this.dx;
+                    // Bounce off walls
+                    if (this.x <= 0 || this.x + this.width >= canvas.width) {
+                        this.dx *= -1;
+                    }
+                }
+            }
+
+            draw() {
+                if (this.type === 'victory') {
+                    ctx.fillStyle = '#22c55e'; // Green
+                    ctx.strokeStyle = '#4ade80';
+                } else {
+                    ctx.fillStyle = this.type === 'moving' ? '#D946EF' : '#6D28D9'; // Purple for static, Magenta for moving
+                    ctx.strokeStyle = '#A78BFA';
+                }
+
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+                if (this.type === 'victory') {
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('VICTORY', this.x + this.width / 2, this.y - 10);
+                }
+            }
+        }
+
+        function initPlatforms() {
+            platforms = [];
+            platforms.push(new Platform(canvas.width / 2 - 50, canvas.height - 50, 100));
+
+            let lastPlatform = platforms[0];
+            const totalPlatforms = 200; // Increased from 150
+
+            for (let i = 1; i < totalPlatforms; i++) {
+                let minGap = 70;
+                let maxGap = 130;
+                let isMoving = false;
+                let width = Math.random() * 50 + 70; // Default width 70-120
+
+                // Zone Logic
+                if (i > 100) { // Zone 3: Hard (High + Moving)
+                    minGap = 120;
+                    maxGap = 180;
+                    isMoving = Math.random() > 0.4; // 60% chance of moving
+                    width = Math.random() * 40 + 60; // Smaller: 60-100
+                } else if (i > 50) { // Zone 2: Medium (Sparse)
+                    minGap = 100;
+                    maxGap = 160;
+                    isMoving = Math.random() > 0.8; // 20% chance of moving
+                }
+
+                // Calculate horizontal position
+                const maxHorizontalReach = 220;
+                let nextX = lastPlatform.x + (Math.random() * maxHorizontalReach * 2) - maxHorizontalReach;
+                nextX = Math.max(0, Math.min(canvas.width - width, nextX));
+
+                // Calculate vertical position
+                const nextY = lastPlatform.y - (Math.random() * (maxGap - minGap) + minGap);
+
+                const type = isMoving ? 'moving' : 'static';
+                const newPlatform = new Platform(nextX, nextY, width, type);
+                platforms.push(newPlatform);
+                lastPlatform = newPlatform;
+            }
+
+            // Add Victory Platform
+            const victoryY = lastPlatform.y - 150;
+            const victoryX = canvas.width / 2 - 75;
+            const victoryPlatform = new Platform(victoryX, victoryY, 150, 'victory');
+            platforms.push(victoryPlatform);
+        }
+
+        function handleCollisions(player) {
+            // Platform collisions
+            platforms.forEach(platform => {
+                if (player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x &&
+                    player.y < platform.y + platform.height &&
+                    player.y + player.height > platform.y &&
+                    player.dy > 0) { // Only collide when falling
+
+                    player.y = platform.y - player.height;
+                    player.dy = 0;
+                    player.onGround = true;
+                    player.lastSafePlatform = platform;
+
+                    if (platform.type === 'victory') {
+                        const winnerId = player === players[0] ? 'p1' : 'p2';
+                        const winnerName = player === players[0] ? 'Player 1' : 'Player 2';
+                        endGame(winnerId, `${winnerName} Reached the Top!`);
+                    }
+                }
+            });
+
+            // Check for falling off screen
+            const bottomBoundary = (gameMode === '1P') ? cameraY + canvas.height : player.cameraY + canvas.height;
+            if (player.y > bottomBoundary) {
+                respawn(player);
+            }
+        }
+
+        function respawn(player) {
+            console.log('Respawn called for player', player);
+            if (player.lastSafePlatform) {
+                player.x = player.lastSafePlatform.x + (player.lastSafePlatform.width / 2) - (player.width / 2);
+                player.y = player.lastSafePlatform.y - player.height * 2; // Place them safely above
+                player.dy = 0;
+                player.dx = 0;
+                console.log('Respawned at platform:', player.lastSafePlatform.y, 'Player Y:', player.y);
+            } else {
+                // Failsafe if no platform is logged
+                player.y = START_Y;
+                player.x = canvas.width / 2;
+                player.dy = 0;
+                player.dx = 0;
+                console.log('Respawned at start. Player Y:', player.y);
+            }
+
+            // Snap camera to player
+            if (gameMode === '1P') {
+                console.log('1P Mode. Old CameraY:', cameraY);
+                cameraY = player.y - (canvas.height / 2);
+                if (cameraY < 0) cameraY = 0; // Don't go below start
+                console.log('New CameraY:', cameraY);
+            } else {
+                console.log('2P Mode. Old Player CameraY:', player.cameraY);
+                // For 2P, adjust individual camera
+                player.cameraY = player.y - (canvas.height / 2);
+                if (player.cameraY < 0) player.cameraY = 0;
+
+                // Snap horizontal camera too
+                const viewportWidth = canvas.width / 2;
+                player.cameraX = player.x - viewportWidth / 2 + player.width / 2;
+                // Clamp cameraX
+                if (player.cameraX < 0) player.cameraX = 0;
+                if (player.cameraX > canvas.width - viewportWidth) player.cameraX = canvas.width - viewportWidth;
+
+                console.log('New Player CameraY:', player.cameraY);
+            }
+        }
+
+        const p1TimerDisplay = document.getElementById('p1-timer');
+        const p2TimerDisplay = document.getElementById('p2-timer');
+
+        function updateUI() {
+            const p1 = players[0];
+            p1ScoreDisplay.textContent = gameMode === '2P' ? `P1: ${p1.score}` : `Score: ${p1.score}`;
+            p1ScoreDisplay.style.color = p1.color;
+
+            // Update P1 power-ups display
+            p1PlasmaDisplay.textContent = p1.plasmaBlasts > 0 ? `⚡ Plasma: ${p1.plasmaBlasts}` : '';
+            p1WingsDisplay.textContent = p1.wingCharges > 0 ? `🪽 Wings: ${p1.wingCharges}` : '';
+            p1Powerups.classList.remove('hidden');
+
+            // Update Timers
+            const minutes = Math.floor(timer / 60);
+            const seconds = timer % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            p1TimerDisplay.textContent = `Time: ${timeString}`;
+            p1TimerDisplay.classList.remove('hidden');
+
+            if (gameMode === '2P') {
+                const p2 = players[1];
+                p2ScoreDisplay.textContent = `P2: ${p2.score}`;
+                p2ScoreDisplay.style.color = p2.color;
+                p2ScoreDisplay.classList.remove('hidden');
+
+                // Update P2 power-ups display
+                p2PlasmaDisplay.textContent = p2.plasmaBlasts > 0 ? `⚡ Plasma: ${p2.plasmaBlasts}` : '';
+                p2WingsDisplay.textContent = p2.wingCharges > 0 ? `🪽 Wings: ${p2.wingCharges}` : '';
+                p2Powerups.classList.remove('hidden');
+
+                p2TimerDisplay.textContent = `Time: ${timeString}`;
+                p2TimerDisplay.classList.remove('hidden');
+            } else {
+                p2ScoreDisplay.classList.add('hidden');
+                p2Powerups.classList.add('hidden');
+                p2TimerDisplay.classList.add('hidden');
+            }
+        }
+
+        function checkWinCondition() {
+            if (!gameActive) return;
+
+            // Game ends when timer runs out
+            if (timer <= 0) {
+                if (gameMode === '1P') {
+                    endGame('p1', `Time's up! Final Score: ${players[0].score}`);
+                } else {
+                    if (players[0].score > players[1].score) {
+                        endGame('p1', `Player 1 Wins! Score: ${players[0].score} vs ${players[1].score}`);
+                    } else if (players[1].score > players[0].score) {
+                        endGame('p2', `Player 2 Wins! Score: ${players[1].score} vs ${players[0].score}`);
+                    } else {
+                        endGame('draw', `It's a Tie! Score: ${players[0].score}`);
+                    }
+                }
+            }
+        }
+
+
+
+        function gameLoop() {
+            if (!gameActive) return;
+
+            requestAnimationFrame(gameLoop);
+
+            // 1. UPDATE PLAYER LOGIC
+            players.forEach(player => {
+                player.update();
+                handleCollisions(player);
+            });
+
+            // Update plasma blasts
+            updatePlasmaBlasts();
+
+            // Update platforms
+            platforms.forEach(p => p.update());
+
+            // 2. RENDER LOGIC
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (gameMode === '1P') {
+                const player = players[0];
+                const cameraThreshold = canvas.height / 2;
+                // Move camera up
+                if (player.y < cameraY + cameraThreshold) {
+                    cameraY = player.y - cameraThreshold;
+                }
+
+                ctx.save();
+                ctx.translate(0, -cameraY);
+
+                platforms.forEach(p => p.draw());
+                players.forEach(p => p.draw());
+                drawPlasmaBlasts();
+
+                ctx.restore();
+
+            } else { // 2-Player Split Screen
+                players.forEach((player, index) => {
+                    // Update this player's camera
+                    const cameraThreshold = canvas.height / 2.5; // Tighter camera follow
+                    if (player.y < player.cameraY + cameraThreshold) {
+                        player.cameraY = player.y - cameraThreshold;
+                    }
+
+                    const viewportX = index * (canvas.width / 2);
+                    const viewportWidth = canvas.width / 2;
+
+                    // Update Horizontal Camera
+                    // Center player in viewport
+                    let targetCameraX = player.x - viewportWidth / 2 + player.width / 2;
+
+                    // Clamp cameraX to world bounds
+                    // World width is canvas.width
+                    // Camera can show [0, viewportWidth] to [canvas.width - viewportWidth, canvas.width]
+                    if (targetCameraX < 0) targetCameraX = 0;
+                    if (targetCameraX > canvas.width - viewportWidth) targetCameraX = canvas.width - viewportWidth;
+
+                    player.cameraX = targetCameraX;
+
+                    ctx.save();
+
+                    // 1. Clip the drawing area to this player's half
+                    ctx.beginPath();
+                    ctx.rect(viewportX, 0, viewportWidth, canvas.height);
+                    ctx.clip();
+
+                    // 2. Move origin to this player's viewport
+                    // We want World(X, Y) to appear at Screen(viewportX + X - cameraX, Y - cameraY)
+                    ctx.translate(viewportX - player.cameraX, -player.cameraY);
+
+                    platforms.forEach(p => p.draw());
+                    players.forEach(p => p.draw());
+                    drawPlasmaBlasts();
+
+                    ctx.restore();
+
+                    // Draw separator line
+                    if (index === 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(viewportWidth, 0);
+                        ctx.lineTo(viewportWidth, canvas.height);
+                        ctx.strokeStyle = '#fff';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                });
+            }
+            updateUI();
+            checkWinCondition();
+        }
+        function startGame() {
+            resizeCanvas();
+            players = [];
+            cameraY = 0;
+            timer = 90; // Set game timer to 90 seconds
+
+            const p1Controls = { left: 'KeyA', right: 'KeyD', jump: 'KeyW' };
+            const p1 = new Player(canvas.width / 2 - 40, START_Y, '#ef4444', p1Controls);
+
+            // Apply quiz rewards to P1
+            p1.speedBoost = p1QuizRewards.speedBoost;
+            p1.jumpBoost = p1QuizRewards.jumpBoost;
+            p1.plasmaBlasts = p1QuizRewards.plasmaBlasts;
+            p1.wingCharges = p1QuizRewards.wingCharges;
+            p1.extraJumps = p1QuizRewards.extraJumps;
+
+            players.push(p1);
+
+            if (gameMode === '2P') {
+                const p2Controls = { left: 'ArrowLeft', right: 'ArrowRight', jump: 'ArrowUp' };
+                const p2 = new Player(canvas.width / 2 + 20, START_Y, '#3b82f6', p2Controls);
+
+                // Apply quiz rewards to P2
+                p2.speedBoost = p2QuizRewards.speedBoost;
+                p2.jumpBoost = p2QuizRewards.jumpBoost;
+                p2.plasmaBlasts = p2QuizRewards.plasmaBlasts;
+                p2.wingCharges = p2QuizRewards.wingCharges;
+                p2.extraJumps = p2QuizRewards.extraJumps;
+
+                players.push(p2);
+            }
+
+            initPlatforms();
+
+            // Set initial safe platform
+            players.forEach(p => p.lastSafePlatform = platforms[0]);
+
+            menuModal.classList.add('hidden');
+            endGameModal.classList.add('hidden');
+            gameActive = true;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timer--;
+                // Safety check to stop timer at 0 (handled in checkWinCondition too)
+                if (timer < 0) timer = 0;
+            }, 1000);
+
+            gameLoop();
+        }
+
+        function endGame(winner, message) {
+            gameActive = false;
+            clearInterval(timerInterval);
+
+            if (gameMode === '1P') {
+                endGameTitle.textContent = 'Challenge Complete!';
+                endGameSubtitle.textContent = message;
+            } else {
+                endGameTitle.textContent = `Winner: ${winner === 'p1' ? 'Player 1' : 'Player 2'} !`;
+                endGameSubtitle.textContent = message;
+            }
+
+            endGameModal.classList.remove('hidden');
+        }
+
+        // Topic Selection Functions
+        function populateTopicSelection() {
+            const topicCheckboxes = document.getElementById('topic-checkboxes');
+            topicCheckboxes.innerHTML = '';
+        
+            if (!quizData) {
+            topicCheckboxes.innerHTML = '<p class="text-red-500">Error: Quiz data not loaded.</p>';
+            return;
+            }
+
+            const topics = Object.keys(quizData);
+            topics.forEach((topic, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `topic - ${index} `;
+                checkbox.value = topic;
+                checkbox.className = 'h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500';
+                checkbox.checked = false; // Default to checked
+
+                const label = document.createElement('label');
+                label.htmlFor = `topic - ${index} `;
+                label.textContent = topic;
+                label.className = 'ml-3 text-md text-white';
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                topicCheckboxes.appendChild(div);
+            });
+        }
+
+        function startTopicSelection() {
+            document.getElementById('topic-selection-modal').classList.remove('hidden');
+            populateTopicSelection();
+        }
+
+        function confirmTopics() {
+            const checkedBoxes = document.querySelectorAll('#topic-checkboxes input[type="checkbox"]:checked');
+            selectedTopics = [];
+            quizQuestions = [];
+
+            checkedBoxes.forEach(box => {
+                const topicName = box.value;
+                if (quizData[topicName]) {
+                    selectedTopics.push(topicName);
+                    quizQuestions.push(...quizData[topicName].questions);
+                }
+            });
+
+            if (selectedTopics.length > 0) {
+                // Shuffle questions
+                for (let i = quizQuestions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [quizQuestions[i], quizQuestions[j]] = [quizQuestions[j], quizQuestions[i]];
+                }
+
+                document.getElementById('topic-selection-modal').classList.add('hidden');
+                startQuiz();
+            } else {
+                alert("Please select at least one topic to start the quiz.");
+            }
+        }
+
+        // Quiz Functions
+        function startQuiz() {
+            p1CurrentQuestion = 0;
+            p2CurrentQuestion = 0;
+            p1Score = 0;
+            p2Score = 0;
+            p1CorrectAnswers = 0;
+            p2CorrectAnswers = 0;
+            quizTimeRemaining = 90; // Reset timer
+
+            // Reset quiz rewards
+            p1QuizRewards = { speedBoost: 0, jumpBoost: 0, plasmaBlasts: 0, wingCharges: 0, extraJumps: 0 };
+            p2QuizRewards = { speedBoost: 0, jumpBoost: 0, plasmaBlasts: 0, wingCharges: 0, extraJumps: 0 };
+
+            // Show quiz page
+            document.getElementById('quiz-page').classList.remove('hidden');
+            showPlayerQuestions();
+            startQuizTimer();
+        }
+
+        function startQuizTimer() {
+            updateTimerDisplay();
+            quizTimerInterval = setInterval(() => {
+                quizTimeRemaining--;
+                updateTimerDisplay();
+
+                if (quizTimeRemaining <= 0) {
+                    endQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(quizTimeRemaining / 60);
+            const seconds = quizTimeRemaining % 60;
+            document.getElementById('quiz-timer').textContent =
+                `${minutes}:${seconds.toString().padStart(2, '0')} `;
+        }
+
+        function endQuiz() {
+            clearInterval(quizTimerInterval);
+            // Hide quiz page and start game immediately
+            document.getElementById('quiz-page').classList.add('hidden');
+            startGame();
+        }
+
+        function showPlayerQuestions() {
+            // Show Player 1's current question
+            if (p1CurrentQuestion < quizQuestions.length) {
+                showQuestionForPlayer(0, p1CurrentQuestion);
+            } else {
+                p1CurrentQuestion = 0;
+            }
+
+            // Show Player 2's current question (if 2P mode)
+            if (gameMode === '2P') {
+                if (p2CurrentQuestion < quizQuestions.length) {
+                    showQuestionForPlayer(1, p2CurrentQuestion);
+                } else {
+                    p2CurrentQuestion = 0;
+                }
+            } else {
+                hidePlayerSection(1);
+            }
+
+            updateProgress();
+        }
+
+        function showQuestionForPlayer(playerIndex, questionIndex) {
+            const question = quizQuestions[questionIndex];
+            const prefix = playerIndex === 0 ? 'p1' : 'p2';
+
+            // Update display
+            document.getElementById(`${prefix}-gif`).src = question.image;
+            document.getElementById(`${prefix}-answer`).textContent = question.question;
+
+            // Update answer options
+            question.options.forEach((answer, index) => {
+                document.getElementById(`${prefix}-answer-${index}`).textContent = answer;
+            });
+
+            // Reset button states
+            document.querySelectorAll(`.${prefix}-btn`).forEach(btn => {
+                btn.disabled = false;
+                btn.className = `quiz-btn ${prefix}-btn`;
+            });
+
+            // Hide feedback
+            document.getElementById(`${prefix}-feedback`).classList.add('hidden');
+        }
+
+        function hidePlayerSection(playerIndex) {
+            const prefix = playerIndex === 0 ? 'p1' : 'p2';
+            const section = document.querySelector(`#${prefix}-gif`).closest('.bg-gray-800');
+            section.style.opacity = '0.5';
+            section.querySelectorAll('.quiz-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        function updateProgress() {
+            const p1Progress = Math.min(p1CurrentQuestion, quizQuestions.length);
+            const p2Progress = Math.min(p2CurrentQuestion, quizQuestions.length);
+            const total = quizQuestions.length;
+
+            if (gameMode === '2P') {
+                document.getElementById('current-question').textContent = `P1: ${p1Progress} /${total} | P2: ${p2Progress}/${total} `;
+            } else {
+                document.getElementById('current-question').textContent = `${p1Progress}/${total}`;
+            }
+            document.getElementById('total-questions').textContent = total;
+        }
+
+        function handleQuizAnswer(playerIndex, answerIndex) {
+            const currentQuestion = playerIndex === 0 ? p1CurrentQuestion : p2CurrentQuestion;
+            if (currentQuestion >= quizQuestions.length) return;
+
+            const question = quizQuestions[currentQuestion];
+            const isCorrect = answerIndex === question.correct;
+
+            // Update scores and correct answers
+            if (isCorrect) {
+                if (playerIndex === 0) {
+                    p1Score += 10;
+                    p1CorrectAnswers++;
+                } else {
+                    p2Score += 10;
+                    p2CorrectAnswers++;
+                }
+
+                // Check for stat boost (every 1 correct answer)
+                if (playerIndex === 0 && p1CorrectAnswers % 1 === 0) {
+                    giveStatBoost(0);
+                } else if (playerIndex === 1 && p2CorrectAnswers % 1 === 0) {
+                    giveStatBoost(1);
+                }
+
+                // Check for power-up (every 2 correct answers)
+                if (playerIndex === 0 && p1CorrectAnswers % 2 === 0) {
+                    givePowerUp(0);
+                } else if (playerIndex === 1 && p2CorrectAnswers % 2 === 0) {
+                    givePowerUp(1);
+                }
+            }
+
+            // Show feedback
+            const prefix = playerIndex === 0 ? 'p1' : 'p2';
+            const feedbackTextId = `${prefix}-feedback-text`;
+            const feedbackId = `${prefix}-feedback`;
+
+            let feedbackText = isCorrect ?
+                `Correct! +10 points` :
+                `Incorrect! Answer: ${question.options[question.correct]}`;
+
+            // Add stat boost message if applicable
+            if (isCorrect && ((playerIndex === 0 && p1CorrectAnswers % 1 === 0) ||
+                (playerIndex === 1 && p2CorrectAnswers % 1 === 0))) {
+                const player = players[playerIndex];
+                if (player && player.speedBoost > 0) {
+                    feedbackText += " | Speed Increased!";
+                } else if (player && player.jumpBoost < 0) {
+                    feedbackText += " | Jump Height Increased!";
+                } else {
+                    feedbackText += " | Stat Boost!";
+                }
+            }
+
+            // Add power-up message if applicable
+            if (isCorrect && ((playerIndex === 0 && p1CorrectAnswers % 2 === 0) ||
+                (playerIndex === 1 && p2CorrectAnswers % 2 === 0))) {
+                const player = players[playerIndex];
+                if (player && player.plasmaBlasts > 0) {
+                    feedbackText += " | Plasma Blasts Received!";
+                } else if (player && player.wingCharges > 0) {
+                    feedbackText += " | Wing Charges Received!";
+                } else {
+                    feedbackText += " | Power-Up Received!";
+                }
+            }
+
+            document.getElementById(feedbackTextId).textContent = feedbackText;
+            document.getElementById(feedbackId).classList.remove('hidden');
+
+            // Highlight correct/incorrect buttons
+            const buttons = document.querySelectorAll(`.${prefix}-btn`);
+            buttons.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === answerIndex) {
+                    btn.classList.add(isCorrect ? 'correct' : 'incorrect');
+                }
+                if (index === question.correct) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            // Move to next question for this player
+            setTimeout(() => {
+                if (playerIndex === 0) {
+                    p1CurrentQuestion++;
+                } else {
+                    p2CurrentQuestion++;
+                }
+                showPlayerQuestions();
+            }, 2000);
+        }
+
+        function giveStatBoost(playerIndex) {
+            const rewards = playerIndex === 0 ? p1QuizRewards : p2QuizRewards;
+
+            if (Math.random() < 0.5) {
+                rewards.speedBoost += 1;
+                console.log(`Player ${playerIndex + 1} got speed boost! Speed increased by 1`);
+            } else {
+                rewards.jumpBoost -= 2; // More negative = higher jump
+                console.log(`Player ${playerIndex + 1} got jump boost! Jump height increased by 2`);
+            }
+        }
+
+        function givePowerUp(playerIndex) {
+            const rewards = playerIndex === 0 ? p1QuizRewards : p2QuizRewards;
+            const powerUpType = Math.random() < 0.5 ? 'plasma' : 'wings';
+
+            if (powerUpType === 'plasma') {
+                rewards.plasmaBlasts += 5;
+                console.log(`Player ${playerIndex + 1} got 5 Plasma Blasts!`);
+            } else {
+                rewards.wingCharges += 3;
+                rewards.extraJumps += 3;
+                console.log(`Player ${playerIndex + 1} got 3 Wing Charges!`);
+            }
+        }
+
+        function firePlasmaBlast(player) {
+            const now = Date.now();
+            const playerKey = player.controls.jump === 'KeyW' ? 'p1' : 'p2';
+
+            // Prevent rapid firing
+            if (now - lastBlastTime[playerKey] < 500) return;
+            lastBlastTime[playerKey] = now;
+
+            const blast = {
+                x: player.x + player.width / 2,
+                y: player.y + player.height,
+                dx: 0,
+                dy: 8, // Always fire downward
+                radius: 8,
+                speed: 8,
+                life: 60, // frames
+                owner: player
+            };
+
+            plasmaBlasts.push(blast);
+        }
+
+        function updatePlasmaBlasts() {
+            // Iterate backwards to safely remove blasts
+            for (let i = plasmaBlasts.length - 1; i >= 0; i--) {
+                const blast = plasmaBlasts[i];
+                blast.x += blast.dx;
+                blast.y += blast.dy;
+                blast.life--;
+
+                // Remove expired blasts or blasts that go off screen
+                if (blast.life <= 0 || blast.y > canvas.height + 100) {
+                    plasmaBlasts.splice(i, 1);
+                    continue;
+                }
+
+                // Check collision with other players
+                let hit = false;
+                for (const target of players) {
+                    if (target === blast.owner) continue;
+
+                    const dx = blast.x - (target.x + target.width / 2);
+                    const dy = blast.y - (target.y + target.height / 2);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < blast.radius + target.width / 2) {
+                        // Push the target player downward (since blast goes down)
+                        const pushForce = 15; // Increased force for better impact feel
+                        target.dy += pushForce; // Push down
+
+                        // Apply slow/damage effect
+                        target.hitTimer = 180; // 3 seconds @ 60fps
+
+                        // Remove the blast
+                        plasmaBlasts.splice(i, 1);
+                        hit = true;
+                        break; // Stop checking other players for this blast
+                    }
+                }
+            }
+        }
+
+        function drawPlasmaBlasts() {
+            plasmaBlasts.forEach(blast => {
+                ctx.fillStyle = '#00ffff';
+                ctx.beginPath();
+                ctx.arc(blast.x, blast.y, blast.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Add glow effect
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(blast.x, blast.y, blast.radius * 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        // Event Listeners
+        window.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            // Handle quiz input
+            if (!document.getElementById('quiz-page').classList.contains('hidden')) {
+                handleQuizKeyInput(e.code);
+            }
+        });
+        window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+        window.addEventListener('resize', resizeCanvas);
+
+        onePlayerBtn.addEventListener('click', () => {
+            gameMode = '1P';
+            startTopicSelection();
+        });
+
+        twoPlayerBtn.addEventListener('click', () => {
+            gameMode = '2P';
+            startTopicSelection();
+        });
+
+        // Quiz button event listeners
+        document.querySelectorAll('.p1-btn').forEach((btn, index) => {
+            btn.addEventListener('click', () => handleQuizAnswer(0, index));
+        });
+
+        document.querySelectorAll('.p2-btn').forEach((btn, index) => {
+            btn.addEventListener('click', () => handleQuizAnswer(1, index));
+        });
+
+        // Topic selection button
+        document.getElementById('confirm-topics-btn').addEventListener('click', confirmTopics);
+
+        function handleQuizKeyInput(keyCode) {
+            // Player 1 controls: W/A/S/D
+            if (keyCode === 'KeyW' || keyCode === 'KeyA' || keyCode === 'KeyS' || keyCode === 'KeyD') {
+                if (p1CurrentQuestion < quizQuestions.length) {
+                    let answerIndex = 0;
+                    if (keyCode === 'KeyW') answerIndex = 0;
+                    else if (keyCode === 'KeyA') answerIndex = 1;
+                    else if (keyCode === 'KeyS') answerIndex = 2;
+                    else if (keyCode === 'KeyD') answerIndex = 3;
+
+                    handleQuizAnswer(0, answerIndex);
+                }
+            }
+            // Player 2 controls: Arrow keys
+            else if (keyCode === 'ArrowUp' || keyCode === 'ArrowLeft' || keyCode === 'ArrowDown' || keyCode === 'ArrowRight') {
+                if (gameMode === '2P' && p2CurrentQuestion < quizQuestions.length) {
+                    let answerIndex = 0;
+                    if (keyCode === 'ArrowUp') answerIndex = 0;
+                    else if (keyCode === 'ArrowLeft') answerIndex = 1;
+                    else if (keyCode === 'ArrowDown') answerIndex = 2;
+                    else if (keyCode === 'ArrowRight') answerIndex = 3;
+
+                    handleQuizAnswer(1, answerIndex);
+                }
+            }
+        }
+
+        restartBtn.addEventListener('click', () => {
+            endGameModal.classList.add('hidden');
+            menuModal.classList.remove('hidden');
+        });
+
+        // Initial call
+        resizeCanvas();
+
+    </script>
+</body>
+
+</html>
