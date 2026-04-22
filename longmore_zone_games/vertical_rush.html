@@ -953,28 +953,42 @@ load_data();
             updateProgress();
         }
 
-        function showQuestionForPlayer(playerIndex, questionIndex) {
-            const question = quizQuestions[questionIndex];
-            const prefix = playerIndex === 0 ? 'p1' : 'p2';
+function showQuestionForPlayer(playerIndex, questionIndex) {
+    const question = quizQuestions[questionIndex];
+    if (!question) return;
 
-            // Update display
-            document.getElementById(`${prefix}-gif`).src = question.image;
-            document.getElementById(`${prefix}-answer`).textContent = question.question;
+    const prefix = playerIndex === 0 ? 'p1' : 'p2';
 
-            // Update answer options
-            question.options.forEach((answer, index) => {
-                document.getElementById(`${prefix}-answer-${index}`).textContent = answer;
-            });
+    // 1. Set the Image (Check for 'image' key from your JSON)
+    const imgElement = document.getElementById(`${prefix}-gif`);
+    if (imgElement) {
+        imgElement.src = question.image || ''; 
+    }
 
-            // Reset button states
-            document.querySelectorAll(`.${prefix}-btn`).forEach(btn => {
-                btn.disabled = false;
-                btn.className = `quiz-btn ${prefix}-btn`;
-            });
+    // 2. Set the Question Text
+    const qElement = document.getElementById(`${prefix}-question`);
+    if (qElement) {
+        qElement.textContent = question.question;
+    }
 
-            // Hide feedback
-            document.getElementById(`${prefix}-feedback`).classList.add('hidden');
-        }
+    // 3. Set the Answer Options Safely
+    if (question.options) {
+        question.options.forEach((answer, index) => {
+            const answerElement = document.getElementById(`${prefix}-answer-${index}`);
+            if (answerElement) {
+                answerElement.textContent = answer;
+            }
+        });
+    }
+
+    // 4. Reset Button States
+    document.querySelectorAll(`.${prefix}-btn`).forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('correct', 'incorrect');
+        // Ensure they are visible
+        btn.parentElement.classList.remove('hidden'); 
+    });
+}
 
         function hidePlayerSection(playerIndex) {
             const prefix = playerIndex === 0 ? 'p1' : 'p2';
