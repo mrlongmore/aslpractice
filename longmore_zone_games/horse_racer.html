@@ -7,12 +7,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
+<style type="text/tailwindcss">
+        /* 1. Scale down the entire UI globally */
+        html {
+            font-size: 85%; /* Try 80% or 85%. This shrinks ALL Tailwind sizing proportionately */
+        }
+
+        /* 2. Lock the viewport to prevent scrollbars */
         body {
             font-family: 'Poppins', sans-serif;
-            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
-min-width: 0; /* Add this line */
+            touch-action: manipulation;
+            margin: 0;
+            padding: 0;
+            max-width: 100vw;
+            overflow-x: hidden;
         }
+
         /* Styles for modal transitions */
         .modal-transition {
             transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
@@ -27,6 +37,8 @@ min-width: 0; /* Add this line */
             transform: scale(1);
             pointer-events: auto;
         }
+
+        /* Button styles */
         .btn {
             @apply w-full py-3 px-4 rounded-xl text-white font-semibold shadow-lg transform transition-transform duration-150;
         }
@@ -45,14 +57,16 @@ min-width: 0; /* Add this line */
         .btn-orange {
             @apply bg-orange-500 hover:bg-orange-600;
         }
+
+        /* 3. Keep the Canvas strictly contained */
         #raceCanvas {
             position: fixed;
-            top: 0;
-            left: 0;
+            display: none;
             width: 100%;
             height: 100%;
-            display: none;
         }
+
+        /* Stat bars and panels */
         .stat-bar-container {
             @apply w-full bg-gray-200 rounded-full h-4 overflow-hidden;
         }
@@ -114,52 +128,82 @@ min-width: 0; /* Add this line */
         </div>
     </div>
 
-    <!-- Raising Section -->
-    <div id="raisingSection" class="min-h-screen flex flex-col items-center justify-center p-4 transition-opacity duration-500">
-        <div class="w-full max-w-md mx-auto">
-            <div class="glass-panel p-6 text-center">
-                <h1 id="raceTitle" class="text-4xl font-bold mb-2">Raise Your Horse</h1>
-                <p id="raceSubtitle" class="text-gray-300 mb-6">Qualifying Race: 1 of 3</p>
-            </div>
-
-            <div class="glass-panel p-6 mt-6">
-                <h2 class="text-2xl font-semibold mb-4 text-center">Horse Stats</h2>
-                <!-- Energy -->
-                <div class="mb-4">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="font-semibold">⚡ Energy</span>
-                        <span id="energyValue">0 / 100</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-5 overflow-hidden border-2 border-gray-600">
-                        <div id="energyBar" class="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="space-y-3">
-                    <div>
-                        <p class="font-semibold mb-1">💨 Speed: <span id="speedValue">10</span></p>
-                        <div class="stat-bar-container"><div id="speedBar" class="stat-bar bg-blue-500" style="width: 10%;"></div></div>
-                    </div>
-                    <div>
-                        <p class="font-semibold mb-1">🔋 Stamina: <span id="staminaValue">10</span></p>
-                        <div class="stat-bar-container"><div id="staminaBar" class="stat-bar bg-green-500" style="width: 10%;"></div></div>
-                    </div>
-                    <div>
-                        <p class="font-semibold mb-1">🔥 Spirit: <span id="spiritValue">10</span></p>
-                        <div class="stat-bar-container"><div id="spiritBar" class="stat-bar bg-red-500" style="width: 10%;"></div></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-                <button id="trainBtn" class="btn btn-blue">Train (Speed)</button>
-                <button id="feedBtn" class="btn btn-green">Feed (Stamina)</button>
-                <button id="restBtn" class="btn btn-purple">Rest (Spirit)</button>
-            </div>
+<div id="raisingSection" class="min-h-screen flex flex-col items-center justify-center p-4 pb-24 transition-opacity duration-500">
+        
+        <div class="w-full max-w-4xl mx-auto">
             
-            <div class="mt-6">
-                <button id="startRaceBtn" class="btn btn-orange w-full text-xl">🏆 Start Race! 🏆</button>
+            <div class="glass-panel p-6 text-center mb-8">
+                <h1 id="raceTitle" class="text-4xl font-bold mb-2">Raise Your Horse</h1>
+                <p id="raceSubtitle" class="text-gray-300">Qualifying Race: 1 of 3</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="glass-panel p-8 flex flex-col justify-center">
+                    <h2 class="text-3xl font-semibold mb-6 text-center">Horse Stats</h2>
+                    
+                    <div class="mb-8 border-b border-gray-600 pb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-xl">⚡ Energy</span>
+                            <span id="energyValue" class="text-xl font-bold text-yellow-400">0 / 100</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-6 overflow-hidden border-2 border-gray-600 shadow-inner">
+                            <div id="energyBar" class="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-semibold text-gray-200">💨 Speed</span>
+                                <span id="speedValue" class="font-bold text-blue-400">10</span>
+                            </div>
+                            <div class="stat-bar-container"><div id="speedBar" class="stat-bar bg-blue-500" style="width: 10%;"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-semibold text-gray-200">🔋 Stamina</span>
+                                <span id="staminaValue" class="font-bold text-green-400">10</span>
+                            </div>
+                            <div class="stat-bar-container"><div id="staminaBar" class="stat-bar bg-green-500" style="width: 10%;"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-semibold text-gray-200">🔥 Spirit</span>
+                                <span id="spiritValue" class="font-bold text-red-400">10</span>
+                            </div>
+                            <div class="stat-bar-container"><div id="spiritBar" class="stat-bar bg-red-500" style="width: 10%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-3xl font-semibold mb-6 text-center">Training</h2>
+                        
+                        <div class="space-y-4">
+                            <button id="trainBtn" class="btn btn-blue py-4 px-6 flex justify-between items-center text-lg">
+                                <span>💨 Train (Speed)</span>
+                                <span class="text-sm bg-black bg-opacity-20 px-3 py-1 rounded-full">-10 Energy</span>
+                            </button>
+                            <button id="feedBtn" class="btn btn-green py-4 px-6 flex justify-between items-center text-lg">
+                                <span>🔋 Feed (Stamina)</span>
+                                <span class="text-sm bg-black bg-opacity-20 px-3 py-1 rounded-full">-10 Energy</span>
+                            </button>
+                            <button id="restBtn" class="btn btn-purple py-4 px-6 flex justify-between items-center text-lg">
+                                <span>🔥 Rest (Spirit)</span>
+                                <span class="text-sm bg-black bg-opacity-20 px-3 py-1 rounded-full">-10 Energy</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-white border-opacity-20">
+                        <button id="startRaceBtn" class="btn btn-orange w-full py-5 text-2xl uppercase tracking-wider shadow-xl transform transition hover:-translate-y-1">
+                            🏆 Start Race! 🏆
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -168,7 +212,7 @@ min-width: 0; /* Add this line */
     <canvas id="raceCanvas"></canvas>
     
     <!-- Timer Display -->
-    <div id="timerDisplay" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 hidden">
+    <div id="timerDisplay" class="fixed top-1/2 left-40 transform -translate-x-1/2 z-50 hidden">
         <div class="glass-panel px-6 py-3 text-center">
             <div class="text-2xl font-bold text-white">
                 <span id="timerText">01:30</span>
@@ -212,472 +256,30 @@ min-width: 0; /* Add this line */
     <script type="module">
      document.addEventListener('DOMContentLoaded', () => {
         // --- DATA ---
-        const questionBank = {
-            "Fingerspelling": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692311747/etvp5upjgqyoilil7rex.gif", question: "What letter is this?", answers: ["A", "S", "T", "M"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692311802/hb0qenrlxyzqlwmrlhln.gif", question: "What letter is this?", answers: ["R", "B", "F", "D"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692311848/ndhas8eswzcnnsk5ear6.gif", question: "What letter is this?", answers: ["K", "O", "C", "G"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692311900/hcs26xfyrlpwcdkerpxz.gif", question: "What letter is this?", answers: ["F", "L", "M", "D"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692311949/bb0niq5n7gtcczrggb34.gif", question: "What letter is this?", answers: ["E", "S", "A", "T"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312187/zapzwb93oz9zxexts9uk.gif", question: "What letter is this?", answers: ["D", "F", "T", "R"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312272/ufoqkaetokda2d8b5w5h.gif", question: "What letter is this?", answers: ["Q", "P", "G", "H"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312435/iud8omzgejkpe457zklk.gif", question: "What letter is this?", answers: ["U", "V", "K", "H"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312481/pfivlgr4eudb2mnufdqg.gif", question: "What letter is this?", answers: ["I", "J", "Y", "P"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312504/xtusunmylwd66di0jb4y.gif", question: "What letter is this?", answers: ["I", "J", "Z", "X"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312581/ysj2iqf1o6z5e6qrsvjj.gif", question: "What letter is this?", answers: ["V", "H", "K", "P"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312661/jzrccxpr08nh8fxheemh.gif", question: "What letter is this?", answers: ["W", "G", "D", "L"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312683/xes4qx277v1zm1fyjzaf.gif", question: "What letter is this?", answers: ["M", "N", "T", "A"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312705/awnxi0q6kaoalohcvpjz.gif", question: "What letter is this?", answers: ["M", "N", "U", "V"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312741/ek6irawgqqdx3by3byu3.gif", question: "What letter is this?", answers: ["C", "Q", "O", "G"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312826/f05subywhiw5jq1qet3u.gif", question: "What letter is this?", answers: ["K", "G", "Q", "P"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312840/c4lngbip28km6jinlvyr.gif", question: "What letter is this?", answers: ["Q", "G", "P", "K"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692312961/sq3uhzmeopqanqddql81.gif", question: "What letter is this?", answers: ["W", "R", "U", "V"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692313004/zuwg9bsw6ibsvcohl3kh.gif", question: "What letter is this?", answers: ["A", "E", "S", "M"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692313033/ndkt3nimxhxlen7g4ioz.gif", question: "What letter is this?", answers: ["M", "N", "A", "T"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692313114/f8zon8c0h3ik4gsixb5m.gif", question: "What letter is this?", answers: ["U", "V", "R", "W"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692313142/vevcibnknxn1xlufpqo7.gif", question: "What letter is this?", answers: ["R", "V", "U", "K"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692313338/uko45nul0ceokkonacht.gif", question: "What letter is this?", answers: ["R", "U", "W", "V"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692313384/aeh1jgwos8z7dlzcfuqp.gif", question: "What letter is this?", answers: ["Y", "I", "J", "X"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692313410/vllvexrzpox17cf2fntt.gif", question: "What letter is this?", answers: ["Y", "I", "J", "X"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692313426/nnzmwdcfstglgfoxd8gh.gif", question: "What letter is this?", answers: ["J", "Z", "X", "Q"], correctAnswer: 1 }
-            ],
-            "Numbers 1-20": [
-                { gif: "https://media.gimkit.com/image/upload/v1756149846/ml5b0do6jfrbpba6qty0.gif", question: "What number is this?", answers: ["1", "2", "3", "4"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/v1756149870/bwa40zusilj7tjbpdiuc.gif", question: "What number is this?", answers: ["1", "2", "3", "4"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/v1756149904/ufvmeod4lk4lrgzeoyau.gif", question: "What number is this?", answers: ["1", "2", "3", "4"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/v1756149933/kpvdo2e7gxxw3hysizlk.gif", question: "What number is this?", answers: ["1", "2", "3", "4"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150032/ubjtwsfzzt8n0tdyzbps.gif", question: "What number is this?", answers: ["5", "6", "7", "8"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150065/gmbnrgyfeya5ilkx5ly2.gif", question: "What number is this?", answers: ["5", "6", "7", "8"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150091/stomgakq7h6gtwrtf5s7.gif", question: "What number is this?", answers: ["5", "6", "7", "8"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150116/qpqjzmlpxgajl29boilg.gif", question: "What number is this?", answers: ["5", "6", "7", "8"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150142/aeh7rl9imyhdagnggq9y.gif", question: "What number is this?", answers: ["9", "10", "11", "12"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150175/xxxrb1tjg0xpuxae4kuu.gif", question: "What number is this?", answers: ["9", "10", "11", "12"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150206/ilbmykowrul9bzio3m1p.gif", question: "What number is this?", answers: ["9", "10", "11", "12"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150231/tjvdoo637mrk06jv50xm.gif", question: "What number is this?", answers: ["9", "10", "11", "12"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150260/m9iufzw6dbcfptqw31r8.gif", question: "What number is this?", answers: ["13", "14", "15", "16"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150301/dor0zisus83yflyx0phc.gif", question: "What number is this?", answers: ["13", "14", "15", "16"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150323/pypkd1zdncgbhbouqoxt.gif", question: "What number is this?", answers: ["13", "14", "15", "16"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150351/tcgygvqctm5wnvew8qlv.gif", question: "What number is this?", answers: ["13", "14", "15", "16"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150378/nckxphzl8eseqsdk0mpu.gif", question: "What number is this?", answers: ["17", "18", "19", "20"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150425/wy8gbrfuzuzmzt4fsysa.gif", question: "What number is this?", answers: ["17", "18", "19", "20"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150500/pirynccjq5h99j6qonnr.gif", question: "What number is this?", answers: ["17", "18", "19", "20"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/v1756150530/bu5c2l55idhjtxyhhaqe.gif", question: "What number is this?", answers: ["17", "18", "19", "20"], correctAnswer: 3 }
-            ],
-            "Family and Pronouns": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025562/mugf77pxrm6xzkeiwobk.gif", question: "What is being signed?", answers: ["HELLO", "GOODBYE", "HI", "HEY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025728/qgxyv5ckfiprmpdfugy3.gif", question: "What is being signed?", answers: ["YOU", "HE/SHE/IT", "THEY", "I"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025795/lrbwl0joglr3mpquwtn8.gif", question: "What is being signed?", answers: ["MY", "YOUR", "HIS/HER/ITS", "THEIR"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025890/inhismahxpgkhtbwwqb8.gif", question: "What is being signed?", answers: ["ME", "YOU", "HE", "I"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025989/y83o0hvnpg9zl6016td3.gif", question: "What is being signed?", answers: ["LIVE (L)", "LIFE", "ADDRESS", "STAY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695026094/czbrsyopubuxn018fqc0.gif", question: "What is being signed?", answers: ["LIVE", "LIVE (A)", "LIFE", "ADDRESS"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695026330/uqsbsp0bybg32xkq6gvv.gif", question: "What is being signed?", answers: ["NICE-TO-MEET-YOU", "HELLO", "MEET-YOU", "HOW-ARE-YOU"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695026514/tbdgdnaipydsxyzdlou9.gif", question: "What is being signed?", answers: ["I", "ME", "MINE", "MY"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695026967/kv1h8qvixctuha6rksuq.gif", question: "What is being signed?", answers: ["NICE", "CLEAN", "GOOD", "FINE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695027393/oojyfcc35clxyvz3mxdw.gif", question: "What is being signed?", answers: ["WE", "OUR", "THEY", "US"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695027525/xtskaukcub76m4cnrkdc.gif", question: "What is being signed?", answers: ["READY", "SET", "READY (X2)", "GO"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695027633/uz88ntjelherbkhylfyp.gif", question: "What is being signed?", answers: ["GO", "SET", "NOW", "READY (X1)"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695029192/o2i7bwzplsb82g26jizz.gif", question: "What is being signed?", answers: ["WE (INFORMAL)", "US", "THEY", "YOU-TWO"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695029275/nkiy6mri8k7vscbqoz2i.gif", question: "What is being signed?", answers: ["US", "WE (FORMAL)", "THEY", "OUR"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695030137/fhy9qy32s4u4qowczlxi.gif", question: "What is being signed?", answers: ["I", "HE", "YOU", "ME"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695030230/g4nilp6dvheppqiyaena.gif", question: "What is being signed?", answers: ["THEY", "WE", "US", "YOU (PLURAL)"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695030416/xelhgwnacq6rurxucuij.gif", question: "What is being signed?", answers: ["YOUR", "MY", "HIS", "THEIR"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695030550/uq4guics0t8qc3fuaub7.gif", question: "What is being signed?", answers: ["THEIR", "YOUR (PLURAL)", "OUR", "MY"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695030918/yhaqmar2dtp65ce2lebz.gif", question: "What is being signed?", answers: ["CALLED", "SIGN", "NAME", "WHAT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024406/kqasjm3uk6adx1uojb8g.gif", question: "What is being signed?", answers: ["GOLD", "YELLOW", "USA", "CALIFORNIA"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024843/oj79dgkhvomv2bulrlwx.gif", question: "What is being signed?", answers: ["DON’T-KNOW", "KNOW", "UNDERSTAND", "NO"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695026880/hk0snd8pty7ddw6erh1s.gif", question: "What is being signed?", answers: ["NEW", "NEW-YORK", "CITY", "STATE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695027078/p1vogph0sngj0ua4ij3i.gif", question: "What is being signed?", answers: ["YES", "NOT", "NO", "DON'T"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695027226/vjcmw1liaymy140l7j3m.gif", question: "What is being signed?", answers: ["NO", "NEVER", "NONE", "NOT"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695028144/vpubvokmhphkuxxrizws.gif", question: "What is being signed?", answers: ["STUDENT", "TEACHER", "LEARN", "SCHOOL"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695028527/ykaqdtobbgbruqbs0hob.gif", question: "What is being signed?", answers: ["STUDENT", "TEACHER", "PERSON", "SCHOOL"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695029440/yqaf0wzfmqmzjfc09epa.gif", question: "What is being signed?", answers: ["WHAT", "WHO", "WHERE", "WHEN"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695029730/kuimi73r6zljp1kyyblz.gif", question: "What is being signed?", answers: ["NO", "MAYBE", "OKAY", "YES"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695029758/vjsqojhb0iz6bb8tlwdn.gif", question: "What is being signed?", answers: ["WHO", "WHAT", "WHERE", "WHEN"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025171/cwpedal3jjdrmvakja5n.gif", question: "What is being signed?", answers: ["DAD", "GRANDFATHER", "MAN", "OLD"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024298/ljcfh7ptniio0abqt6vp.gif", question: "What is being signed?", answers: ["SISTER", "FRIEND", "BROTHER", "BOY"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695026441/ovc5sak17aqcyhie60xu.gif", question: "What is being signed?", answers: ["DAD", "GRANDMOTHER", "WOMAN", "MOM"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024566/brzzpclnffn7bvp0nmux.gif", question: "What is being signed?", answers: ["DAD", "GRANDFATHER", "MAN", "BOY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695027975/tkztruypzbkyf3fgl113.gif", question: "What is being signed?", answers: ["DAUGHTER", "SON", "BOY", "BABY"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024645/nvjsmdrgrhdjeun2kkph.gif", question: "What is being signed?", answers: ["SON", "GIRL", "DAUGHTER", "BABY"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695027633/uz88ntjelherbkhylfyp.gif", question: "What is being signed?", answers: ["GO", "SET", "NOW", "READY"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024204/ynb5t6fsyrbypkhuz3nt.gif", question: "What is being signed?", answers: ["AUNT", "UNCLE", "WOMAN", "MOM"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025058/yrm0nmfcuch8ijvnquga.gif", question: "What is being signed?", answers: ["BOY", "GIRL", "WOMAN", "DAUGHTER"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024952/z9ot5ekxbufbvjtf2vtc.gif", question: "What is being signed?", answers: ["LIVE", "WHERE", "FROM", "COME"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695026219/maxedwanzbtdl2seju36.gif", question: "What is being signed?", answers: ["DAD", "BOY", "GRANDFATHER", "MAN"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025277/e6kzfbn7l1tloih1pwzc.gif", question: "What is being signed?", answers: ["GRANDMOTHER", "MOM", "WOMAN", "OLD"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024147/ztww7f3nemveczgm1lmx.gif", question: "What is being signed?", answers: ["MAN", "BOY", "SON", "BROTHER"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695026627/p42czfpz8rmlqkwrlxaa.gif", question: "What is being signed?", answers: ["NEPHEW", "AUNT", "NIECE", "GIRL"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695027853/rya2qoqr5unbdst8qg98.gif", question: "What is being signed?", answers: ["BROTHER", "GIRL", "FRIEND", "SISTER"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695026695/a4rp7avygfm1nthtifut.gif", question: "What is being signed?", answers: ["NEPHEW", "UNCLE", "BOY", "NIECE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695029614/wcxjkw29zmcalpgfjnw9.gif", question: "What is being signed?", answers: ["MOM", "WOMAN", "GIRL", "GRANDMOTHER"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695028252/dkqru1zyudzchrslbewe.gif", question: "What is being signed?", answers: ["AGAIN", "LOOK", "REVIEW", "PRACTICE"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695028926/ftd6lokvjnrepqeud2kt.gif", question: "What is being signed?", answers: ["SAME", "BROTHER", "SISTER", "TWIN"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695029073/yfgeq5pzfvwadlovhjvq.gif", question: "What is being signed?", answers: ["UNCLE", "AUNT", "MAN", "DAD"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024492/oxmtblkhq6iq4h30b88j.gif", question: "What is being signed?", answers: ["FRIEND", "COUSIN (NEUTRAL)", "FAMILY", "RELATIVE"], correctAnswer: 1 }
-            ],
-            "School and Deaf Culture": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024725/lc9fqzsmwipzcszep9jn.gif", question: "What is being signed?", answers: ["DEAF", "HEARING", "EAR", "LISTEN"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025425/jt4cpgvar1igac9xmam8.gif", question: "What is being signed?", answers: ["HEARING", "HARD-OF-HEARING", "DEAF", "LISTEN"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025503/gh10e2ggew0593zrm025.gif", question: "What is being signed?", answers: ["DEAF", "SPEAK", "HEARING", "SAY"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259457/asvqeant0kkrokmabfel.gif", question: "What is being signed?", answers: ["SCHOOL", "CLASS", "NORMAL", "MAINSTREAM"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259919/vy5hcxrbvkvwkurfldhx.gif", question: "What is being signed?", answers: ["RESIDENTIAL-SCHOOL", "DORM", "SCHOOL", "LIVE-SCHOOL"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259372/lefgpozd3vdlrkvxap1w.gif", question: "What is being signed?", answers: ["MANY", "HOW-MANY", "HOW-MUCH", "COUNT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259489/glnd1borxdqavce67sme.gif", question: "What is being signed?", answers: ["HOW-MANY", "LOTS", "MANY", "MUCH"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259562/uikh3yjxyl52regm4fqp.gif", question: "What is being signed?", answers: ["WHAT", "EXPLAIN", "WHY", "MEAN/MEANING"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259616/zo6s5jywinszkut9tull.gif", question: "What is being signed?", answers: ["MORE", "ADD", "AGAIN", "PLUS"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259677/uywhqlbtzl1u647iweez.gif", question: "What is being signed?", answers: ["WANT", "NEED", "MUST", "HAVE-TO"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259859/sshyzuwbmvcj6oxbmnh8.gif", question: "What is being signed?", answers: ["UNDERSTAND", "OH", "GOTCHA/OH-I-SEE", "YES"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696260046/l2lgxzmg41jjii2228v8.gif", question: "What is being signed?", answers: ["NAME", "WORD", "LANGUAGE", "SIGN"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696260223/ulc0lw7vwk4rfz3tqjuu.gif", question: "What is being signed?", answers: ["WHY", "HOW", "WHAT", "BECAUSE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696260177/ggfmvmz4lspang2ffmr6.gif", question: "What is being signed?", answers: ["KNOW", "UNDERSTAND", "THINK", "AGREE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259891/g01hthym2wahvbajuiko.gif", question: "What is being signed?", answers: ["THANK-YOU", "WELCOME", "PLEASE", "SORRY"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259735/rzbly1hhk3dor4iubiub.gif", question: "What is being signed?", answers: ["TODAY", "LATER", "SOON", "NOW"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696258583/pzwcftbfyv9nqpexsl0e.gif", question: "What is being signed?", answers: ["AGAIN", "REPEAT", "MORE", "OTHER"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696258845/eemv0wnujbsfdme630mc.gif", question: "What is being signed?", answers: ["READ", "BOOK", "PAPER", "SCHOOL"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696258994/aqmisbokapsqc0wycxd2.gif", question: "What is being signed?", answers: ["SCHOOL", "GROUP", "CLASS", "FAMILY"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259041/tdh3hslapnlm5etgzv4x.gif", question: "What is being signed?", answers: ["SCHOOL", "UNIVERSITY", "HIGH-SCHOOL", "COLLEGE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259190/ymrqrhzjvmyeqyfykzc4.gif", question: "What is being signed?", answers: ["GO-TO/GO", "COME", "WALK", "LEAVE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259224/xhr7dcnhp5yoope15lil.gif", question: "What is being signed?", answers: ["NEED", "HAVE", "WANT", "GET"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259416/tfa3nupnd74gbwluwb1c.gif", question: "What is being signed?", answers: ["STUDY", "READ", "LEARN", "KNOW"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259765/zmbblpdqolzyfwjpr3kp.gif", question: "What is being signed?", answers: ["BOOK", "PAPER", "TURN", "PAGE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259795/c7b0c3qgokb3msma0uqp.gif", question: "What is being signed?", answers: ["PAPER", "WRITE", "BOOK", "READ"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259817/jscqn2wiexkaeuw8inht.gif", question: "What is being signed?", answers: ["WRITE", "PENCIL", "PEN", "PAPER"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696259981/thfhgbchgk0amkaurdbz.gif", question: "What is being signed?", answers: ["CLASS", "WORK", "SCHOOL", "LEARN"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696260085/rz5xv7xshtf5amklpxoo.gif", question: "What is being signed?", answers: ["START", "MAJOR", "CLASS", "TAKE-UP"], correctAnswer: 3 }
-            ],
-            "Feelings": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818233/wbfdwelze53quauvm0cw.gif", question: "What is being signed?", answers: ["RELAX/RELAXED", "TIRED", "CALM", "BORED"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818504/owlaeg8av8mpldmonvfo.gif", question: "What is being signed?", answers: ["ANGRY", "ANNOYED", "FRUSTRATED", "MAD"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818521/fabgth5xxw6mybchmsbi.gif", question: "What is being signed?", answers: ["SCARED", "NERVOUS", "WORRY/WORRIED", "THINK"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818546/pu1vi50kh6ey1fccdi0q.gif", question: "What is being signed?", answers: ["SAD", "ANGRY", "DISAPPOINTED", "UPSET"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818578/wz0yyovfln09vkcsffy2.gif", question: "What is being signed?", answers: ["SURPRISED", "SHOCKED", "SCARED", "EXCITED"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818217/eom4g95lz96onqxbgrdj.gif", question: "What is being signed?", answers: ["HARD", "PRESSURE/STRESSED", "WORK", "DIFFICULT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818253/d1vh1wk4cv6gzp6rrgt9.gif", question: "What is being signed?", answers: ["BUSY", "STRESSED", "OVERWHELMED", "CONFUSED"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818270/sudalyvqfg7uta4dnqha.gif", question: "What is being signed?", answers: ["HAPPY", "GOOD", "SUCCESS", "PRIDE/PROUD"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818285/c12mhbjnpwc0qosu7f4v.gif", question: "What is being signed?", answers: ["HEARTBROKEN", "SAD", "LOVE-GONE", "CRY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818384/qwamevc3chaaj4xqj4wh.gif", question: "What is being signed?", answers: ["LOVE", "FALL-IN-LOVE", "LIKE", "CRUSH"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818398/dxyfk7gm9hjgdimyfguc.gif", question: "What is being signed?", answers: ["FEEL", "HEART", "EMOTION/EMOTIONAL", "SENSITIVE"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818411/sjkxld62n8xx6lntqiox.gif", question: "What is being signed?", answers: ["SAD", "UPSET", "MISS", "DISAPPOINTED"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818428/yy9oatocx3dhma1rkyno.gif", question: "What is being signed?", "answers": ["CONFUSED", "LOST", "MIXED-UP", "THINK"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818445/jnlnmwmlxnicaculycnf.gif", question: "What is being signed?", "answers": ["RELAX", "CALM", "QUIET", "PEACE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818836/usbtybeawmazjxrrupzz.gif", question: "What is being signed?", "answers": ["ANGRY", "ANNOYED", "CRANKY", "MEAN"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818708/rddzi1tzrjs6mnlnfdgd.gif", question: "What is being signed?", "answers": ["SHAKE", "SCARED", "WORRIED", "NERVOUS (hands)"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818722/esh7ptlbyujilistxcef.gif", question: "What is being signed?", "answers": ["NERVOUS (legs)", "SCARED", "SHAKE", "WORRY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818818/yp9cc5mmuquza2lxko2i.gif", question: "What is being signed?", "answers": ["HAPPY", "EXCITED", "FUN", "JUMP"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818352/pjjcntyzjcqwnsvakdze.gif", question: "What is being signed?", "answers": ["FEEL", "EMOTION", "FEELING", "TOUCH"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818367/hnguk3eactedacn5muzc.gif", question: "What is being signed?", "answers": ["FEELING", "TOUCH", "SICK", "FEEL"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818592/xhmn3989lhhpxrggi2ck.gif", question: "What is being signed?", "answers": ["SO-SO", "OKAY", "MAYBE", "AVERAGE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818607/rt2eextu2n9vom1xwnks.gif", question: "What is being signed?", "answers": ["TIRED", "SLEEPY", "BORED", "NIGHT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818655/xjkcru4nlxzi1ci7waxw.gif", question: "What is being signed?", "answers": ["FEEL", "HURT", "SICK", "TIRED"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818676/wonkb1rsyusmadfpj96v.gif", question: "What is being signed?", "answers": ["HAPPY", "CONTENT", "FULL", "SATISFIED"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818196/joh3nycjbezglapz1osj.gif", question: "What is being signed?", "answers": ["BORED", "TIRED", "LAZY", "NOT-INTERESTED"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818316/i07hoarm6awvrap3x1g0.gif", question: "What is being signed?", "answers": ["ANGRY", "FRUSTRATED", "STUCK", "ANNOYED"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818561/b3e5tqosbuckmzw7dw8v.gif", question: "What is being signed?", "answers": ["SLEEPY", "BORED", "TIRED", "EXHAUSTED"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818691/kqfhdcattqi07lptrkqi.gif", question: "What is being signed?", "answers": ["UPSET", "CRY", "DEPRESSED", "SAD"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818750/ojefojd8qjezq7hcarig.gif", question: "What is being signed?", "answers": ["ANGRY/MAD", "FRUSTRATED", "UPSET", "ANNOYED"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697818767/k2dwin5d41sque2ckx0d.gif", question: "What is being signed?", "answers": ["WHAT", "HOW", "WHY", "WHEN"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1697819608/wqeevk98scdopjz5kn9i.gif", question: "What is being signed?", "answers": ["SMILE", "LAUGH", "HAPPY", "FUN"], correctAnswer: 2 }
-            ],
-            "Foods and Drinks": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656892/zseebsikytql5olj4txc.gif", question: "What is being signed?", answers: ["BREAKFAST", "MORNING-EAT", "SUNRISE-FOOD", "EARLY-MEAL"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655855/bvdtrcqlgot5dv93ln9c.gif", question: "What is being signed?", answers: ["BAGEL", "DONUT", "COOKIE", "CIRCLE-BREAD"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655772/y2yyivagjjhwrzcbnoiv.gif", question: "What is being signed?", answers: ["TACO", "WRAP", "BURRITO", "ROLL"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655677/fkdorxlpm6wedigge0uc.gif", question: "What is being signed?", answers: ["HOTDOG", "MEAT-TUBE", "LINK", "SAUSAGE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655788/tcv4rbuleuqd9pzjqgww.gif", question: "What is being signed?", answers: ["CEREAL", "SOUP", "OATS", "BOWL-FOOD"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655820/eyhakpebq8mzm0htvgyd.gif", question: "What is being signed?", answers: ["PANCAKE", "WAFFLES", "BREAD", "GRID-CAKE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655890/la96vn34fmofpxkoua0z.gif", question: "What is being signed?", answers: ["DONUT", "BREAD", "BAGEL", "ROUND-TOAST"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655701/twzajoyixiwjk7cb5ydq.gif", question: "What is being signed?", answers: ["BREAD", "SANDWICH", "CRACKER", "TOAST"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655735/jyhwncr5uf08onjhd6ob.gif", question: "What is being signed?", answers: ["POTATO", "APPLE", "ONION", "ROOT"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656961/ygoytpnwybkvx0ok1phe.gif", question: "What is being signed?", answers: ["PEAR", "AVOCADO", "GREEN-FRUIT", "SEED"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656603/kqvhfir62k159vyuyasw.gif", question: "What is being signed?", answers: ["COOKIE", "CHIP", "CRACKER", "BISCUIT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655803/yg9stwmvhsqkn3wd0txg.gif", question: "What is being signed?", answers: ["WAFFLE", "COOKIE", "FLAPJACK", "PANCAKE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655720/pbqjkj3uuk27jackkkdc.gif", question: "What is being signed?", answers: ["FRENCH TOAST", "BREAD-EGG", "SYRUP-BREAD", "TOAST"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655661/vmmom751icgwjjlv8jta.gif", question: "What is being signed?", answers: ["HAM", "BACON", "PORK", "MEAT-STRIP"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655604/kfspy75ze1v2ky90lpqb.gif", question: "What is being signed?", answers: ["CHICKEN", "BIRD", "EGG", "OVAL"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655324/pe6w3helaieokmbxwxdx.gif", question: "What is being signed?", answers: ["DINNER", "BREAKFAST", "SNACK", "LUNCH"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655907/oxwivlgmpln9p8lt1bgg.gif", question: "What is being signed?", answers: ["SANDWICH", "BURGER", "BREAD", "LUNCH"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655967/c0qbizqwgicdc8yc1shr.gif", question: "What is being signed?", answers: ["FRIES", "FRENCH-FRIES", "POTATO-STICKS", "CHIPS"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655983/v38mf3jhr5juvlwz1tsi.gif", question: "What is being signed?", answers: ["SANDWICH", "BUN", "HAMBURGER", "MEAT-PATTY"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656016/vrytjkzltegtgegvt6g2.gif", question: "What is being signed?", answers: ["PEPPERONI", "CHEESE-BREAD", "PIE", "PIZZA"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656124/tmnk8d5ja0xp57odinf4.gif", question: "What is being signed?", answers: ["SUSHI", "FISH-RICE", "ROLL", "SEAWEED"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655677/fkdorxlpm6wedigge0uc.gif", question: "What is being signed?", answers: ["SAUSAGE", "HOTDOG", "LINK", "MEAT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655754/pcxabqltua9gyljtcvlb.gif", question: "What is being signed?", answers: ["MILK", "DAIRY", "CHEESE", "YELLOW-BLOCK"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656138/xx4nuglf977giozpgaw9.gif", question: "What is being signed?", answers: ["BURRITO", "SANDWICH", "WRAP", "TACO"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655305/n15fo6v2q7szkqsar62h.gif", question: "What is being signed?", answers: ["DINNER", "NIGHT-EAT", "SUPPER", "EVENING-MEAL"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656227/sqqy69ybextqddjbclac.gif", question: "What is being signed?", answers: ["NOODLES", "PASTA/SPAGHETTI", "ITALIAN-FOOD", "WORM-EAT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656072/f8vj1z6j3oi3xj8xsorn.gif", question: "What is being signed?", answers: ["TOAST", "LOAF", "BREAD", "SANDWICH"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656873/jcp8l67mjlcmb50skl5z.gif", question: "What is being signed?", answers: ["CRAB", "SHRIMP", "SEAFOOD", "LOBSTER"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656849/mjjyszgifi2fpfyzur59.gif", question: "What is being signed?", answers: ["CRAB", "LOBSTER", "PINCH", "SEAFOOD"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656208/pchx6qtdffmse9z4qpeq.gif", question: "What is being signed?", answers: ["TURKEY", "CHICKEN", "BIRD", "ROOSTER"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656103/wp7fo3knqcceid3sqeun.gif", question: "What is being signed?", answers: ["CHICKEN", "BIRD", "TURKEY", "GOBBLE"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656153/wwdvzlcllfmvz9exvmqm.gif", question: "What is being signed?", answers: ["SWIM", "WATER-ANIMAL", "SEAFOOD", "FISH"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655999/c084vuouxaprlz8gu69c.gif", question: "What is being signed?", answers: ["SALAD", "VEGETABLES", "GREENS", "TOSS-FOOD"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656241/h4vsewdifb7re3wo0w4j.gif", question: "What is being signed?", answers: ["CEREAL", "SOUP", "BOWL", "HOT-LIQUID"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656327/nyhu61rmytzoogsfjweb.gif", question: "What is being signed?", answers: ["FROZEN-YOGURT", "DESSERT", "ICECREAM", "COLD-TREAT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656349/ky2vjgtxoo6vhnm5gazx.gif", question: "What is being signed?", answers: ["MOVIE-SNACK", "CORN", "CHIPS", "POPCORN"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656365/yhqzluk2t6oysnb1u8wh.gif", question: "What is being signed?", answers: ["COOKIE", "BISCUIT", "DESSERT", "ROUND-TREAT"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656424/whwpujqrizbxpklkxmpc.gif", question: "What is being signed?", answers: ["PIE", "CAKE", "DESSERT", "BIRTHDAY"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656710/xiqv48jeqigceyq761dt.gif", question: "What is being signed?", answers: ["CANDY", "BROWN", "CHOCOLATE", "SWEET"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656726/nzni2y1waa4jdjqzy7vt.gif", question: "What is being signed?", answers: ["WHITE", "ICECREAM", "SWEET", "VANILLA"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656570/cb8irykvd2cyluwi9rkw.gif", question: "What is being signed?", answers: ["CHIPS", "CRUNCHY", "POTATO", "SNACK"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656441/ftve9hrdowanzn4zdnip.gif", question: "What is being signed?", answers: ["CAKE", "PIE", "DESSERT", "SLICE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655519/rvqnqxqr5ddpf2n9mxec.gif", question: "What is being signed?", answers: ["HUNGRY", "ENOUGH", "FULL", "SATISFIED"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655501/xlplmfpejjeb5fij7n6c.gif", question: "What is being signed?", answers: ["DRINK", "WATER", "WANT", "THIRSTY"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655582/qbcmgnwswgszf2js5srn.gif", question: "What is being signed?", answers: ["ORDER", "CHOOSE", "WANT", "TELL"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656833/pfcwregpllznfcskubla.gif", question: "What is being signed?", answers: ["FOOD-PLACE", "RESTAURANT", "EAT-OUT", "FANCY-MEAL"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656815/zedjsmgffnyibtusfzzt.gif", question: "What is being signed?", answers: ["NO-WANT", "WANT-NOT", "DON’T-WANT", "REJECT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656798/rk3pjidjg8xn62obgm3o.gif", question: "What is being signed?", answers: ["NEED", "LIKE", "DESIRE", "WANT"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656773/iag8fuy4qteaxhxsnwri.gif", question: "What is being signed?", answers: ["FAVORITE", "BEST", "LIKE-MOST", "PREFER"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656758/neqlcjmkmuphqehotil8.gif", question: "What is being signed?", answers: ["FAVORITE", "PREFER", "CHOOSE", "RATHER"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656741/ezzcn76z2ht8ejczvjc6.gif", question: "What is being signed?", answers: ["CANDY", "SWEET", "SUGAR", "DESSERT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656278/ho1iqmam10yu3b6wv4rr.gif", question: "What is being signed?", answers: ["PEPPER", "SPICE", "WHITE-POWDER", "SALT"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656294/qw4qv1noedlv6p2vtg3b.gif", question: "What is being signed?", answers: ["PEPPER", "SALT", "BLACK-POWDER", "SHAKE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656087/pcai1otvzgptmcomko6p.gif", question: "What is being signed?", answers: ["CHEESE", "BUTTER", "YELLOW", "SPREAD"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698695347/lywqz2a2qp9rqenqqzzo.gif", question: "What is being signed?", answers: ["HONEY", "SAUCE", "SYRUP", "SWEET-LIQUID"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655481/uevolhc2tg6yl6aptfkk.gif", question: "What is being signed?", answers: ["APPLE-JUICE", "ORANGE", "JUICE", "ORANGE JUICE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655443/kau9hhbktahcfobxsjvi.gif", question: "What is being signed?", answers: ["MILK", "WATER", "WHITE-DRINK", "COW"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655418/j0vr3q9czs7rbyx5jj4s.gif", question: "What is being signed?", answers: ["COFFEE", "TEA", "HOT-DRINK", "CUP"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655400/kz85cfgkv3skuzpce1pi.gif", question: "What is being signed?", answers: ["POP", "COKE", "SODA", "FIZZY-DRINK"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655375/bo0ndjsbn2g4zwwin8of.gif", question: "What is being signed?", answers: ["TEA", "BLACK-DRINK", "HOT", "COFFEE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655356/czc7ejlcjukv0bre6qrc.gif", question: "What is being signed?", answers: ["WATER", "DRINK", "CLEAR", "LIQUID"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655560/l73cywxzglyqk0kzal0q.gif", question: "What is being signed?", answers: ["WATER", "DRINK", "THIRSTY", "GULP"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656191/plnuvjxenksbfut2c7e0.gif", question: "What is being signed?", answers: ["FOOD", "ANIMAL", "MEAT", "BEEF"], correctAnswer: 2 }
-            ],
-            "Classes": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696258994/aqmisbokapsqc0wycxd2.gif", question: "What is being signed?", answers: ["CLASS", "GROUP", "FAMILY", "TEAM"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1696260085/rz5xv7xshtf5amklpxoo.gif", question: "What is being signed?", answers: ["CHOOSE", "TAKE-UP", "MAJOR", "DECIDE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780510/i5v7ioczpki3g74uelgx.gif", question: "What is being signed?", answers: ["FARM", "PLANT", "AGRICULTURE", "GARDEN"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780493/eqjehkufyjfptvy4uy8n.gif", question: "What is being signed?", answers: ["MATH", "GEOMETRY", "CALCULUS", "ALGEBRA"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780459/ndmpmdnchzdie38l0cv1.gif", question: "What is being signed?", answers: ["HUMAN ANATOMY", "BIOLOGY", "BODY", "SCIENCE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780394/zrpfo5eapaca4bgcea79.gif", question: "What is being signed?", answers: ["DRAW", "ART", "PAINT", "CREATE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780375/hhmmmdgy2p6fgkwu43kx.gif", question: "What is being signed?", answers: ["CAR", "MECHANIC", "AUTO SHOP", "ENGINE"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780301/r77eedfnsfojuu5lfnfz.gif", question: "What is being signed?", answers: ["SCIENCE", "CHEMISTRY", "LIFE", "BIOLOGY"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780209/owkpybj5ejfgjjzhxfwl.gif", question: "What is being signed?", answers: ["CHEMISTRY", "SCIENCE", "MIX", "BIOLOGY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780189/f8nafzsztmnqot5jvlhn.gif", question: "What is being signed?", answers: ["TECHNOLOGY", "COMPUTER SCIENCE", "TYPING", "PROGRAMMING"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780165/ar7dwl4grugxo8jaewpr.gif", question: "What is being signed?", answers: ["FOOD", "EAT", "COOK/COOKING", "KITCHEN"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780146/nbf3kpkomjiq1z5lh0sb.gif", question: "What is being signed?", answers: ["ART", "DRAW", "CREATE", "DESIGN"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780126/i63wnq9jgkoqxassuyfn.gif", question: "What is being signed?", answers: ["ENGINEERING", "BUILD", "GEARS", "MACHINE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780109/h5qwxrxfom3qz3y6zxzu.gif", question: "What is being signed?", answers: ["READING", "ENGLISH", "LANGUAGE", "BOOK"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780091/uunyttvevj6ip7rqzaaf.gif", question: "What is being signed?", answers: ["MATH", "SHAPES", "GEOMETRY", "ALGEBRA"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780056/yke6dvrxhpak4bcmslxn.gif", question: "What is being signed?", answers: ["PAST", "TIME", "STORY", "HISTORY"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780004/o5fzwr4eusk3azouomid.gif", question: "What is being signed?", answers: ["INTEGRATED MATH", "MATH", "ALGEBRA", "GEOMETRY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779964/xalko3tihvdvjqbrhyfy.gif", question: "What is being signed?", answers: ["CALCULATE", "MATH", "NUMBERS", "ALGEBRA"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779947/rq6hvvj8ty81x4ek2gw7.gif", question: "What is being signed?", answers: ["WOOD SHOP", "WELDING", "METAL SHOP", "BUILD"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779932/c6ffrvilmdyqy1fl9fc8.gif", question: "What is being signed?", answers: ["SING", "DANCE", "PLAY", "MUSIC/BAND"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779901/hjboi9yu9apv46xeer2n.gif", question: "What is being signed?", answers: ["PE", "SPORTS", "EXERCISE", "GYM"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779866/clkeqatqwdtj4t8lew21.gif", question: "What is being signed?", answers: ["SCIENCE", "PHYSICS", "CHEMISTRY", "BIOLOGY"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779814/wedbhrsbgfjav3hwalzy.gif", question: "What is being signed?", answers: ["CHEMISTRY", "BIOLOGY", "SCIENCE", "PHYSICS"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779785/ksmovs2dv83rkifugnqk.gif", question: "What is being signed?", answers: ["MATH", "GRAPH", "DATA", "STATISTICS"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779771/ld0yisqxweehyva6newf.gif", question: "What is being signed?", answers: ["STUDY", "READ", "LEARN", "BOOK"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779743/yitojaysbzzsbz8bdiux.gif", question: "What is being signed?", answers: ["METAL SHOP", "WOOD SHOP", "BUILD", "HAMMER"], correctAnswer: 1 }
-            ],
-            "Sports": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780247/fpvarvnnoy1cek5xykge.gif", question: "What is being signed?", answers: ["CROSS-COUNTRY", "RUNNING", "RACE", "TRACK"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742401412/m4laadwukykwhuuakquv.gif", question: "What is being signed?", answers: ["DANCE", "CHEER", "JUMP", "SUPPORT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780020/wiwnsbj4fzt8tg6gqsp1.gif", question: "What is being signed?", answers: ["HORSE-RACING", "FARM-COMPETITION", "HORSE RIDE COMPETITION", "ANIMAL-RACE"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779852/vezdruelokrb0m5msfdv.gif", question: "What is being signed?", answers: ["FOOTBALL", "SOCCER", "WRESTLING", "RUGBY"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779756/nii7g6nlek4njhnl5vqx.gif", question: "What is being signed?", answers: ["TRACK AND FIELD", "RUNNING-JUMPING", "SPORTS-DAY", "RACE-EVENT"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742401373/xzceijh8aop582popvdb.gif", question: "What is being signed?", answers: ["CHEER", "DANCE", "BALLET", "MOVE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742401325/lidfseezomupnemosles.gif", question: "What is being signed?", answers: ["WATER-POLO", "WATER", "SWIM", "POOL"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742401279/hjvh4hft8vcf7qvswrqk.gif", question: "What is being signed?", answers: ["SWIM", "VOLLEYBALL", "BASKETBALL", "WATER POLO"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742401251/gb2vunbbmj62enfdgzxw.gif", question: "What is being signed?", answers: ["WRESTLING", "FIGHT", "BOXING", "RUGBY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742401227/rzafulfzt8s3th17p2in.gif", question: "What is being signed?", answers: ["TENNIS", "GOLF", "BASEBALL", "SWING"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742401165/gudhiyy4hzphkm1owtwn.gif", question: "What is being signed?", answers: ["BASEBALL", "VOLLEYBALL", "TENNIS", "RACQUET"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742401015/rqvx1l4tm4orhjrcgv8c.gif", question: "What is being signed?", answers: ["BASKETBALL", "SOCCER", "NETBALL", "VOLLEYBALL"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742400933/gpsxcx2tynwqjrfnnamt.gif", question: "What is being signed?", answers: ["SOCCER", "FOOTBALL", "KICKBALL", "BALL"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742400903/yzlyntu9wxwyqie8mqwu.gif", question: "What is being signed?", answers: ["VOLLEYBALL", "BASKETBALL", "HOOPS", "THROW"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1742400799/m62pgd3l7zjrijziatf0.gif", question: "What is being signed?", answers: ["RUGBY", "SOCCER", "FOOTBALL", "TACKLE"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780318/srnfubebr0mrf6sqtluo.gif", question: "What is being signed?", answers: ["SOFTBALL", "GOLF", "BAT-BALL", "BASEBALL"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780341/w3rjy7ndh815jb9yb5ou.gif", question: "What is being signed?", answers: ["SOFTBALL", "BASEBALL", "BIG-BALL", "THROW"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701780039/qdw1kk6tizjd9ajutbkp.gif", question: "What is being signed?", answers: ["LACROSSE", "HOCKEY", "ICE-SKATING", "STICK-SPORT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1701779988/jznkthsl3u8zfrake8lz.gif", question: "What is being signed?", answers: ["HOCKEY", "FIELD-HOCKEY", "LACROSSE", "NET-STICK"], correctAnswer: 2 }
-            ],
-            "Locations": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098525/cq1773cnwjw6wq309w7o.gif", question: "What is being signed?", answers: ["PLACE", "AREA", "HERE", "LOCATION"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098543/o1xdbmde4jm3jmlvcix1.gif", question: "What is being signed?", answers: ["WORK", "OFFICE", "ROOM", "BUILDING"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098456/jxaqspvhm6kaq7b1njyl.gif", question: "What is being signed?", answers: ["MONEY", "STORE", "#BANK", "BUILDING"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098585/lfxhquajrwh7itpkafw6.gif", question: "What is being signed?", answers: ["BATHROOM", "WASHROOM", "TOILET", "RESTROOM"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098566/hitthwpqd4hkjnaovhmf.gif", question: "What is being signed?", answers: ["MUSEUM", "ART-GALLERY", "HISTORY-PLACE", "EXHIBIT"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098613/ppjgnpwurmpvdw9joqku.gif", question: "What is being signed?", answers: ["BOOK-STORE", "LIBRARY", "SCHOOL", "READING-ROOM"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098890/nrmkfgjvx0v85knilzxu.gif", question: "What is being signed?", answers: ["LEFT", "CORRECT", "RIGHT", "STRAIGHT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098738/x8iipyzlb2mrmfteqkbi.gif", question: "What is being signed?", answers: ["LIBRARY", "STORE", "BUY-BOOKS", "BOOK STORE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098819/jdryrcaqdn00jhuosvm0.gif", question: "What is being signed?", answers: ["CAFETERIA", "RESTAURANT", "FOOD-COURT", "LUNCH-ROOM"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098951/b41ett5ojrabejzecb0e.gif", question: "What is being signed?", answers: ["RIGHT", "LEFT", "TURN", "WRONG"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098698/o2g6gi6ktnittc0p4zhh.gif", question: "What is being signed?", answers: ["BOX", "DOOR", "LOCKER", "CLOSET"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098789/xhnpceoavbfyha6jqspp.gif", question: "What is being signed?", answers: ["BUY", "SHOP", "MALL", "STORE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716392996/gdeafgaqer0qnmqrhymt.gif", question: "What is being signed?", answers: ["NEXT-TO", "BESIDE", "NEAR", "CLOSE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716393872/hmcaejdhzlu6ouak30yx.gif", question: "What is being signed?", answers: ["OVER", "ACROSS", "BRIDGE", "OTHER-SIDE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716393676/rmaklgvvyjiq5v5m8kka.gif", question: "What is being signed?", answers: ["AFTER", "BACK", "BEHIND", "FOLLOW"], correctAnswer: 2 }
-            ],
-            "Directional Verbs": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717403/a1grypncfteupvdqzea0.gif", question: "What is being signed?", answers: ["PAY-ME", "GIVE-ME-MONEY", "I-GET-PAID", "MY-MONEY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717301/xldygkbmvqhfrjj85las.gif", question: "What is being signed?", answers: ["I-PAY", "PAY-YOU", "GIVE-YOU-MONEY", "YOUR-MONEY"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717238/jskmfbti3quedivatkf6.gif", question: "What is being signed?", answers: ["TAKE", "RECEIVE", "GIVE-ME", "GET"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717203/mlxswrqfjidmyico9dex.gif", question: "What is being signed?", answers: ["GIVE-TO-THEM", "OFFER", "PRESENT", "GIVE-YOU"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717164/zxav22awjo5jtoyiwvhb.gif", question: "What is being signed?", answers: ["CARRY-HERE", "BRING-TO-ME", "COME-WITH", "TAKE-HERE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717135/iesu9woybvg65y2g7wri.gif", question: "What is being signed?", answers: ["CARRY-AWAY", "CARRY-THERE", "TAKE-AWAY", "GO-WITH"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717107/ofszxfrategogtma9tpe.gif", question: "What is being signed?", answers: ["COME-HERE", "TAKE-HERE", "BRING-HERE", "GIVE-ME"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717049/stwebye7j5utb6jluiml.gif", question: "What is being signed?", answers: ["TAKE-THERE", "GO-THERE", "CARRY-THERE", "BRING-THERE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717010/vjfxcqymwzmdyusn9onq.gif", question: "What is being signed?", answers: ["MOVE-HERE", "COME-HERE", "SHIFT-THIS-WAY", "ARRIVE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706716949/rfpfly5ikhzcgjpri2bp.gif", question: "What is being signed?", answers: ["GO-AWAY", "MOVE-THERE", "LEAVE", "SHIFT-THAT-WAY"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706719672/vlru6ijiwd0hkdaqe6c0.gif", question: "What is being signed?", answers: ["SUPPORT-YOU", "I-HELP", "HELP-YOU", "ASSIST-YOU"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706718130/gbzx8bubegvdrlbwfcxr.gif", question: "What is being signed?", answers: ["I-SEND", "MAIL-TO-YOU", "GIVE-YOU", "SEND-YOU"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706717466/hootrvbsanprsj370wlx.gif", question: "What is being signed?", answers: ["SEND-ME", "I-RECEIVE", "MAIL-TO-ME", "GIVE-ME"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706718194/udrz8ytcqyudqtsmecaz.gif", question: "What is being signed?", answers: ["QUESTION-ME", "ASK-ME", "INQUIRE-OF-ME", "I-AM-ASKED"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706718165/wgnkdf3x7tko9mua4ybc.gif", question: "What is being signed?", answers: ["I-QUESTION", "I-ASK", "ASK-YOU", "YOU-ARE-ASKED"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706719712/p9ocghm6bkf0ctdi01eb.gif", question: "What is being signed?", answers: ["SUPPORT-ME", "YOU-HELP", "ASSIST-ME", "HELP-ME"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738615500/w8unem4sdu3laznwttzi.gif", question: "What is being signed?", answers: ["OWE-YOU", "GIVE-YOU", "I-OWE", "DEBT"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738615451/xzmiheqsfk4hnkpchkij.gif", question: "What is being signed?", answers: ["YOU-OWE", "OWE-ME", "MY-DEBT", "GIVE-ME"], correctAnswer: 1 }
-            ],
-            "Weather": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715700413/rvpcdasstnsso5dtczf4.gif", question: "What is the weather?", answers: ["CLOUDY", "FOGGY", "GRAY", "OVERCAST"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715700386/axe3lcwv09emkwzjhojb.gif", question: "What is the weather?", answers: ["RAINY", "SNOWY", "COLD", "WINTER"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715700343/pr5w00uuqbl21xn91nij.gif", question: "What is the weather?", answers: ["BREEZY", "STORY", "WINDY", "BLOWING"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715700314/dkoxtigxbix5zwwpyjvn.gif", question: "What is the weather?", answers: ["SNOWY", "WET", "WATER-FALLING", "RAIN"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715700295/o4jzbfgdadq30q6ewzqq.gif", question: "What is the weather?", answers: ["SUNNY", "BRIGHT", "CLEAR", "DAYLIGHT"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715700195/gyydlnlakdjnbcvettqo.gif", question: "What is the weather?", answers: ["HOT", "WARM", "NICE", "MILD"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715700144/azdbmtlazqmf59nqyxbb.gif", question: "What is the weather?", answers: ["COLD", "CHILLY", "COOL", "NICE"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715700113/yvcdurxqrllrphyxejba.gif", question: "What is the weather?", answers: ["FREEZING", "COOL", "WINTER", "COLD"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715700091/jcxietgf0tawjxuif8hb.gif", question: "What is the weather?", answers: ["HOT", "WARM", "SUMMER", "SUNNY"], correctAnswer: 0 }
-            ],
-            "Weekdays": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715008738/s5l1gw0u83dsk3c063qd.gif", question: "What day is it?", answers: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715008767/y2lkvrbck2hhdwkzxrgc.gif", question: "What day is it?", answers: ["MONDAY", "TUESDAY", "WEDNESDAY", "FRIDAY"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715008797/jbg1nklaeic9bvafh71j.gif", question: "What day is it?", answers: ["TUESDAY", "THURSDAY", "WEDNESDAY", "SATURDAY"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715008832/jbnrptuavyyiyvx1smth.gif", question: "What day is it?", answers: ["TUESDAY", "WEDNESDAY", "FRIDAY", "THURSDAY"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715008996/norbhojaaq4s2gablwhh.gif", question: "What day is it?", answers: ["FRIDAY", "SATURDAY", "SUNDAY", "THURSDAY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715009018/gjcy4ss8uvsnbemhvc9e.gif", question: "What day is it?", answers: ["FRIDAY", "SATURDAY", "SUNDAY", "MONDAY"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715009054/qwihw074mo06rcccvtmv.gif", question: "What day is it?", answers: ["SATURDAY", "MONDAY", "SUNDAY", "WEEKEND"], correctAnswer: 2 }
-            ],
-            "Conversational Words": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738615783/tha7aoedkwafm62lfuzn.gif", question: "What is being signed?", answers: ["WON’T", "CAN'T", "NO", "REFUSE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738615757/cmdyiykmblfdum9uwsqn.gif", question: "What is being signed?", answers: ["WON'T", "CAN’T", "NOT-ABLE", "IMPOSSIBLE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738615729/mruqymvdh7fq3k5spimc.gif", question: "What is being signed?", answers: ["ABLE", "POSSIBLE", "CAN", "OK"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738615698/id4tvf7musp0uoubxa8a.gif", question: "What is being signed?", answers: ["QUESTION", "TELL", "ASK", "ANSWER"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738615663/qjtfzhh1pl0zueat1r0a.gif", question: "What is being signed?", answers: ["GO-WITH", "COME-WITH", "TOGETHER", "ACCOMPANY"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738615562/vpgrzd0rpi7wb9wzxxyf.gif", question: "What is being signed?", answers: ["PROCEED", "GO-AHEAD", "CONTINUE", "START"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738615527/odsne3iochoiwo2b8v15.gif", question: "What is being signed?", answers: ["BEGIN", "GO", "START", "NOW"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716392791/gncqzkhky38tlfwvjiqk.gif", question: "What is being signed?", answers: ["BECAUSE", "WHAT-FOR", "WHY", "FOR"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716479539/erpljosrecrllf9eueut.gif", question: "What is being signed?", answers: ["HURRY", "RUSH", "FAST", "NOW"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716479332/ft2brnsa8wkupl4vqfq5.gif", question: "What is being signed?", answers: ["SMALL", "A-LITTLE", "SOME", "BIT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716479491/lidd6mvud3okmrcdmewv.gif", question: "What is being signed?", answers: ["SORRY", "PARDON", "EXCUSE-ME", "OOPS"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716479638/tlnr6q5dyk3lzsayddfq.gif", question: "What is being signed?", answers: ["APOLOGIZE", "MISTAKE", "REGRET", "SORRY"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716392696/n8lvr5xiy1tcca3ddbix.gif", question: "What is being signed?", answers: ["FOR-FOR?", "WHY", "WHAT-FOR", "REASON"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716479670/rqdbr0ushg0vphew7wkh.gif", question: "What is being signed?", answers: ["YES", "SURE/TRUE", "REAL", "HONEST"], correctAnswer: 1 }
-            ],
-            "Time": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496524/aijtkohudir6jdkjtqjn.gif", question: "What time is it?", answers: ["1:00", "10:00", "11:00", "12:00"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496369/afq9aclzkdax615o4uii.gif", question: "What time is it?", answers: ["1:00", "2:00", "3:00", "4:00"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496384/n8tx4esnjf9l4wczvytk.gif", question: "What time is it?", answers: ["2:00", "4:00", "3:00", "5:00"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496408/jbvoq4jdzlcb25pf9du7.gif", question: "What time is it?", answers: ["3:00", "5:00", "6:00", "4:00"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496448/z9gw3lcluazhye4eiffg.gif", question: "What time is it?", answers: ["5:00", "6:00", "7:00", "8:00"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496466/xitagqentpz36oaokbne.gif", question: "What time is it?", answers: ["5:00", "6:00", "7:00", "8:00"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496484/ii437c8aehqqxwq5fuga.gif", question: "What time is it?", answers: ["6:00", "8:00", "7:00", "9:00"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496580/treqgzhfmwoym6p59wrt.gif", question: "What time is it?", answers: ["7:00", "9:00", "10:00", "8:00"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496597/dqdrgcm4a6goospid5lb.gif", question: "What time is it?", answers: ["9:00", "10:00", "11:00", "12:00"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496635/mw8qqllcmlr89rfyhh3p.gif", question: "What time is it?", answers: ["9:00", "10:00", "11:00", "12:00"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496651/stajko2uckde3omdw7fs.gif", question: "What time is it?", answers: ["10:00", "12:00", "11:00", "1:00"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496670/p1x5dw4lbvawhshq4dd5.gif", question: "What time is it?", answers: ["11:00", "1:00", "10:00", "12:00"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496721/l9got7xfbhazwlyvdkzl.gif", question: "What time is it?", answers: ["1:30", "2:30", "12:30", "3:30"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496777/wuqp7d9krpygduuhcggp.gif", question: "What time is it?", answers: ["1:30", "2:30", "3:30", "4:30"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496796/ggldsxovkaodxtcvudfd.gif", question: "What time is it?", answers: ["2:30", "4:30", "3:30", "5:30"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496815/rbtt1obh0x8fqo4rxwou.gif", question: "What time is it?", answers: ["3:30", "5:30", "6:30", "4:30"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496883/dyluhbsziqrmbpgwpgnc.gif", question: "What time is it?", answers: ["5:30", "6:30", "7:30", "8:30"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496897/rmtyvkqjo5ezexruwx1e.gif", question: "What time is it?", answers: ["5:30", "6:30", "7:30", "8:30"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496918/rgyi9frsewc5ygtunekk.gif", question: "What time is it?", answers: ["6:30", "8:30", "7:30", "9:30"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756496944/bzvkvvvxtezjkxqfmu6b.gif", question: "What time is it?", answers: ["7:30", "9:30", "10:30", "8:30"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756497021/kejdq8xuzvtfhn6putnc.gif", question: "What time is it?", answers: ["9:30", "10:30", "11:30", "12:30"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756497052/ihxjgswcjdpj1zbfmyhu.gif", question: "What time is it?", answers: ["9:30", "10:30", "11:30", "12:30"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756497221/gnlmp96xedgafbiuss7i.gif", question: "What time is it?", answers: ["10:30", "12:30", "11:30", "1:30"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756497267/uwfijqzaqdgyyskq9vev.gif", question: "What time is it?", answers: ["11:30", "1:30", "10:30", "12:30"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756497299/lv6vjeg8sda7rbghdu0d.gif", question: "What is being signed?", answers: ["3PM", "3AM", "3:00", "AFTERNOON"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756497349/skgyez7aaf30tqg8wq7v.gif", question: "What is being signed?", answers: ["6AM", "6PM", "6:00", "EVENING"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756497376/sq2vchrgilxvewoatlr1.gif", question: "What is being signed?", answers: ["9PM", "NIGHT", "9AM", "MORNING"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756497417/lm7fptokor322erkvwok.gif", question: "What is being signed?", answers: ["9AM", "MORNING", "NIGHT", "9PM"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1756497461/zdbrhe4rqv4pcoykkezd.gif", question: "What is being signed?", answers: ["12PM", "12AM", "NOON", "MIDNIGHT"], correctAnswer: 0 }
-            ],
-            "Classifiers": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706862809/vjgd1avxwz3hnd3ogskv.gif", question: "What is being signed?", answers: ["DCL:C”small cylinder”", "DCL:F”buttons”", "ICL:C”hold cup”", "DCL:CC”large cylinder”"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706862851/xcoa8stzau70havgcnnm.gif", question: "What is being signed?", answers: ["DCL:C”small cylinder”", "DCL:CC”large cylinder”", "ICL:CC”hold large object”", "PCL:CC”large stack”"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706862906/dneqlvclmlupglfjdp9u.gif", question: "What is being signed?", answers: ["ICL:CC*”move stack”", "DCL:CC”large cylinder”", "DCL:CC*”stack”", "BCL:B”flat surface”"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863142/onwgtf29tev2bmf0uw22.gif", question: "What is being signed?", answers: ["DCL:F”curved cylinder”", "SCL:F”small animal moving”", "DCL:9”small round object”", "DCL:F”buttons”"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863212/a4xsqdpsspevubpehfut.gif", question: "What is being signed?", answers: ["DCL:F”curved cylinder”", "DCL:C”small cylinder”", "DCL:F”buttons”", "DCL:FF”curved cylinder”"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863251/jw5cms7cdk6lokca2aaj.gif", question: "What is being signed?", answers: ["DCL:F”curved cylinder”", "DCL:FF”curved cylinder”", "DCL:CC”large cylinder”", "PCL:FF”row of items”"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863328/ummpmtxdoeb3uwjatjit.gif", question: "What is being signed?", answers: ["DCL:B”square”", "DCL:44”grid”", "DCL:11”triangle”", "SCL:11”two people walking”"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863368/jqlask0ct7ocae9roe06.gif", question: "What is being signed?", answers: ["ICL:OO*”move sheet”", "BCL:B”paper”", "DCL:B”flat surface”", "DCL:OO*”sheet”"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863421/ptsfvtixg2vna7d1o58z.gif", question: "What is being signed?", answers: ["ECL:5*:”sprayed with water”", "ECL:4”waterfall”", "ECL:5”wind”", "ECL:1”stream of liquid”"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863594/xkzrgdp3f4txhkgbblbx.gif", question: "What is being signed?", answers: ["DCL:CC*”stack”", "ICL:CC*”move stack”", "ICL:B”move flat object”", "ICL:C”move cylinder”"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863880/okupuzmnndbb43bu5xv7.gif", question: "What is being signed?", answers: ["DCL:OO*”sheet”", "ICL:B”move paper”", "ICL:OO*”move sheet”", "ICL:F”move small object”"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863929/pq24kpvmjuiyqpco5um8.gif", question: "What is being signed?", answers: ["SCL:3”vehicle moving”", "PCL:44”long line of people”", "PCL:55”crowd”", "PCL:33”row of vehicles”"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706863972/aandaniap6itcd7i8vcw.gif", question: "What is being signed?", answers: ["PCL:44”long line of people”", "PCL:33”row of vehicles”", "SCL:4”people walking”", "PCL:11”two lines”"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706864015/nnq3usj8ghgcboade2av.gif", question: "What is being signed?", answers: ["SCL:1”person standing”", "SCL:V*”creature sitting”", "PCL:V”person sitting”", "SCL:2”two people sitting”"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706864074/ca2xbla15a8ammweopgt.gif", question: "What is being signed?", answers: ["SCL:V*”creature sitting”", "DCL:1”line”", "SCL:1”person/pole”", "PCL:1”person walking”"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706864298/zjamw4gnznwuaiczohoq.gif", question: "What is being signed?", answers: ["PCL:3”vehicle parked”", "PCL:33”row of vehicles”", "ICL:3”drive”", "SCL:3”ground vehicle”"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706864333/ckfjiwmckzqchxequdy0.gif", question: "What is being signed?", answers: ["SCL:A”statue/building”", "DCL:A”object in location”", "ICL:A”place object”", "PCL:A”house”"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706864415/wh6svfxpiae86ypkh7wg.gif", question: "What is being signed?", answers: ["SCL:V*”creature sitting”", "SCL:VV”4-legged creature running”", "PCL:V”animal walking”", "ECL:VV”animal jumping”"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706858513/ith443wzorqe2dggoq8y.gif", question: "What is being signed?", answers: ["ICL:B”pat on back”", "BPCL:”tap on arm”", "BCL:B*”person tapping shoulder”", "BCL:5”tap on head”"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1706858830/oirxfn0ct3xvhbkgh2ox.gif", question: "What is being signed?", answers: ["BCL:B”flat surface”", "SCL:B”walk on surface”", "PCL:B”feet on floor”", "F-E-E-T CL:BB*”put feet up”"], correctAnswer: 3 }
-            ],
-            "Money": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711041848/mpztpjvu8xasclsdk6ye.gif", question: "How much money is this?", answers: ["1-DOLLAR", "10-DOLLAR", "2-DOLLAR", "5-DOLLAR"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711997397/uzc8em88d8sppponoeqy.gif", question: "How much money is this?", answers: ["12-DOLLAR", "2-DOLLAR", "20-DOLLAR", "3-DOLLAR"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711041983/phyb2thdjxppnurdqkt8.gif", question: "How much money is this?", answers: ["14-DOLLAR", "3-DOLLAR", "4-DOLLAR", "5-DOLLAR"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711042015/ccebm1drre27avophwww.gif", question: "How much money is this?", answers: ["1-DOLLAR", "10-DOLLAR", "50-CENTS", "5-DOLLAR"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711042139/umjxigyeqdpmeobeb2yi.gif", question: "How much money is this?", answers: ["6-DOLLAR", "7-DOLLAR", "5-DOLLAR", "16-DOLLAR"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711042179/eidigl9l7mg3w9a2unks.gif", question: "How much money is this?", answers: ["8-DOLLAR", "7-DOLLAR", "6-DOLLAR", "17-DOLLAR"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711042208/x6xlzltsz3w4xko0419p.gif", question: "How much money is this?", answers: ["7-DOLLAR", "9-DOLLAR", "8-DOLLAR", "18-DOLLAR"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711042266/jxvsufrg33ycdtehbhbr.gif", question: "How much money is this?", answers: ["19-DOLLAR", "8-DOLLAR", "6-DOLLAR", "9-DOLLAR"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711042295/iwxagyxyno7ojgmxkckk.gif", question: "How much money is this?", answers: ["10-DOLLAR", "1-DOLLAR", "10-CENTS", "100-DOLLARS"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711041695/cq7qaj6qsxrfkxjuufsq.gif", question: "What is being signed?", answers: ["DOLLAR", "CENT", "MONEY", "POINT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045730/yucib9vxjkjgfbuvhpf2.gif", question: "How much money is this?", answers: ["50-CENT", "10-CENT", "15-CENT", "25-CENT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045765/nibqla1hi6rwdmrw2sne.gif", question: "How much money is this?", answers: ["75-CENT", "5-CENT", "2-CENT", "25-CENT"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045820/kgb9hk5nzegey87tp4lg.gif", question: "How much money is this?", answers: ["50-CENT", "15-CENT", "5-CENT", "25-CENT"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045852/lcz05rqx2baunueurldn.gif", question: "How much money is this?", answers: ["25-CENT", "75-CENT", "50-CENT", "7-CENT"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045885/mmrx8ttnyau0grmleafj.gif", question: "How much money is this?", answers: ["9-CENT", "90-CENT", "99-CENT", "19-CENT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045310/xglzgqib1gfj6zl2gmdh.gif", question: "How much money is this?", answers: ["$1.25", "$5.10", "$15.00", "$1.50"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045339/uwybljagycgj6uvigyd9.gif", question: "How much money is this?", answers: ["$2.38", "$3.28", "$8.23", "$2.83"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045411/exc5zvs0dljzelz05fih.gif", question: "How much money is this?", answers: ["$4.38", "$3.48", "$3.84", "$8.43"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045452/cryzhcu19vprr73myooh.gif", question: "How much money is this?", answers: ["$5.74", "$4.57", "$4.75", "$7.45"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045482/apqefaoyuk1mkbu04pjk.gif", question: "How much money is this?", answers: ["$6.57", "$5.76", "$7.65", "$5.67"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045652/uqfly8pzkojalc0eaexz.gif", question: "How much money is this?", answers: ["$7.99", "$9.79", "$7.90", "$9.97"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711045693/tuwgs8jx8pq4sihvokmf.gif", question: "How much money is this?", answers: ["$4.80", "$8.40", "$8.14", "$4.08"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711040783/oqz7an7flx4rlba18i0t.gif", question: "What is being signed?", answers: ["PAY", "CARD", "CREDIT/DEBIT", "MONEY"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711041035/j66uevwkvpox2yztmde2.gif", question: "What is being signed?", answers: ["BUY", "STORE", "GIVE", "SHOPPING"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711040819/fuomfre7s0kvah5tbr36.gif", question: "What is being signed?", answers: ["BROKE", "POOR", "MONEY", "HAVE-NONE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1711041110/ast4dgsecjnl4wlfi381.gif", question: "What is being signed?", answers: ["NONE", "FREE", "SAVE", "CHEAP"], correctAnswer: 1 }
-            ],
-            "House": [
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715099768/crx0jluegcfjhccnqk7h.gif", question: "What is being signed?", answers: ["HOUSE", "HOME", "APARTMENT", "DORM"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715099801/kadj8bcpwlu7dganmeqd.gif", question: "What is being signed?", answers: ["HOUSE", "HOME", "BUILDING", "ROOF"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101379/w8phzr9uygtmwo72mgxb.gif", question: "What is being signed?", answers: ["BUILDING", "HOUSE", "APARTMENT", "ROOM"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101403/dym1pabuw07qkipbfjsd.gif", question: "What is being signed?", answers: ["HOUSE", "APT", "CONDO", "TOWN-HOUSE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101477/v5lej5xyjts5qdfyn8g9.gif", question: "What is being signed?", answers: ["ENTER", "EXIT", "IN", "DOOR"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101506/exofmoplgo8mtibbqnk5.gif", question: "What is being signed?", answers: ["ROOM", "HALL", "WALK", "PATH"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101548/cfs74wfrb4co9htmmmfo.gif", question: "What is being signed?", answers: ["KITCHEN", "LIVING ROOM", "DINING ROOM", "EAT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101621/vfh0iisl3cixntr4zfja.gif", question: "What is being signed?", answers: ["SLEEP", "ROOM", "NIGHT", "BED ROOM"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101670/cd7p92rtpmfgoweaakda.gif", question: "What is being signed?", answers: ["LAUNDRY", "WASH", "CLOTHES", "MACHINE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101726/hcpqwy8fpntolgvjqgz1.gif", question: "What is being signed?", answers: ["COOK", "KITCHEN", "FOOD", "ROOM"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101791/cp3r0b5xjq0bz1wvznev.gif", question: "What is being signed?", answers: ["DOOR", "ROOM", "CLOSET", "CLOTHES"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715101849/tuwnk4xz8nbij8z6ciq6.gif", question: "What is being signed?", answers: ["CAR", "HOUSE", "DOOR", "GARAGE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715102047/rnetvegs9fcrxfhlqwdw.gif", question: "What is being signed?", answers: ["BATHROOM", "RESTROOM", "TOILET", "WASH"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715102103/g5m6je5jdmdcooicllii.gif", question: "What is being signed?", answers: ["WALK", "STAIRS", "UP", "DOWN"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715102291/dqycaqlevoqkdcec9muu.gif", question: "What is being signed?", answers: ["GROUND", "DOWN", "FLOOR", "FLAT"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715102372/voydedjef7xfzwcfxbin.gif", question: "What is being signed?", answers: ["CHAIR", "TABLE", "COUCH", "FURNITURE"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715102403/p3f9zmkdnqxg8e65uoab.gif", question: "What is being signed?", answers: ["COUCH", "CHAIR", "SIT", "FURNITURE"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715102516/tberecxxfqonj22klrms.gif", question: "What is being signed?", answers: ["TABLE", "DESK/COUNTER", "SHELF", "SURFACE"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715102555/q9xxiyskytcvfn0fs9if.gif", question: "What is being signed?", answers: ["DESK", "TABLE", "COFFEE TABLE", "LIVING ROOM"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715102662/ykohhgpdkxgl7xiuybdz.gif", question: "What is being signed?", answers: ["TABLE", "COUNTER", "WALL", "SHELF"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715102782/ksziqymtj3iwtkr9vmpm.gif", question: "What is being signed?", answers: ["SHOWER", "RAIN", "WATER", "BATH"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715103003/ngwdnnb4gjmlhp9dng4d.gif", question: "What is being signed?", answers: ["SHOWER", "BATH TUB", "WATER", "WASH"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715103190/eb1uymvxurt8cdrdvshe.gif", question: "What is being signed?", answers: ["FREEZER", "COLD", "REFRIGERATOR", "FOOD"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715108358/tro4blkcmaclqionesf6.gif", question: "What is being signed?", answers: ["MIRROR", "BATHROOM", "PILLS", "MEDICINE CABINET"], correctAnswer: 3 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715108462/tq2rzrvprfb6agd2gxvk.gif", question: "What is being signed?", answers: ["MICROWAVE", "OVEN", "COOK", "HEAT"], correctAnswer: 0 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715108511/z1hwzl9zfptwayssmk9e.gif", question: "What is being signed?", answers: ["SEE", "MIRROR", "LOOK", "REFLECTION"], correctAnswer: 1 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715108556/zxrl3rj3lbdkgmz0pd4z.gif", question: "What is being signed?", answers: ["TABLE", "COUNTER", "ISLAND", "KITCHEN"], correctAnswer: 2 },
-                { gif: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1715108582/jjb9gvoflmnwka8r8e4u.gif", question: "What is being signed?", answers: ["WIND", "AIR", "COOL", "FAN"], correctAnswer: 3 }
-            ]
-        };
+        let questionBank = {};
+ async function load_data() {
+    try {
+        const response = await fetch('../vocab.json'); // Adjust path (e.g., '../vocab.json') if needed
+        if (!response.ok) throw new Error("Network response was not ok");
+        return await response.json(); 
+    } catch (error) {
+        console.error('Error loading question bank:', error);
+        return null; 
+    }
+}
 
+// 2. Build the checkboxes
+async function initMenu() {
+    // Load the JSON into our global variable
+    questionBank = await load_data();
+
+    if (!questionBank) {
+        console.log('Failed to load question bank. Cannot initialize menu.');
+        return;
+    }
+    populateSelectionModal();
+}
+initMenu();
         // --- STATE MANAGEMENT ---
         let gameResources = 0;
         let selectedQuestions = [];
@@ -708,7 +310,7 @@ min-width: 0; /* Add this line */
          * Populates the selection modal with checkboxes for each question unit.
          */
         const populateSelectionModal = () => {
-            const units = Object.keys(questionBank);
+            let units = Object.keys(questionBank);
             units.forEach((unit, index) => {
                 const div = document.createElement('div');
                 div.className = 'flex items-center';
@@ -720,7 +322,7 @@ min-width: 0; /* Add this line */
 
                 const label = document.createElement('label');
                 label.htmlFor = `unit-${index}`;
-                label.textContent = unit;
+                label.textContent = questionBank[unit].title;
                 label.className = 'ml-3 text-md text-gray-700';
 
                 div.appendChild(checkbox);
@@ -744,12 +346,13 @@ min-width: 0; /* Add this line */
          * Starts the game by collecting selected units and enabling the quiz button.
          */
         const startQuiz = () => {
+            startTimer();
             const checkedBoxes = unitCheckboxesContainer.querySelectorAll('input[type="checkbox"]:checked');
             selectedQuestions = [];
             checkedBoxes.forEach(box => {
                 const unitName = box.value;
-                if (questionBank[unitName]) {
-                    selectedQuestions.push(...questionBank[unitName]);
+                if (questionBank[unitName].questions) {
+                    selectedQuestions.push(...questionBank[unitName].questions);
                 }
             });
 
@@ -779,18 +382,18 @@ min-width: 0; /* Add this line */
             do {
                 const randomIndex = Math.floor(Math.random() * selectedQuestions.length);
                 nextQuestion = selectedQuestions[randomIndex];
-            } while (answeredQuestions.has(nextQuestion.gif)); // Use GIF as a unique ID
+            } while (answeredQuestions.has(nextQuestion.image)); // Use GIF as a unique ID
 
             currentQuestion = nextQuestion;
-            answeredQuestions.add(currentQuestion.gif);
+            answeredQuestions.add(currentQuestion.image);
 
-            quizGif.src = currentQuestion.gif;
+            quizGif.src = currentQuestion.image;
             quizQuestion.textContent = currentQuestion.question;
 
             resetAnswerStyles();
             answerOptionsContainer.innerHTML = ''; // Clear previous options
 
-            const shuffledAnswers = [...currentQuestion.answers];
+            const shuffledAnswers = [...currentQuestion.options];
             shuffleArray(shuffledAnswers);
 
             shuffledAnswers.forEach(answer => {
@@ -799,7 +402,7 @@ min-width: 0; /* Add this line */
                 button.className = 'bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-lg transition duration-200 ease-in-out';
                 
                 // Find the original index of the answer to check correctness
-                const originalIndex = currentQuestion.answers.indexOf(answer);
+                const originalIndex = currentQuestion.options.indexOf(answer);
                 button.addEventListener('click', () => checkAnswer(originalIndex, button));
                 answerOptionsContainer.appendChild(button);
             });
@@ -812,10 +415,10 @@ min-width: 0; /* Add this line */
          */
         const checkAnswer = (selectedIndex, selectedButton) => {
              if (isFeedbackShowing) return;
-            const isCorrect = selectedIndex === currentQuestion.correctAnswer;
+            const isCorrect = selectedIndex === currentQuestion.correct;
 
             // Find the correct answer text to display
-            const correctAnswerText = currentQuestion.answers[currentQuestion.correctAnswer];
+            const correctAnswerText = currentQuestion.options[currentQuestion.correct];
             
             // Highlight the correct answer in green
             Array.from(answerOptionsContainer.children).forEach(btn => {
@@ -880,9 +483,6 @@ min-width: 0; /* Add this line */
             feedbackOverlay.classList.remove('flex');
             displayQuestion();
         });
-
-        // --- INITIALIZATION ---
-        populateSelectionModal();
     });
        
         const state = {
@@ -1364,7 +964,6 @@ min-width: 0; /* Add this line */
 
         // --- Initial Load ---
         updateUI();
-        startTimer(); // Start the timer when the game loads
     </script>
 
 </body>
