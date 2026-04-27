@@ -1914,8 +1914,8 @@
             }
         ]
     },
-    "Location": {
-        "title": "🏪 Location",
+    "Locations": {
+        "title": "🏪 Locations",
         "questions": [
             {
                 "question": "What is being signed?",
@@ -1985,17 +1985,6 @@
             },
             {
                 "question": "What is being signed?",
-                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098890/nrmkfgjvx0v85knilzxu.gif",
-                "options": [
-                    "LEFT",
-                    "CORRECT",
-                    "RIGHT",
-                    "STRAIGHT"
-                ],
-                "correct": 2
-            },
-            {
-                "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098738/x8iipyzlb2mrmfteqkbi.gif",
                 "options": [
                     "LIBRARY",
@@ -2018,17 +2007,6 @@
             },
             {
                 "question": "What is being signed?",
-                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098951/b41ett5ojrabejzecb0e.gif",
-                "options": [
-                    "RIGHT",
-                    "LEFT",
-                    "TURN",
-                    "WRONG"
-                ],
-                "correct": 1
-            },
-            {
-                "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098698/o2g6gi6ktnittc0p4zhh.gif",
                 "options": [
                     "BOX",
@@ -2048,39 +2026,6 @@
                     "STORE"
                 ],
                 "correct": 3
-            },
-            {
-                "question": "What is being signed?",
-                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716392996/gdeafgaqer0qnmqrhymt.gif",
-                "options": [
-                    "NEXT-TO",
-                    "BESIDE",
-                    "NEAR",
-                    "CLOSE"
-                ],
-                "correct": 0
-            },
-            {
-                "question": "What is being signed?",
-                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716393872/hmcaejdhzlu6ouak30yx.gif",
-                "options": [
-                    "OVER",
-                    "ACROSS",
-                    "BRIDGE",
-                    "OTHER-SIDE"
-                ],
-                "correct": 1
-            },
-            {
-                "question": "What is being signed?",
-                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716393676/rmaklgvvyjiq5v5m8kka.gif",
-                "options": [
-                    "AFTER",
-                    "BACK",
-                    "BEHIND",
-                    "FOLLOW"
-                ],
-                "correct": 2
             }
         ]
     },
