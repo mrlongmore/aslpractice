@@ -297,7 +297,7 @@
         let score = 0;
         let isGameOver = false;
         let isQuizActive = false;
-        const gameTimeLimit = 180; // 3 minutes
+        const gameTimeLimit = 60; // 1 minute
         let gameTimeRemaining = gameTimeLimit;
         const maxAmmo = 20;
         let currentAmmo = maxAmmo;
@@ -594,7 +594,7 @@ initMenu()
             if(isCorrect) {
                 resultTitle.textContent = "Correct!";
                 resultTitle.style.color = "#27ae60";
-                resultText.textContent = `+1 Dart Added!`;
+                resultText.textContent = `+2 Darts Added!`;
                 updateAmmo(currentAmmo + 2);
             } else {
                 resultTitle.textContent = "Incorrect";
@@ -771,7 +771,7 @@ initMenu()
                         const hitTarget = intersects[0].object;
                         const targetIndex = targets.indexOf(hitTarget);
                         if (targetIndex > -1) targets.splice(targetIndex, 1);
-                        
+                        //herehere
                         disposeObject(hitTarget); // Properly dispose of the target
                         disposeObject(dart); // Properly dispose of the dart
                         
@@ -900,7 +900,7 @@ initMenu()
             updateScore(0);
             updateAmmo(maxAmmo);
             gameTimeRemaining = gameTimeLimit;
-            timerElement.textContent = `Time: 3:00`;
+            timerElement.textContent = `Time: 1:00`;
             selectedQuizKey = null; // Force re-selection of topic
             timeSinceLastSpawn = 0;
 
