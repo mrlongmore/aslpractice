@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Practice Tool</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 2rem;
+        }
+        .container {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        video, canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1); /* Mirror image */
+        }
+        canvas {
+            z-index: 10;
+            pointer-events: none;
+        }
+        #statusPanel {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            width: 600px;
+        }
+        .letter-display {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 10px 0;
+            min-height: 120px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="statusPanel">
+        <h2 id="statusText">1. Loading Data & Training Model...</h2>
+        <div class="letter-display" id="predictedLetter">-</div>
+        <p id="confidenceText">Confidence: 0%</p>
+    </div>
+
+    <div class="container">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="output_canvas"></canvas>
+    </div>
+
+    <script type="module">
+        const { HandLandmarker, FilesetResolver } = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest");
+
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('output_canvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('statusText');
+        const predictedLetterEl = document.getElementById('predictedLetter');
+        const confidenceText = document.getElementById('confidenceText');
+
+        let handLandmarker;
+        let tfModel;
+        let vocabLabels = []; // This acts as our "vocab.json"
+        
+        // Ensure canvas matches video size
+        canvas.width = 640;
+        canvas.height = 480;
+
+        async function init() {
+            try {
+                // 1. Fetch the JSON dataset you created
+                const response = await fetch('my_clean_asl_dataset.json');
+                const dataset = await response.json();
+                
+                // 2. Build the Vocab array and prepare the data for TensorFlow
+                // Extract unique letters and sort them (e.g., ['A', 'B', 'C'])
+                vocabLabels = [...new Set(dataset.map(item => item.label))].sort();
+                
+                const features = [];
+                const labels = [];
+                
+                dataset.forEach(item => {
+                    features.push(item.features);
+                    // Find the index of the letter in our vocab array (One-Hot Encoding prep)
+                    labels.push(vocabLabels.indexOf(item.label));
+                });
+
+                // Convert arrays to Tensors
+                const xs = tf.tensor2d(features);
+                const ys = tf.oneHot(tf.tensor1d(labels, 'int32'), vocabLabels.length);
+
+                // 3. Create a lightweight Neural Network
+                tfModel = tf.sequential();
+                tfModel.add(tf.layers.dense({ inputShape: [63], units: 128, activation: 'relu' }));
+                tfModel.add(tf.layers.dropout({ rate: 0.2 }));
+                tfModel.add(tf.layers.dense({ units: 64, activation: 'relu' }));
+                tfModel.add(tf.layers.dense({ units: vocabLabels.length, activation: 'softmax' }));
+
+                tfModel.compile({
+                    optimizer: 'adam',
+                    loss: 'categoricalCrossentropy',
+                    metrics: ['accuracy']
+                });
+
+                // 4. Train the model (takes a few seconds)
+                statusText.innerText = `Training model on ${dataset.length} samples...`;
+                await tfModel.fit(xs, ys, {
+                    epochs: 50,
+                    callbacks: {
+                        onEpochEnd: (epoch, logs) => {
+                            if (epoch % 10 === 0) console.log(`Epoch ${epoch}: loss = ${logs.loss.toFixed(4)}`);
+                        }
+                    }
+                });
+
+                // Cleanup memory
+                xs.dispose();
+                ys.dispose();
+
+                // 5. Initialize MediaPipe Hands
+                statusText.innerText = "Loading MediaPipe Tasks...";
+                const vision = await FilesetResolver.forVisionTasks(
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+                );
+                
+                handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                        delegate: "GPU"
+                    },
+                    runningMode: "VIDEO",
+                    numHands: 1
+                });
+
+                // 6. Start Webcam
+                statusText.innerText = "Opening Webcam...";
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+                video.srcObject = stream;
+                
+                video.addEventListener('loadeddata', () => {
+                    statusText.innerText = "Ready! Sign a letter.";
+                    predictLoop();
+                });
+
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Error! Check console.";
+            }
+        }
+
+        async function predictLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Run MediaPipe Vision
+            const startTimeMs = performance.now();
+            const results = handLandmarker.detectForVideo(video, startTimeMs);
+
+            if (results.landmarks && results.landmarks.length > 0) {
+                const hand = results.landmarks[0];
+                const wrist = hand[0];
+                
+                // Draw skeleton (Optional visual feedback)
+                ctx.fillStyle = "#00FF00";
+                for (let landmark of hand) {
+                    ctx.beginPath();
+                    ctx.arc(landmark.x * canvas.width, landmark.y * canvas.height, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+                // Normalize coordinates just like we did in Python
+                const flatArray = [];
+                for (let landmark of hand) {
+                    flatArray.push(landmark.x - wrist.x);
+                    flatArray.push(landmark.y - wrist.y);
+                    flatArray.push(landmark.z - wrist.z);
+                }
+
+                // Predict using our trained TF.js model
+                tf.tidy(() => {
+                    const input = tf.tensor2d([flatArray]);
+                    const prediction = tfModel.predict(input);
+                    
+                    // Get the highest probability
+                    const classId = prediction.argMax(-1).dataSync()[0];
+                    const confidence = prediction.max().dataSync()[0];
+
+                    if (confidence > 0.6) {
+                        predictedLetterEl.innerText = vocabLabels[classId];
+                        confidenceText.innerText = `Confidence: ${(confidence * 100).toFixed(1)}%`;
+                    } else {
+                        predictedLetterEl.innerText = "?";
+                        confidenceText.innerText = "Confidence: Too Low";
+                    }
+                });
+            } else {
+                predictedLetterEl.innerText = "-";
+                confidenceText.innerText = "No Hand Detected";
+            }
+
+            // Loop continuously
+            requestAnimationFrame(predictLoop);
+        }
+
+        // Start the app!
+        init();
+    </script>
+</body>
+</html>
