@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Dart Gun Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #111;
+            color: white;
+        }
+        canvas {
+            display: block;
+        }
+        #blocker {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #instructions, #topic-menu {
+            width: 90%;
+            max-width: 600px;
+            cursor: default;
+            text-align: center;
+            padding: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            overflow: auto;
+            max-height: 600px;
+        }
+        #instructions h1, #topic-menu h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        #instructions p, #topic-menu p {
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        .topic-button {
+            display: block;
+            width: 100%;
+            padding: 5px;
+            margin: 10px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: #333;
+            color: white;
+            border: 2px solid #555;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        #debug-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.6);
+            padding: 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #fff;
+            z-index: 1000;
+            line-height: 1.4;
+            pointer-events: none; /* Make it non-interactive */
+        }
+        .topic-button:hover {
+            background-color: #444;
+            border-color: #777;
+        }
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid white;
+            display: none; /* Hidden until pointer lock */
+        }
+        #stats-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px #000;
+            display: flex;
+            gap: 30px;
+        }
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5em;
+            color: #ff4444;
+            text-shadow: 3px 3px 6px #000;
+            display: none;
+            text-align: center;
+        }
+        #game-over p {
+            font-size: 0.4em;
+            margin-top: 10px;
+        }
+        #final-score {
+            font-size: 0.5em;
+            margin-top: 15px;
+            color: #fff;
+        }
+        #get-darts-button {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+            background-color: rgba(255, 204, 0, 0.9);
+            color: #333;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            display: none;
+            transition: background-color 0.2s;
+        }
+        #get-darts-button:hover {
+            background-color: #ffdd55;
+        }
+        #quiz-modal {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            display: none; /* Initially hidden */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #quiz-content {
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+        }
+        #quiz-question {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        #quiz-image {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        #quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .quiz-option {
+            padding: 20px;
+            font-size: 1.2em;
+            background-color: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .quiz-option:hover {
+            background-color: #3a3a3a;
+        }
+        #quiz-result {
+            text-align: center;
+            display: none; /* Initially hidden */
+        }
+        #quiz-result h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        #quiz-result p {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+        #close-quiz-button {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2.5em;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            line-height: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="blocker">
+        <div id="topic-menu">
+             <h1>Choose a Topic</h1>
+             <p>Select a quiz category to get started.</p>
+             <div id="topic-buttons"></div>
+        </div>
+        <div id="instructions" style="display: none;">
+            <h1>Dart Gun Challenge</h1>
+            <p><strong>Goal:</strong> Shoot as many targets as you can!</p>
+            <p><strong>Controls:</strong><br>
+                W, A, S, D - Move<br>
+                SPACE - Jump<br>
+                MOUSE - Look<br>
+                CLICK - Shoot Dart
+            </p>
+            <p>Run out of darts? Find the chest to answer questions and earn more!</p>
+            <p style="font-size: 1.5em; margin-top: 20px;">Click to Start</p>
+        </div>
+    </div>
+
+    <div id="crosshair"></div>
+    <div id="stats-container">
+        <div id="score-container">Score: 0</div>
+        <div id="timer-container">Time: 3:00</div>
+        <div id="ammo-container">Ammo: 20/20</div>
+    </div>
+    <div id="game-over">
+        Time's Up!
+        <p id="final-score">Final Score: 0</p>
+        <p style="font-size: 0.4em; margin-top: 10px;">Press ESC to restart</p>
+    </div>
+    
+    <button id="get-darts-button">Get Darts! (SPACE)</button>
+
+    <div id="quiz-modal">
+        <button id="close-quiz-button" onclick="closeQuiz()">×</button>
+        <div id="quiz-content">
+            <p id="quiz-question">Question text goes here</p>
+            <img id="quiz-image" src="" alt="Quiz visual aid"/>
+            <div id="quiz-options">
+                <div class="quiz-option" onclick="selectAnswer(0)">Option A</div>
+                <div class="quiz-option" onclick="selectAnswer(1)">Option B</div>
+                <div class="quiz-option" onclick="selectAnswer(2)">Option C</div>
+                <div class="quiz-option" onclick="selectAnswer(3)">Option D</div>
+            </div>
+        </div>
+        <div id="quiz-result">
+            <h2 id="result-title">Correct!</h2>
+            <p id="result-text">+20 Darts Added!</p>
+        </div>
+    </div>
+
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Import Three.js and PointerLockControls -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+
+        // --- SCENE SETUP ---
+        let scene, camera, renderer, controls;
+        let clock = new THREE.Clock();
+
+        // --- GAME OBJECTS ---
+        let player, playerVelocity, onObject = false;
+        const darts = [];
+        const targets = [];
+        let gun, chest;
+        const objects = []; // For collision detection with player
+        const raycaster = new THREE.Raycaster(); // For dart collision
+        let dartGeo, dartMat;
+        const targetMaterials = {};
+
+        // --- GAME STATE ---
+        let score = 0;
+        let isGameOver = false;
+        let isQuizActive = false;
+        const gameTimeLimit = 180; // 3 minutes
+        let gameTimeRemaining = gameTimeLimit;
+        const maxAmmo = 20;
+        let currentAmmo = maxAmmo;
+        let timeSinceLastSpawn = 0;
+        
+        // --- QUIZ STATE ---
+        let selectedQuizKey = null;
+        let currentQuestion = null;
+        let askedQuestions = [];
+
+        const blocker = document.getElementById('blocker');
+        const instructions = document.getElementById('instructions');
+        const topicMenu = document.getElementById('topic-menu');
+        const scoreElement = document.getElementById('score-container');
+        const timerElement = document.getElementById('timer-container');
+        const ammoElement = document.getElementById('ammo-container');
+        const crosshairElement = document.getElementById('crosshair');
+        const gameOverElement = document.getElementById('game-over');
+        const finalScoreElement = document.getElementById('final-score');
+        const getDartsButton = document.getElementById('get-darts-button');
+        const quizModal = document.getElementById('quiz-modal');
+        const quizContent = document.getElementById('quiz-content');
+        const quizResult = document.getElementById('quiz-result');
+
+        let quizzes = {};
+async function load_data() {
+    try {
+        const response = await fetch('../vocab.json'); // Adjust path (e.g., '../vocab.json') if needed
+        if (!response.ok) throw new Error("Network response was not ok");
+        return await response.json(); 
+    } catch (error) {
+        console.error('Error loading question bank:', error);
+        return null; 
+    }
+}
+
+// 2. Build the checkboxes
+async function initMenu() {
+    // Load the JSON into our global variable
+    quizzes = await load_data();
+
+    if (!quizzes) {
+        console.log('Failed to load quiz topics. Cannot initialize menu.');
+        return;
+    }
+createTopicMenu();
+}
+initMenu()
+
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87ceeb);
+            scene.fog = new THREE.Fog(0x87ceeb, 0, 300);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            
+            // --- PRE-GENERATE ASSETS TO PREVENT MEMORY LEAKS ---
+            // Dart assets
+            dartGeo = new THREE.CylinderGeometry(0.05, 0.05, 1, 8);
+            dartGeo.rotateX(Math.PI / 2);
+            dartMat = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xff0000, emissiveIntensity: 0.5 });
+            
+            // Target assets
+            targetMaterials[10] = new THREE.MeshStandardMaterial({ map: createTargetTexture('#ff4444') });
+            targetMaterials[25] = new THREE.MeshStandardMaterial({ map: createTargetTexture('#27ae60') });
+            targetMaterials[50] = new THREE.MeshStandardMaterial({ map: createTargetTexture('#8e44ad') });
+
+
+            // --- LIGHTING ---
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(-50, 100, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+
+            // --- CONTROLS ---
+            controls = new PointerLockControls(camera, renderer.domElement);
+            instructions.addEventListener('click', () => {
+                if(selectedQuizKey) {
+                    controls.lock();
+                } else {
+                    // If no topic selected, go back to topic menu
+                    topicMenu.style.display = 'block';
+                    instructions.style.display = 'none';
+                }
+            });
+            
+            controls.addEventListener('lock', () => {
+                instructions.style.display = 'none';
+                blocker.style.display = 'none';
+                crosshairElement.style.display = 'block';
+            });
+            
+            controls.addEventListener('unlock', () => {
+                crosshairElement.style.display = 'none';
+
+                // If the quiz is active, its own overlay handles everything. Don't show the main blocker.
+                if (isQuizActive) {
+                    return;
+                }
+
+                blocker.style.display = 'flex';
+                instructions.style.display = 'none'; // Hide by default
+                gameOverElement.style.display = 'none'; // Hide by default
+                topicMenu.style.display = 'none'; // Hide by default
+                
+                if (isGameOver) {
+                    gameOverElement.style.display = 'block';
+                } else {
+                    // This handles manual ESC press.
+                    // It shows the instructions to get back in.
+                    instructions.style.display = 'block';
+                }
+            });
+
+            scene.add(controls.getObject());
+
+            // --- PLAYER ---
+            playerVelocity = new THREE.Vector3();
+            player = controls.getObject();
+            
+            // --- WORLD & GUN CREATION ---
+            createWorld();
+            createGun();
+            createChest();
+
+            // --- EVENT LISTENERS ---
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+            document.addEventListener('mousedown', shootDart);
+            window.addEventListener('resize', onWindowResize);
+            getDartsButton.addEventListener('click', openQuiz);
+        }
+
+        function createTopicMenu() {
+            const container = document.getElementById('topic-buttons');
+            container.innerHTML = '';
+            for (const key in quizzes) {
+                const button = document.createElement('button');
+                button.className = 'topic-button';
+                button.textContent = quizzes[key].title;
+                button.onclick = () => selectTopic(key);
+                container.appendChild(button);
+            }
+        }
+        
+        window.selectTopic = (key) => {
+            selectedQuizKey = key;
+            askedQuestions = []; // Reset for the new topic
+            topicMenu.style.display = 'none';
+            instructions.style.display = 'block';
+        }
+
+        function createWorld() {
+            // Ground
+            const groundGeo = new THREE.BoxGeometry(500, 1, 500);
+            const groundMat = new THREE.MeshLambertMaterial({ color: 0x4a7d29 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.position.y = -1.5;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Player Platform
+            const platformGeo = new THREE.BoxGeometry(30, 1, 30);
+            const platformMat = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+            const platform = new THREE.Mesh(platformGeo, platformMat);
+            platform.position.y = -0.5;
+            platform.receiveShadow = true;
+            platform.castShadow = true;
+            scene.add(platform);
+            objects.push(platform);
+
+            // Boundary Walls
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x666666 });
+            const wallHeight = 1.5;
+            const wallThickness = 0.5;
+            
+            const walls = [
+                { size: [30 + wallThickness*2, wallHeight, wallThickness], pos: [0, wallHeight/2, 15] },
+                { size: [30 + wallThickness*2, wallHeight, wallThickness], pos: [0, wallHeight/2, -15] },
+                { size: [wallThickness, wallHeight, 30], pos: [15, wallHeight/2, 0] },
+                { size: [wallThickness, wallHeight, 30], pos: [-15, wallHeight/2, 0] },
+            ];
+
+            walls.forEach(w => {
+                const wallGeo = new THREE.BoxGeometry(...w.size);
+                const wall = new THREE.Mesh(wallGeo, wallMat);
+                wall.position.set(...w.pos);
+                scene.add(wall);
+            });
+        }
+        
+        function createChest() {
+            const chestGroup = new THREE.Group();
+            const bodyMat = new THREE.MeshStandardMaterial({color: 0x8B4513});
+            const lockMat = new THREE.MeshStandardMaterial({color: 0xFFD700});
+
+            const bodyGeo = new THREE.BoxGeometry(2, 1.5, 1);
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            chestGroup.add(body);
+
+            const lockGeo = new THREE.BoxGeometry(0.2, 0.4, 0.2);
+            const lock = new THREE.Mesh(lockGeo, lockMat);
+            lock.position.set(0, 0, 0.55);
+            chestGroup.add(lock);
+            
+            chestGroup.position.set(0, 0, 12);
+            chestGroup.castShadow = true;
+            chest = chestGroup;
+            scene.add(chest);
+        }
+
+        function checkChestProximity() {
+            if (!chest || isGameOver) return;
+            const distance = player.position.distanceTo(chest.position);
+            if (distance < 5) {
+                getDartsButton.style.display = 'block';
+            } else {
+                getDartsButton.style.display = 'none';
+            }
+        }
+        
+        function getNewQuestion() {
+            if (!selectedQuizKey || !quizzes[selectedQuizKey]) return null;
+
+            const allQuestions = quizzes[selectedQuizKey].questions;
+            let availableQuestions = allQuestions.filter((q, index) => !askedQuestions.includes(index));
+
+            if (availableQuestions.length === 0) {
+                // All questions in this topic have been answered, so reset the list
+                askedQuestions = [];
+                availableQuestions = allQuestions;
+                if (availableQuestions.length === 0) return null; // Topic has no questions at all
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+            const newQuestion = availableQuestions[randomIndex];
+            // Find the question's original index to mark it as asked
+            const originalIndex = allQuestions.indexOf(newQuestion);
+            askedQuestions.push(originalIndex);
+            
+            return newQuestion;
+        }
+
+        function openQuiz() {
+            isQuizActive = true;
+            controls.unlock();
+
+            currentQuestion = getNewQuestion();
+            if (!currentQuestion) {
+                console.error("Could not get a question for this topic.");
+                closeQuiz(); // Failsafe
+                return;
+            }
+            
+            displayQuestion(currentQuestion);
+            quizModal.style.display = 'flex';
+            quizContent.style.display = 'block';
+            quizResult.style.display = 'none';
+        }
+
+        function displayQuestion(q) {
+            document.getElementById('quiz-question').textContent = q.question;
+            document.getElementById('quiz-image').src = q.image;
+            const options = document.getElementById('quiz-options').children;
+            for(let i = 0; i < options.length; i++) {
+                if(q.options[i]) {
+                    options[i].textContent = q.options[i];
+                    options[i].style.display = 'block';
+                } else {
+                    options[i].style.display = 'none';
+                }
+            }
+        }
+
+        window.selectAnswer = (selectedIndex) => {
+            const isCorrect = selectedIndex === currentQuestion.correct;
+            const resultTitle = document.getElementById('result-title');
+            const resultText = document.getElementById('result-text');
+            
+            if(isCorrect) {
+                resultTitle.textContent = "Correct!";
+                resultTitle.style.color = "#27ae60";
+                resultText.textContent = `+1 Dart Added!`;
+                updateAmmo(currentAmmo + 2);
+            } else {
+                resultTitle.textContent = "Incorrect";
+                resultTitle.style.color = "#c0392b";
+                resultText.textContent = "No darts this time. Try again later!";
+            }
+
+            quizContent.style.display = 'none';
+            quizResult.style.display = 'block';
+
+            // After a 2-second delay, automatically load the next question
+            setTimeout(loadNextQuestion, 1000);
+        }
+
+        window.loadNextQuestion = () => {
+            currentQuestion = getNewQuestion();
+            if (!currentQuestion) {
+                // This can happen if a topic has no questions.
+                console.error("Failed to load next question, closing quiz.");
+                closeQuiz();
+                return;
+            }
+            displayQuestion(currentQuestion);
+            quizContent.style.display = 'block';
+            quizResult.style.display = 'none';
+        }
+
+        window.closeQuiz = () => {
+            isQuizActive = false;
+            quizModal.style.display = 'none';
+            // Immediately re-lock the controls to resume gameplay
+            controls.lock();
+        }
+
+
+        function createGun() {
+            gun = new THREE.Group();
+            
+            const gunBodyMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.6 });
+            const gunBarrelMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.5 });
+
+            const bodyGeo = new THREE.BoxGeometry(0.2, 0.3, 1);
+            const body = new THREE.Mesh(bodyGeo, gunBodyMat);
+            body.position.z = 0.2; // Flipped Z to face away from player
+            gun.add(body);
+
+            const barrelGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.8, 16);
+            const barrel = new THREE.Mesh(barrelGeo, gunBarrelMat);
+            barrel.position.z = -0.1; // Flipped Z to face away from player
+            barrel.rotation.x = Math.PI / 2;
+            gun.add(barrel);
+            
+            const handleGeo = new THREE.BoxGeometry(0.2, 0.5, 0.2);
+            const handle = new THREE.Mesh(handleGeo, gunBodyMat);
+            handle.position.y = -0.3;
+            handle.position.z = 0.5; // Flipped Z to face away from player
+            handle.rotation.x = 0.2;
+            gun.add(handle);
+
+            gun.position.set(0.4, -0.3, -1);
+            gun.rotation.y = -0.1;
+            camera.add(gun);
+        }
+
+        // --- MOVEMENT LOGIC ---
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false, canJump = false;
+
+        function onKeyDown(event) {
+            switch (event.code) {
+                case 'KeyW': moveForward = true; break;
+                case 'KeyA': moveLeft = true; break;
+                case 'KeyS': moveBackward = true; break;
+                case 'KeyD': moveRight = true; break;
+                case 'Space':
+                    if (getDartsButton.style.display === 'block' && !isQuizActive) {
+                        openQuiz();
+                    } else {
+                        if (canJump) playerVelocity.y += 20;
+                        canJump = false;
+                    }
+                    break;
+                case 'Escape': if(isGameOver) resetGame(); break;
+            }
+        }
+
+        function onKeyUp(event) {
+            switch (event.code) {
+                case 'KeyW': moveForward = false; break;
+                case 'KeyA': moveLeft = false; break;
+                case 'KeyS': moveBackward = false; break;
+                case 'KeyD': moveRight = false; break;
+            }
+        }
+
+        function updatePlayer(delta) {
+            if (!controls.isLocked) return;
+
+            const moveSpeed = 80.0;
+            const damping = -10.0;
+
+            playerVelocity.x += playerVelocity.x * damping * delta;
+            playerVelocity.z += playerVelocity.z * damping * delta;
+            playerVelocity.y -= 9.8 * 10.0 * delta; // gravity
+
+            const direction = new THREE.Vector3();
+            direction.z = Number(moveForward) - Number(moveBackward);
+            direction.x = Number(moveRight) - Number(moveLeft);
+            direction.normalize();
+
+            if (moveForward || moveBackward) playerVelocity.z -= direction.z * moveSpeed * delta;
+            if (moveLeft || moveRight) playerVelocity.x -= direction.x * moveSpeed * delta;
+
+            controls.moveRight(-playerVelocity.x * delta);
+            controls.moveForward(-playerVelocity.z * delta);
+            player.position.y += playerVelocity.y * delta;
+            
+            const limit = 14.5;
+            player.position.x = Math.max(-limit, Math.min(limit, player.position.x));
+            player.position.z = Math.max(-limit, Math.min(limit, player.position.z));
+
+            if (player.position.y < 2) {
+                playerVelocity.y = 0;
+                player.position.y = 2;
+                canJump = true;
+            }
+        }
+
+        // --- DART & TARGET LOGIC ---
+        let isRecoiling = false;
+        let recoilTimer = 0;
+
+        function shootDart() {
+            if (!controls.isLocked || isGameOver || currentAmmo <= 0) return;
+            updateAmmo(currentAmmo - 1);
+            isRecoiling = true;
+            recoilTimer = 0.15;
+
+            // Reuse pre-generated geometry and material
+            const dart = new THREE.Mesh(dartGeo, dartMat);
+            dart.castShadow = true;
+
+            const cameraDirection = new THREE.Vector3();
+            camera.getWorldDirection(cameraDirection);
+
+            const spawnPoint = new THREE.Vector3();
+            gun.children[1].getWorldPosition(spawnPoint);
+            spawnPoint.add(cameraDirection.clone().multiplyScalar(0.5));
+
+            dart.position.copy(spawnPoint);
+            dart.quaternion.copy(camera.quaternion);
+            
+            dart.velocity = cameraDirection.multiplyScalar(200);
+            dart.previousPosition = dart.position.clone();
+            
+            darts.push(dart);
+            scene.add(dart);
+        }
+
+        function updateDarts(delta) {
+            for (let i = darts.length - 1; i >= 0; i--) {
+                const dart = darts[i];
+                dart.previousPosition.copy(dart.position);
+                dart.position.add(dart.velocity.clone().multiplyScalar(delta));
+                
+                const direction = dart.position.clone().sub(dart.previousPosition);
+                const distance = direction.length();
+                
+                if (distance > 0) {
+                    raycaster.set(dart.previousPosition, direction.normalize());
+                    raycaster.far = distance;
+                    const intersects = raycaster.intersectObjects(targets);
+
+                    if (intersects.length > 0) {
+                        const hitTarget = intersects[0].object;
+                        const targetIndex = targets.indexOf(hitTarget);
+                        if (targetIndex > -1) targets.splice(targetIndex, 1);
+                        
+                        disposeObject(hitTarget); // Properly dispose of the target
+                        disposeObject(dart); // Properly dispose of the dart
+                        
+                        updateScore(score + hitTarget.points);
+
+                        break;
+                    }
+                }
+                
+                if (dart.position.length() > 500) {
+                    disposeObject(dart);
+                    darts.splice(i, 1);
+                }
+            }
+        }
+
+        function updateGun(delta) {
+            if (isRecoiling) {
+                recoilTimer -= delta;
+                const recoilDistance = 0.2;
+                const recoilProgress = Math.sin((0.15 - recoilTimer) / 0.15 * Math.PI);
+                gun.position.z = -1 + recoilProgress * recoilDistance;
+
+                if (recoilTimer <= 0) {
+                    isRecoiling = false;
+                    gun.position.z = -1;
+                }
+            }
+        }
+
+        function updateTargets(delta) {
+             for (let i = targets.length - 1; i >= 0; i--) {
+                const target = targets[i];
+                if (Date.now() - target.spawnTime > 7000) {
+                    disposeObject(target);
+                    targets.splice(i, 1);
+                }
+            }
+        }
+
+        function spawnTarget() {
+            const targetGeo = new THREE.CylinderGeometry(2, 2, 0.5, 32);
+            let targetMat, points, position = new THREE.Vector3();
+            const rand = Math.random();
+
+            if (rand < 0.1) {
+                points = 50;
+                targetMat = targetMaterials[50];
+                position.set((Math.random() - 0.5) * 200, Math.random() * 20 + 5, -Math.random() * 100 - 150);
+            } else if (rand < 0.3) {
+                points = 25;
+                targetMat = targetMaterials[25];
+                position.set((Math.random() - 0.5) * 180, Math.random() * 15 + 4, -Math.random() * 70 - 80);
+            } else {
+                points = 10;
+                targetMat = targetMaterials[10];
+                position.set((Math.random() - 0.5) * 150, Math.random() * 10 + 2, -Math.random() * 50 - 30);
+            }
+            
+            const target = new THREE.Mesh(targetGeo, targetMat);
+            target.spawnTime = Date.now();
+            target.points = points;
+            target.position.copy(position);
+            target.rotation.x = Math.PI / 2;
+            target.castShadow = true;
+            target.receiveShadow = true;
+            
+            targets.push(target);
+            scene.add(target);
+        }
+        
+        function createTargetTexture(baseColor = '#ff4444') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2, centerY = canvas.height / 2, radius = canvas.width / 2;
+            const tanColor = '#f5deb3';
+
+            ctx.fillStyle = baseColor;
+            ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = tanColor;
+            ctx.beginPath(); ctx.arc(centerX, centerY, radius * 0.8, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = baseColor;
+            ctx.beginPath(); ctx.arc(centerX, centerY, radius * 0.6, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = tanColor;
+            ctx.beginPath(); ctx.arc(centerX, centerY, radius * 0.4, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = baseColor;
+            ctx.beginPath(); ctx.arc(centerX, centerY, radius * 0.2, 0, 2 * Math.PI); ctx.fill();
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function updateTimer(delta) {
+            if (controls.isLocked && !isGameOver) {
+                gameTimeRemaining -= delta;
+                if (gameTimeRemaining <= 0) {
+                    gameTimeRemaining = 0;
+                    endGame();
+                }
+                const minutes = Math.floor(gameTimeRemaining / 60);
+                const seconds = Math.floor(gameTimeRemaining % 60);
+                timerElement.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function updateScore(newScore) {
+            score = newScore;
+            scoreElement.textContent = `Score: ${score}`;
+        }
+
+        function updateAmmo(newAmmo) {
+            currentAmmo = Math.min(newAmmo, maxAmmo);
+            ammoElement.textContent = `Ammo: ${currentAmmo}/${maxAmmo}`;
+        }
+
+        function endGame() {
+            isGameOver = true;
+            controls.unlock();
+            finalScoreElement.textContent = `Final Score: ${score}`;
+            gameOverElement.style.display = 'block';
+        }
+        
+        function resetGame() {
+            isGameOver = false;
+            updateScore(0);
+            updateAmmo(maxAmmo);
+            gameTimeRemaining = gameTimeLimit;
+            timerElement.textContent = `Time: 3:00`;
+            selectedQuizKey = null; // Force re-selection of topic
+            timeSinceLastSpawn = 0;
+
+            darts.forEach(d => disposeObject(d));
+            darts.length = 0;
+            targets.forEach(t => disposeObject(t));
+            targets.length = 0;
+            
+            player.position.set(0, 2, 0);
+            playerVelocity.set(0, 0, 0);
+
+            blocker.style.display = 'flex';
+            instructions.style.display = 'none';
+            topicMenu.style.display = 'block'; // Show topic menu on reset
+            gameOverElement.style.display = 'none';
+        }
+
+        // --- RENDER LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+
+            if (controls.isLocked && !isGameOver) {
+                updatePlayer(delta);
+                updateDarts(delta);
+                updateGun(delta);
+                updateTargets(delta);
+                updateTimer(delta);
+                checkChestProximity();
+
+                // New robust spawn logic
+                timeSinceLastSpawn += delta;
+                const spawnDelay = Math.max(0.25, 2.0 - (score / 100.0));
+                if (timeSinceLastSpawn > spawnDelay) {
+                    spawnTarget();
+                    timeSinceLastSpawn = 0;
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        // --- UTILITY ---
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function disposeObject(obj) {
+            scene.remove(obj);
+            if (obj.geometry) obj.geometry.dispose();
+            // Don't dispose shared materials, but if they were unique, you would:
+            // if (obj.material) {
+            //     if (obj.material.map) obj.material.map.dispose();
+            //     obj.material.dispose();
+            // }
+        }
+
+        // --- INITIALIZATION ---
+        init();
+        animate();
+    </script>
+</body>
+</html>
+
+
+
+
+
