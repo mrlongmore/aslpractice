@@ -110,51 +110,22 @@
             { "question": "Where does the signer go first to get it?", "type": "multiple-choice", "options": ["library", "book store", "city hall", "community center"], "correct": "library"},
             { "question": "What problem do they encounter?", "type": "multiple-choice", "options": ["the library doesn't have the book", "the library is closed", "there was no problem", "they forgot their card"], "correct": "the library doesn't have the book" },
             { "question": "Where does the signer decide to go?", "type": "multiple-choice", "options": ["book store", "home", "a different library", "school"], "correct": "book store" },
-            { "question": "What color is his jacket?", "type": "multiple-choice", "options": ["red", "pink", "green", "yellow"], "correct": "red" },
-            { "question": "What color are his pants?", "type": "multiple-choice", "options": ["blue", "black", "brown", "yellow"], "correct": "blue" },
-            { "question": "What color are his shoes?", "type": "multiple-choice", "options": ["brown", "black", "gray", "white"], "correct": "brown" },
-            { "question": "What color are his socks?", "type": "multiple-choice", "options": ["white", "gray", "black", "blue"], "correct": "white" }
+            { "question": "Which way does the signer drive first?", "type": "multiple-choice", "options": ["left", "right", "straight", "back"], "correct": "left" },
+            { "question": "Which way does the signer drive second?", "type": "multiple-choice", "options": ["left", "right", "straight", "back"], "correct": "straight" },
+            { "question": "At the intersection, which way does the signer go?", "type": "multiple-choice", "options": ["left", "right", "straight", "back"], "correct": "straight" },
+            { "question": "After the intersection, which way does the signer go before arriving?", "type": "multiple-choice", "options": ["left", "right", "straight", "back"], "correct": "right" }
           ]
         },
         {
           "video": "Directions2.mp4",
           "questions": [
-            { "question": "Who is being discussed?", "type": "multiple-choice", "options": ["man", "woman", "boy", "girl"], "correct": "woman" },
-            { "question": "What is the woman's height?", "type": "multiple-choice", "options": ["short", "average", "tall", "unknown"], "correct": "short" },
-            { "question": "What is the woman's body type?", "type": "multiple-choice", "options": ["thin", "average", "chubby", "unknown"], "correct": "chubby" },
-            { "question": "What color is her dress?", "type": "multiple-choice", "options": ["pink", "red", "purple", "green"], "correct": "pink" },
-            { "question": "What color are her leggings?", "type": "multiple-choice", "options": ["black", "blue", "brown", "red"], "correct": "black" },
-            { "question": "What color are her earings?", "type": "multiple-choice", "options": ["gold", "silver", "green", "yellow"], "correct": "gold" },
-            { "question": "What color are her high-heels?", "type": "multiple-choice", "options": ["silver", "gold", "seagreen", "gold"], "correct": "silver" },
-            { "question": "What color are her socks?", "type": "multiple-choice", "options": ["black", "blue", "gray", "red"], "correct": "black" }
-          ]
-        },
-        {
-          "video": "Directions3.mp4",
-          "questions": [
-            { "question": "Who is being discussed?", "type": "multiple-choice", "options": ["man", "woman", "boy", "girl"], "correct": "boy" },
-            { "question": "What is the boy's height?", "type": "multiple-choice", "options": ["short", "average", "tall", "unknown"], "correct": "short" },
-            { "question": "What is the boy's body type?", "type": "multiple-choice", "options": ["thin", "average", "chubby", "unknown"], "correct": "average" },
-            { "question": "What is the primary color of his shirt?", "type": "multiple-choice", "options": ["dark yellow", "light yellow", "dark gold", "white"], "correct": "dark yellow" },
-            { "question": "What color are the stripes on his shirt?", "type": "multiple-choice", "options": ["dark green", "light green", "dark gray", "white"], "correct": "white" },
-            { "question": "What color are his shorts?", "type": "multiple-choice", "options": ["dark green", "light green", "gray", "gold"], "correct": "dark green" },
-            { "question": "What color is his hat?", "type": "multiple-choice", "options": ["blue", "black", "brown", "gray"], "correct": "blue" },
-            { "question": "What color are his shoes?", "type": "multiple-choice", "options": ["white", "gray", "black", "red"], "correct": "white" },
-            { "question": "What color are his socks?", "type": "multiple-choice", "options": ["gray", "white", "black", "red"], "correct": "gray" }
-          ]
-        },
-        {
-          "video": "Directions4.mp4",
-          "questions": [
-            { "question": "Who is being discussed?", "type": "multiple-choice", "options": ["man", "woman", "boy", "girl"], "correct": "girl" },
-            { "question": "What is the girl's height?", "type": "multiple-choice", "options": ["short", "average", "tall", "unknown"], "correct": "average" },
-            { "question": "What is the girl's body type?", "type": "multiple-choice", "options": ["thin", "average", "chubby", "unknown"], "correct": "average" },
-            { "question": "What is the primary color of her shirt?", "type": "multiple-choice", "options": ["light purple", "dark purple", "dark orange", "light orange"], "correct": "light purple" },
-            { "question": "What color and style are the stripes on her shirt?", "type": "multiple-choice", "options": ["straight, purple", "squiggly, purple", "straight, orange", "squiggly, orange"], "correct": "squiggly, orange" },
-            { "question": "What color is her skirt?", "type": "multiple-choice", "options": ["orange", "red", "green", "gold"], "correct": "orange" },
-            { "question": "What color are her glasses?", "type": "multiple-choice", "options": ["white", "black", "brown", "gray"], "correct": "white" },
-            { "question": "What color is her watch?", "type": "multiple-choice", "options": ["white", "gray", "black", "red"], "correct": "gray" },
-            { "question": "What color are her sandals?", "type": "multiple-choice", "options": ["dark purple", "light purple", "dark pink", "hot pink"], "correct": "dark purple" }
+            { "question": "What place does the signer describe in the story?", "type": "multiple-choice", "options": ["school", "library", "store", "college"], "correct": "school" },
+            { "question": "Where is the office if the signer is looking at the front of the school?", "type": "multiple-choice", "options": ["in the front on the left", "in the front on the right", "in the back on the left", "in the back on the right"], "correct": "in the front on the left" },
+            { "question": "Where are the classrooms if the signer is looking at the front of the school?", "type": "multiple-choice", "options": ["in the front on the left", "in the front on the right", "in the back on the left", "in the back on the right"], "correct": "in the front on the right" },
+            { "question": "Where is the pool if the signer is looking at the front of the school?", "type": "multiple-choice", "options": ["in the front on the left", "in the front on the right", "in the back on the left", "in the back on the right"], "correct": "in the back on the right" },
+            { "question": "Where is the football field if the signer is looking at the front of the school?", "type": "multiple-choice", "options": ["in the front on the left", "in the front on the right", "in the back on the left", "in the back on the right"], "correct": "in the back on the left" },
+            { "question": "The locker room is located where?", "type": "multiple-choice", "options": ["to the left of the football field", "to the right of the football field", "to the left of the classroom", "to the right of the classroom"], "correct": "to the left of the football field" },
+            { "question": "Which places have the cafeteria between them?", "type": "multiple-choice", "options": ["classrooms and office", "classrooms and pool", "pool and football field", "locker room and office"], "correct": "locker room and office" }
           ]
         }
       ]
