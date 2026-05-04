@@ -2028,6 +2028,198 @@
                 "correct": 3
             }
         ]
+    },  
+    "Directions": {
+        "title": "📍 Directions",
+        "questions": [
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098890/nrmkfgjvx0v85knilzxu.gif",
+                "options": [
+                    "RIGHT",
+                    "LEFT",
+                    "STREET",
+                    "DRIVE"
+                ],
+                "correct": 0
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1738098951/b41ett5ojrabejzecb0e.gif",
+                "options": [
+                    "RIGHT",
+                    "LEFT",
+                    "CLOSE",
+                    "NEAR"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716392996/gdeafgaqer0qnmqrhymt.gif",
+                "options": [
+                    "ACROSS",
+                    "BEHIND",
+                    "NEXT-TO",
+                    "STREET"
+                ],
+                "correct": 2
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716393872/hmcaejdhzlu6ouak30yx.gif",
+                "options": [
+                    "ACROSS",
+                    "CIRCLE",
+                    "STRAIGHT",
+                    "AVENUE"
+                ],
+                "correct": 0
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1716393676/rmaklgvvyjiq5v5m8kka.gif",
+                "options": [
+                    "NEAR",
+                    "BEHIND",
+                    "ADDRESS",
+                    "ARRIVE"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901093/w8vg705kdt5pqmnbx7gy.gif",
+                "options": [
+                    "ADDRESS",
+                    "AVENUE",
+                    "STREET",
+                    "ARRIVE"
+                ],
+                "correct": 0
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901119/vu0c0af3n08ea4vwru68.gif",
+                "options": [
+                    "DRIVE",
+                    "ARRIVE",
+                    "TURN LEFT",
+                    "INTERSECTION"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901448/ujiavhc1a2yq7g399p0q.gif",
+                "options": [
+                    "CLOSE",
+                    "NEAR",
+                    "BEHIND",
+                    "CIRCLE"
+                ],
+                "correct": 0
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901351/qkscoyjbanvvd69ugyh1.gif",
+                "options": [
+                    "STREET",
+                    "AVENUE",
+                    "INTERSECTION",
+                    "ADDRESS"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901316/mmmgm1agaaasstbui84d.gif",
+                "options": [
+                    "TURN LEFT",
+                    "STRAIGHT",
+                    "TURN RIGHT",
+                    "DRIVE"
+                ],
+                "correct": 2
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901234/ofkpducucgxuoh57x03z.gif",
+                "options": [
+                    "AVENUE",
+                    "INTERSECTION",
+                    "STREET",
+                    "ACROSS"
+                ],
+                "correct": 2
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901150/hr61l3cutcqoaj41kxhb.gif",
+                "options": [
+                    "INTERSECTION",
+                    "CIRCLE",
+                    "NEXT-TO",
+                    "ARRIVE"
+                ],
+                "correct": 0
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901183/bl96ogi1ymreczdiykq5.gif",
+                "options": [
+                    "STRAIGHT",
+                    "DRIVE",
+                    "STREET",
+                    "CLOSE"
+                ],
+                "correct": 0
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901401/ac2qamfdv8btfrgkekyq.gif",
+                "options": [
+                    "CIRCLE",
+                    "TURN RIGHT",
+                    "ACROSS",
+                    "ADDRESS"
+                ],
+                "correct": 0
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901279/qxejyjiqfqrjmi7q4flr.gif",
+                "options": [
+                    "TURN RIGHT",
+                    "TURN LEFT",
+                    "STRAIGHT",
+                    "BEHIND"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767901489/mludbcyaa5hdtx5u5igz.gif",
+                "options": [
+                    "ARRIVE",
+                    "DRIVE",
+                    "STREET",
+                    "AVENUE"
+                ],
+                "correct": 1
+            },
+            {
+                "question": "What word is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1767983456/v8ni0ka4ieyggmiqyfpd.gif",
+                "options": [
+                    "NEXT-TO",
+                    "CLOSE",
+                    "NEAR",
+                    "ACROSS"
+                ],
+                "correct": 2
+            }
+        ]
     },
 "colors": {
     "title": "🎨 ASL Colors",
