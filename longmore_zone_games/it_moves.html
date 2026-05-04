@@ -679,7 +679,7 @@ document.addEventListener('click', (event) => {
         });
 
         // --- GAME LOGIC ---
-        function updatePlayer() {
+       function updatePlayer() {
             if (!controlsEnabled) return;
             
             const moveSpeed = player.speed;
@@ -702,18 +702,27 @@ document.addEventListener('click', (event) => {
 
             const exitX = (9 - mazeLayout[0].length / 2) * wallSize;
             const exitZ = (7 - mazeLayout.length / 2) * wallSize;
-            if (playerObject.position.distanceTo(new THREE.Vector3(exitX, player.height, exitZ)) < wallSize / 2) {
+            
+            // 2D distance check for the exit
+            const distToExit = Math.hypot(playerObject.position.x - exitX, playerObject.position.z - exitZ);
+            if (distToExit < wallSize / 2) {
                 showEndScreen("YOU ESCAPED!", "Congratulations!");
             }
 
-            if (playerObject.position.distanceTo(creature.position) < 2) {
-                 showEndScreen("YOU WERE CAUGHT", "The creature found you in the dark.");
+            // 2D distance check for creature catch (ignores the Y height difference)
+            if (creature) {
+                const distToCreature = Math.hypot(playerObject.position.x - creature.position.x, playerObject.position.z - creature.position.z);
+                
+                // 2.5 is a fair catch radius. Increase it if the game is too easy!
+                if (distToCreature < 2.5) {
+                     showEndScreen("YOU WERE CAUGHT", "The creature found you in the dark.");
+                }
             }
         }
 
         function updateFlashlight() {
             if(flashlightOn) {
-                battery -= 0.02;
+                battery -= 0.05;
                 if(battery <= 0) {
                     battery = 0;
                     flashlightOn = false;
@@ -741,35 +750,120 @@ document.addEventListener('click', (event) => {
              document.getElementById('message-text').textContent = text;
              overlay.style.display = 'flex';
         }
+// --- PATHFINDING & GRID MATH ---
+        function worldToGrid(worldPos) {
+            const j = Math.round((worldPos.x / wallSize) + mazeLayout[0].length / 2);
+            const i = Math.round((worldPos.z / wallSize) + mazeLayout.length / 2);
+            return { 
+                x: Math.max(0, Math.min(mazeLayout[0].length - 1, j)), 
+                y: Math.max(0, Math.min(mazeLayout.length - 1, i)) 
+            };
+        }
+
+        function gridToWorld(gridPos) {
+            const x = (gridPos.x - mazeLayout[0].length / 2) * wallSize;
+            const z = (gridPos.y - mazeLayout.length / 2) * wallSize;
+            return new THREE.Vector3(x, 0, z);
+        }
+
+        function findNextStep(startX, startY, targetX, targetY) {
+            if (startX === targetX && startY === targetY) return null;
+
+            let queue = [{x: startX, y: startY, path: []}];
+            let visited = new Set([`${startX},${startY}`]);
+            const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]]; 
+
+            while (queue.length > 0) {
+                let current = queue.shift();
+
+                if (current.x === targetX && current.y === targetY) {
+                    return current.path[0];
+                }
+
+                for (let dir of dirs) {
+                    let nx = current.x + dir[0];
+                    let ny = current.y + dir[1];
+
+                    if (ny >= 0 && ny < mazeLayout.length && nx >= 0 && nx < mazeLayout[0].length) {
+                        if (mazeLayout[ny][nx] !== 1 && !visited.has(`${nx},${ny}`)) {
+                            visited.add(`${nx},${ny}`);
+                            queue.push({ x: nx, y: ny, path: [...current.path, {x: nx, y: ny}] });
+                        }
+                    }
+                }
+            }
+            return null; 
+        }
 
         // --- CREATURE AI ---
         const creatureSpeed = 0.08;
 
         function updateCreature() {
             if (!controlsEnabled) return;
-
             updateSingleCreature(creature, "Beast 1");
         }
 
         function updateSingleCreature(creatureObj, name = "Beast") {
-            const distance = playerObject.position.distanceTo(creatureObj.position);
-            let movementDirection;
+            const pGrid = worldToGrid(playerObject.position);
+            const cGrid = worldToGrid(creatureObj.position);
+            
+            let movementDirection = new THREE.Vector3();
+            let behavior = "CHASING";
             
             if (flashlightOn) {
                 const cameraDirection = new THREE.Vector3();
                 camera.getWorldDirection(cameraDirection);
                 raycaster.set(playerObject.position, cameraDirection);
-                
                 const intersects = raycaster.intersectObject(creatureObj, true);
-                const inFlashlightBeam = intersects.length > 0 && intersects[0].distance < 30;
-                
-                if (inFlashlightBeam) {
-                    movementDirection = creatureObj.position.clone().sub(playerObject.position).normalize();
-                } else {
-                    movementDirection = playerObject.position.clone().sub(creatureObj.position).normalize();
+                if (intersects.length > 0 && intersects[0].distance < 30) {
+                    behavior = "FLEEING";
                 }
+            }
+
+            // Safety catch: If game resets and creature teleports, clear its pathing memory
+            if (creatureObj.userData.targetGridPos) {
+                const checkDist = creatureObj.position.distanceTo(gridToWorld(creatureObj.userData.targetGridPos));
+                if (checkDist > wallSize * 1.5) creatureObj.userData.targetGridPos = null;
+            }
+
+            if (behavior === "FLEEING") {
+                creatureObj.userData.targetGridPos = null; // Forget path when fleeing
+                movementDirection = creatureObj.position.clone().sub(playerObject.position);
+                movementDirection.y = 0; 
+                movementDirection.normalize();
             } else {
-                movementDirection = playerObject.position.clone().sub(creatureObj.position).normalize();
+                // 1. Give creature a target cell center if it has nowhere to go
+                if (!creatureObj.userData.targetGridPos) {
+                    creatureObj.userData.targetGridPos = { x: cGrid.x, y: cGrid.y };
+                }
+
+                let targetWorldPos = gridToWorld(creatureObj.userData.targetGridPos);
+                targetWorldPos.y = creatureObj.position.y;
+
+                // 2. Check distance to the center of the current target cell
+                const dist = creatureObj.position.distanceTo(targetWorldPos);
+
+                // 3. Once it reaches the exact center, ask the maze for the next step
+                if (dist < 0.5) {
+                    const nextStep = findNextStep(creatureObj.userData.targetGridPos.x, creatureObj.userData.targetGridPos.y, pGrid.x, pGrid.y);
+                    
+                    if (nextStep) {
+                        creatureObj.userData.targetGridPos = nextStep;
+                        targetWorldPos = gridToWorld(nextStep);
+                        targetWorldPos.y = creatureObj.position.y;
+                    } else {
+                        // If no path (or player is in the same cell), steer directly to player
+                        targetWorldPos = playerObject.position.clone();
+                        targetWorldPos.y = creatureObj.position.y;
+                    }
+                }
+
+                // 4. Steer directly toward the target
+                movementDirection = targetWorldPos.clone().sub(creatureObj.position);
+                movementDirection.y = 0;
+                if (movementDirection.lengthSq() > 0) {
+                    movementDirection.normalize();
+                }
             }
             
             const originalPosition = creatureObj.position.clone();
@@ -778,57 +872,19 @@ document.addEventListener('click', (event) => {
             let hitWall = false;
             const creatureBoundingBox = new THREE.Box3().setFromCenterAndSize(
                 creatureObj.position, 
-                new THREE.Vector3(0.8, 2, 0.8) 
+                new THREE.Vector3(1.2, 2, 1.2) 
             );
+            
             for (const object of worldObjects) {
                 const objectBoundingBox = new THREE.Box3().setFromObject(object);
                 if (creatureBoundingBox.intersectsBox(objectBoundingBox)) {
                     creatureObj.position.copy(originalPosition); 
-                    hitWall = true;
                     break;
                 }
             }
             
-            if (hitWall) {
-                const angles = [Math.PI/4, -Math.PI/4, Math.PI/2, -Math.PI/2, 3*Math.PI/4, -3*Math.PI/4, Math.PI];
-                let foundPath = false;
-                
-                for (let angle of angles) {
-                    const testDirection = movementDirection.clone();
-                    testDirection.x = Math.cos(angle) * movementDirection.x - Math.sin(angle) * movementDirection.z;
-                    testDirection.z = Math.sin(angle) * movementDirection.x + Math.cos(angle) * movementDirection.z;
-                    testDirection.normalize();
-                    
-                    const testPosition = originalPosition.clone().add(testDirection.multiplyScalar(creatureSpeed));
-                    creatureObj.position.copy(testPosition);
-                    
-                    let wallHit = false;
-                    const testBoundingBox = new THREE.Box3().setFromCenterAndSize(
-                        creatureObj.position, 
-                        new THREE.Vector3(0.8, 2, 0.8) 
-                    );
-                    for (const object of worldObjects) {
-                        const objectBoundingBox = new THREE.Box3().setFromObject(object);
-                        if (testBoundingBox.intersectsBox(objectBoundingBox)) {
-                            wallHit = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!wallHit) {
-                        foundPath = true;
-                        break;
-                    }
-                }
-                
-                if (!foundPath) {
-                    creatureObj.position.copy(originalPosition);
-                }
-            }
-            
-            const currentDirection = creatureObj.position.clone().sub(originalPosition).normalize();
-            if (currentDirection.length() > 0) {
-                const lookAtPosition = creatureObj.position.clone().add(currentDirection);
+            if (movementDirection.lengthSq() > 0) {
+                const lookAtPosition = creatureObj.position.clone().add(movementDirection);
                 creatureObj.lookAt(lookAtPosition.x, creatureObj.position.y, lookAtPosition.z);
             }
         }
