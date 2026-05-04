@@ -129,6 +129,28 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Directions 2",
+      "videos": [
+        {
+          "video": "Directions3.mp4",
+          "questions": [
+            { "question": "What place does the signer ask about?", "type": "multiple-choice", "options": ["grandpa's house", "grandma's house", "dad's house", "mom's house"], "correct": "grandpa's house" },
+            { "question": "What is the first street in the intersection mentioned?", "type": "multiple-choice", "options": ["salami street", "salamance street", "salami road", "salamance road"], "correct": "salami street"},
+            { "question": "What is the second street in the intersection mentioned?", "type": "multiple-choice", "options": ["bongo drive", "bingo drive", "bongo road", "salamance road"], "correct": "bongo drive" }
+          ]
+        },
+        {
+          "video": "Directions4.mp4",
+          "questions": [
+            { "question": "What item does the signer ask if the person wants?", "type": "multiple-choice", "options": ["new clothes", "dress clothes", "new paper", "new place"], "correct": "new clothes" },
+            { "question": "What are the directions for 3 intersections?", "type": "multiple-choice", "options": ["go straight", "go right", "go right, then left, then right", "go right, then left, then left"], "correct": "go straight" },
+            { "question": "What direction does the signer have to turn to get to the destination?", "type": "multiple-choice", "options": ["left", "right", "straight", "up (transforming time)"], "correct": "left" },
+            { "question": "What location is the destination?", "type": "multiple-choice", "options": ["clothing store", "clothing shop", "dress store", "dress shop"], "correct": "clothing store" }
+          ]
+        }
+      ]
     }
   ]
 }
