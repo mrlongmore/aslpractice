@@ -276,15 +276,23 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .quiz-category-grid.selected {
-    background-color: #4CAF50; /* A nice green color */
-    border-color: #fff;        /* White border to make it pop */
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5); /* Optional green glow */
+        .quiz-category-grid button.selected {
+            background: #4CAF50;
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
         }
 
         .quiz-category-grid button.selected:hover {
-            background: linear-gradient(135deg, #5a8c5a, #3a6a3a);
+            background: #5a8c5a;
             border-color: #7a9c7a;
+        }
+        
+        #replay-btn {
+            margin-top: 40px;
+            font-size: 0.5em; /* relative to the 3em parent overlay */
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #4a7c4a, #2d5a2d);
+            border-color: #6a9c6a;
         }
     </style>
 </head>
@@ -300,12 +308,12 @@
         Click to start | [W,A,S,D] to Move | [Mouse] to Look | [F] to Toggle Flashlight | [Q] to Recharge Battery with Quiz
     </div>
     
-    <div id="message-overlay" id="win-message">
+    <div id="message-overlay">
         <h1 id="message-title"></h1>
         <p id="message-text"></p>
+        <button id="replay-btn" class="quiz-option" onclick="resetGame()">Replay Game</button>
     </div>
 
-    <!-- Quiz Selection Modal -->
     <div id="quiz-selection-modal" class="quiz-modal" style="display: block;">
         <div class="quiz-content">
             <div class="quiz-header">
@@ -317,9 +325,8 @@
                     Select a quiz category to recharge your flashlight when needed. 
                     Each correct answer gives you 20% battery power!
                 </p>
-                <div id = "quiz-category-grid" class="quiz-category-grid">
-                    <!-- Quiz category buttons will be dynamically generated here -->
-                </div>
+                <div id="quiz-category-grid" class="quiz-category-grid">
+                    </div>
                 <div style="text-align: center; margin-top: 20px;">
                     <button id="start-game-btn" class="quiz-option" onclick="startGame()" style="background: linear-gradient(135deg, #4a7c4a, #2d5a2d); border-color: #6a9c6a;">
                         Start Game with Selected Category
@@ -329,7 +336,6 @@
         </div>
     </div>
 
-    <!-- Quiz Modal -->
     <div id="quiz-modal" class="quiz-modal" style="display: none;">
         <div class="quiz-content">
             <div class="quiz-header">
@@ -363,33 +369,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <script>
-let quiz_category_grid = document.getElementById('quiz-category-grid');
-        // Quiz categories
-let quizCategories = {};
+        let quiz_category_grid = document.getElementById('quiz-category-grid');
+        let quizCategories = {};
 
-async function load_data() {
-    try {
-        const response = await fetch('../vocab.json'); // Adjust path (e.g., '../vocab.json') if needed
-        if (!response.ok) throw new Error("Network response was not ok");
-        return await response.json(); 
-    } catch (error) {
-        console.error('Error loading question bank:', error);
-        return null; 
-    }
-}
+        async function load_data() {
+            try {
+                const response = await fetch('../vocab.json'); 
+                if (!response.ok) throw new Error("Network response was not ok");
+                return await response.json(); 
+            } catch (error) {
+                console.error('Error loading question bank:', error);
+                return null; 
+            }
+        }
 
-// 2. Build the checkboxes
-async function initMenu() {
-    // Load the JSON into our global variable
-    quizTopics = await load_data();
-    if (quizCategories) {
-        Object.assign(quizCategories, quizTopics);
-    }
+        async function initMenu() {
+            quizTopics = await load_data();
+            if (quizCategories) {
+                Object.assign(quizCategories, quizTopics);
+            }
 
-    if (!quizTopics) {
-        console.log('Failed to load quiz topics. Cannot initialize menu.');
-        return;
-    }
+            if (!quizTopics) {
+                console.log('Failed to load quiz topics. Cannot initialize menu.');
+                return;
+            }
             quiz_category_grid.innerHTML = '';
 
             Object.keys(quizCategories).forEach(topicKey => {
@@ -397,7 +400,7 @@ async function initMenu() {
                 const title = topic.title || topicKey;
 
                 const button = document.createElement('button');
-                button.className = 'category-button';
+                button.className = 'quiz-category-btn';
                 button.textContent = title;
                 
                 button.onclick = () => selectQuizCategory(topicKey, button);
@@ -405,48 +408,75 @@ async function initMenu() {
                 quiz_category_grid.appendChild(button);
             });
         }
-initMenu() 
+        initMenu();
 
         // --- GLOBAL FUNCTIONS FOR HTML ONCLICK HANDLERS ---
         let selectedQuizCategory = null;
         let gameStarted = false;
 
         function selectQuizCategory(category, element) {
-            console.log('selectQuizCategory called with:', category);
-            // Remove previous selection
             document.querySelectorAll('.quiz-category-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            
-            // Add selection to clicked button
             element.classList.add('selected');
             selectedQuizCategory = category;
-            console.log('Selected category:', selectedQuizCategory);
         }
 
         function startGame() {
-            console.log('startGame called, selectedQuizCategory:', selectedQuizCategory);
             if (!selectedQuizCategory) {
                 alert('Please select a quiz category first!');
                 return;
             }
             
-            // Hide quiz selection modal
             const modal = document.getElementById('quiz-selection-modal');
             if (modal) {
                 modal.style.display = 'none';
             }
             
             gameStarted = true;
-            console.log('Game started! gameStarted:', gameStarted, 'selectedQuizCategory:', selectedQuizCategory);
-            
-            // Enable controls
             document.body.requestPointerLock();
         }
 
-        // Make functions and variables globally accessible
+        // --- RESET GAME STATE ---
+        function resetGame() {
+            // Hide the end screen
+            document.getElementById('message-overlay').style.display = 'none';
+
+            // Reset Game Variables
+            gameStarted = false;
+            selectedQuizCategory = null;
+            controlsEnabled = false;
+
+            // Reset Player Position & Rotation
+            playerObject.position.set(-35, player.height, -35);
+            playerObject.rotation.set(0, 0, 0);
+            camera.rotation.set(0, 0, 0);
+
+            // Reset Creature Position
+            const exitX = (9 - mazeLayout[0].length / 2) * wallSize;
+            const exitZ = (7 - mazeLayout.length / 2) * wallSize;
+            if (creature) {
+                creature.position.set(exitX, 0, exitZ);
+            }
+
+            // Reset Flashlight & Battery
+            battery = 100;
+            flashlightOn = false;
+            updateBatteryDisplay();
+
+            // Reset Quiz Variables
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            document.querySelectorAll('.quiz-category-btn').forEach(btn => btn.classList.remove('selected'));
+
+            // Show Quiz Selection Modal & Instructions again
+            document.getElementById('instructions').style.display = 'block';
+            document.getElementById('quiz-selection-modal').style.display = 'block';
+        }
+
         window.selectQuizCategory = selectQuizCategory;
         window.startGame = startGame;
+        window.resetGame = resetGame;
         window.selectedQuizCategory = selectedQuizCategory;
         window.gameStarted = gameStarted;
 
@@ -468,16 +498,13 @@ initMenu()
             canJump: false
         };
         const keyboard = {};
-        const worldObjects = []; // For collision detection
+        const worldObjects = []; 
         let creature;
-        let creature2; // Second beast for testing
         const raycaster = new THREE.Raycaster();
 
-        // Player object for rotation and movement
         const playerObject = new THREE.Object3D();
         playerObject.add(camera);
         scene.add(playerObject);
-
 
         // --- FLASHLIGHT ---
         const flashlight = new THREE.SpotLight(0xffffff, 0, 200, Math.PI / 8, 0.5, 2);
@@ -497,7 +524,7 @@ initMenu()
             [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1],
             [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
             [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1],
-            [1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 1], // 2 is the exit
+            [1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 1], 
             [1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
             [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
             [1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
@@ -511,14 +538,12 @@ initMenu()
 
         // --- WORLD BUILDING ---
         function createWorld() {
-            // Floor
             const floorGeometry = new THREE.PlaneGeometry(mazeLayout[0].length * wallSize, mazeLayout.length * wallSize);
             const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
             const floor = new THREE.Mesh(floorGeometry, floorMaterial);
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
 
-            // Walls
             const wallGeometry = new THREE.BoxGeometry(wallSize, wallSize, wallSize);
             const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.8, metalness: 0.2 });
             for (let i = 0; i < mazeLayout.length; i++) {
@@ -532,7 +557,6 @@ initMenu()
                         scene.add(wall);
                         worldObjects.push(wall);
                     } else if (mazeLayout[i][j] === 2) {
-                        // Create a visual marker for the exit
                         const exitLight = new THREE.PointLight(0x00ff00, 3, 15);
                         exitLight.position.set(x, wallSize / 2, z);
                         scene.add(exitLight);
@@ -546,7 +570,6 @@ initMenu()
                 }
             }
 
-            // Lighting has been removed to make the flashlight the only light source
             createCreatures();
         }
 
@@ -555,19 +578,16 @@ initMenu()
 
             const bodyMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 
-            // Body
             const bodyGeometry = new THREE.CylinderGeometry(0.5, 0.3, 2.5, 8);
             const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
             body.position.y = 1.25;
             newCreature.add(body);
 
-            // Head
             const headGeometry = new THREE.SphereGeometry(0.6, 16, 16);
             const head = new THREE.Mesh(headGeometry, bodyMaterial);
             head.position.y = 2.8;
             newCreature.add(head);
 
-            // Eyes
             const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, emissive: 0xffffff });
             const eyeGeometry = new THREE.SphereGeometry(0.1, 8, 8);
             const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
@@ -577,10 +597,8 @@ initMenu()
             rightEye.position.set(0.2, 3, 0.5);
             newCreature.add(rightEye);
 
-            // Limbs
             const limbGeometry = new THREE.CylinderGeometry(0.08, 0.06, 2.5, 6);
             
-            // Arms
             const leftArm = new THREE.Mesh(limbGeometry, bodyMaterial);
             leftArm.position.set(-0.7, 1.8, 0);
             leftArm.rotation.z = Math.PI / 4;
@@ -591,7 +609,6 @@ initMenu()
             rightArm.rotation.z = -Math.PI / 4;
             newCreature.add(rightArm);
             
-            // Legs
             const leftLeg = new THREE.Mesh(limbGeometry, bodyMaterial);
             leftLeg.position.set(-0.3, 0, 0);
             leftLeg.rotation.z = Math.PI / 16;
@@ -602,52 +619,40 @@ initMenu()
             rightLeg.rotation.z = -Math.PI / 16;
             newCreature.add(rightLeg);
 
-            // Creature will constantly chase the player
-
             return newCreature;
         }
 
         function createCreatures() {
-            // Create first creature at the exit (row 7, col 9) - confirmed open space
             creature = createSingleCreature();
-            const exitX = (9 - mazeLayout[0].length / 2) * wallSize; // Exit is at col 9
-            const exitZ = (7 - mazeLayout.length / 2) * wallSize;   // Exit is at row 7
+            const exitX = (9 - mazeLayout[0].length / 2) * wallSize; 
+            const exitZ = (7 - mazeLayout.length / 2) * wallSize;   
             creature.position.set(exitX, 0, exitZ);
             scene.add(creature);
-
-            // Create second creature in open space (row 5, col 1) - confirmed open space
-            creature2 = createSingleCreature();
-            const openX = (1 - mazeLayout[0].length / 2) * wallSize;  // Col 1
-            const openZ = (5 - mazeLayout.length / 2) * wallSize;     // Row 5
-            creature2.position.set(openX, 0, openZ);
-            scene.add(creature2);
         }
 
         // --- PLAYER & CAMERA POSITION ---
-        // Set player position, camera is a child so its position is relative
-        playerObject.position.set(-35, player.height, -35); // Start in an open space
+        playerObject.position.set(-35, player.height, -35); 
         
         // --- CONTROLS ---
-        document.addEventListener('click', () => {
-            if (!controlsEnabled && gameStarted) {
-                document.body.requestPointerLock();
-            }
-        });
+// Replace your current click listener with this one:
+document.addEventListener('click', (event) => {
+    // Check if the click originated from inside a modal or overlay menu
+    const isClickingMenu = event.target.closest('.quiz-modal') || event.target.closest('#message-overlay');
+    
+    // Only lock the pointer if we are NOT clicking inside a menu
+    if (!controlsEnabled && gameStarted && !isClickingMenu) {
+        document.body.requestPointerLock();
+    }
+});
 
         document.addEventListener('pointerlockchange', () => {
             controlsEnabled = document.pointerLockElement === document.body;
-            document.getElementById('instructions').style.display = controlsEnabled ? 'none' : 'block';
         });
 
         document.addEventListener('mousemove', (event) => {
             if (controlsEnabled) {
-                // Yaw (left/right) is applied to the player container
                 playerObject.rotation.y -= event.movementX * player.turnSpeed;
-
-                // Pitch (up/down) is applied to the camera directly
                 camera.rotation.x -= event.movementY * player.turnSpeed;
-
-                // Clamp vertical rotation to prevent flipping upside down
                 camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
             }
         });
@@ -664,16 +669,10 @@ initMenu()
                  }
              }
              
-             // Add Q key handler for quiz
              if (e.key.toLowerCase() === 'q') {
-                 console.log('Q key pressed - attempting to open quiz');
-                 console.log('gameStarted:', gameStarted, 'selectedQuizCategory:', selectedQuizCategory);
-                 
                  if (gameStarted && selectedQuizCategory) {
-                     console.log('Opening quiz...');
                      openQuiz();
                  } else {
-                     console.log('Quiz blocked - gameStarted:', gameStarted, 'selectedQuizCategory:', selectedQuizCategory);
                      alert('Please start the game and select a quiz category first!');
                  }
              }
@@ -686,49 +685,35 @@ initMenu()
             const moveSpeed = player.speed;
             const originalPosition = playerObject.position.clone();
 
-            // Simplified FPS-style movement
-            if (keyboard['w']) {
-                playerObject.translateZ(-moveSpeed);
-            }
-            if (keyboard['s']) {
-                playerObject.translateZ(moveSpeed);
-            }
-            if (keyboard['a']) {
-                playerObject.translateX(-moveSpeed);
-            }
-            if (keyboard['d']) {
-                playerObject.translateX(moveSpeed);
-            }
+            if (keyboard['w']) playerObject.translateZ(-moveSpeed);
+            if (keyboard['s']) playerObject.translateZ(moveSpeed);
+            if (keyboard['a']) playerObject.translateX(-moveSpeed);
+            if (keyboard['d']) playerObject.translateX(moveSpeed);
 
-            // Collision Detection
             const playerBoundingBox = new THREE.Box3().setFromCenterAndSize(playerObject.position, new THREE.Vector3(1, player.height, 1));
             
             for (const object of worldObjects) {
                 const objectBoundingBox = new THREE.Box3().setFromObject(object);
                 if (playerBoundingBox.intersectsBox(objectBoundingBox)) {
-                    playerObject.position.copy(originalPosition); // Revert movement
+                    playerObject.position.copy(originalPosition); 
                     break;
                 }
             }
 
-            // Check for win condition
-            // The exit is at mazeLayout[i=7][j=9]
             const exitX = (9 - mazeLayout[0].length / 2) * wallSize;
             const exitZ = (7 - mazeLayout.length / 2) * wallSize;
             if (playerObject.position.distanceTo(new THREE.Vector3(exitX, player.height, exitZ)) < wallSize / 2) {
                 showEndScreen("YOU ESCAPED!", "Congratulations!");
             }
 
-            // Check for creature catch
-            if (playerObject.position.distanceTo(creature.position) < 2 || 
-                playerObject.position.distanceTo(creature2.position) < 2) {
+            if (playerObject.position.distanceTo(creature.position) < 2) {
                  showEndScreen("YOU WERE CAUGHT", "The creature found you in the dark.");
             }
         }
 
         function updateFlashlight() {
             if(flashlightOn) {
-                battery -= 0.02; // Drain rate
+                battery -= 0.02;
                 if(battery <= 0) {
                     battery = 0;
                     flashlightOn = false;
@@ -741,12 +726,10 @@ initMenu()
             camera.getWorldPosition(cameraWorldPosition);
             flashlight.position.copy(cameraWorldPosition);
 
-            // Make flashlight point where camera is looking
             const cameraWorldDirection = new THREE.Vector3();
             camera.getWorldDirection(cameraWorldDirection);
             flashlight.target.position.copy(cameraWorldPosition).add(cameraWorldDirection);
 
-            // Update UI
             document.getElementById('battery-level').style.width = battery + '%';
         }
 
@@ -759,26 +742,20 @@ initMenu()
              overlay.style.display = 'flex';
         }
 
-        // --- CREATURE AI (Simplified Direct Movement) ---
+        // --- CREATURE AI ---
         const creatureSpeed = 0.08;
 
         function updateCreature() {
             if (!controlsEnabled) return;
 
             updateSingleCreature(creature, "Beast 1");
-            updateSingleCreature(creature2, "Beast 2");
         }
 
         function updateSingleCreature(creatureObj, name = "Beast") {
-            // Beast constantly chases the player
-            const pos = creatureObj.position;
             const distance = playerObject.position.distanceTo(creatureObj.position);
-            
-            // Calculate movement direction
             let movementDirection;
             
             if (flashlightOn) {
-                // If flashlight is on, check if beast is in the beam
                 const cameraDirection = new THREE.Vector3();
                 camera.getWorldDirection(cameraDirection);
                 raycaster.set(playerObject.position, cameraDirection);
@@ -787,40 +764,32 @@ initMenu()
                 const inFlashlightBeam = intersects.length > 0 && intersects[0].distance < 30;
                 
                 if (inFlashlightBeam) {
-                    // Beast flees from the player (opposite of chase direction)
                     movementDirection = creatureObj.position.clone().sub(playerObject.position).normalize();
                 } else {
-                    // Beast chases player normally
                     movementDirection = playerObject.position.clone().sub(creatureObj.position).normalize();
                 }
             } else {
-                // Flashlight off - beast chases player normally
                 movementDirection = playerObject.position.clone().sub(creatureObj.position).normalize();
             }
             
-            // Try to move in the calculated direction
             const originalPosition = creatureObj.position.clone();
             creatureObj.position.add(movementDirection.clone().multiplyScalar(creatureSpeed));
             
-            // Check for wall collision with smaller bounding box
             let hitWall = false;
             const creatureBoundingBox = new THREE.Box3().setFromCenterAndSize(
                 creatureObj.position, 
-                new THREE.Vector3(0.8, 2, 0.8) // Smaller collision box
+                new THREE.Vector3(0.8, 2, 0.8) 
             );
             for (const object of worldObjects) {
                 const objectBoundingBox = new THREE.Box3().setFromObject(object);
                 if (creatureBoundingBox.intersectsBox(objectBoundingBox)) {
-                    creatureObj.position.copy(originalPosition); // Revert movement
+                    creatureObj.position.copy(originalPosition); 
                     hitWall = true;
-                    console.log(`${name} hit wall at position:`, creatureObj.position);
                     break;
                 }
             }
             
-            // If we hit a wall, try alternative directions
             if (hitWall) {
-                // Try moving around the wall by testing different angles
                 const angles = [Math.PI/4, -Math.PI/4, Math.PI/2, -Math.PI/2, 3*Math.PI/4, -3*Math.PI/4, Math.PI];
                 let foundPath = false;
                 
@@ -833,11 +802,10 @@ initMenu()
                     const testPosition = originalPosition.clone().add(testDirection.multiplyScalar(creatureSpeed));
                     creatureObj.position.copy(testPosition);
                     
-                    // Check if this direction avoids the wall
                     let wallHit = false;
                     const testBoundingBox = new THREE.Box3().setFromCenterAndSize(
                         creatureObj.position, 
-                        new THREE.Vector3(0.8, 2, 0.8) // Same smaller collision box
+                        new THREE.Vector3(0.8, 2, 0.8) 
                     );
                     for (const object of worldObjects) {
                         const objectBoundingBox = new THREE.Box3().setFromObject(object);
@@ -853,62 +821,27 @@ initMenu()
                     }
                 }
                 
-                // If no alternative path found, stay in original position
                 if (!foundPath) {
                     creatureObj.position.copy(originalPosition);
                 }
             }
             
-            // Look at the direction of movement
             const currentDirection = creatureObj.position.clone().sub(originalPosition).normalize();
             if (currentDirection.length() > 0) {
                 const lookAtPosition = creatureObj.position.clone().add(currentDirection);
                 creatureObj.lookAt(lookAtPosition.x, creatureObj.position.y, lookAtPosition.z);
             }
-            
-            // Check if beast is fleeing
-            let behavior = "CHASING";
-            if (flashlightOn) {
-                const cameraDirection = new THREE.Vector3();
-                camera.getWorldDirection(cameraDirection);
-                raycaster.set(playerObject.position, cameraDirection);
-                const intersects = raycaster.intersectObject(creatureObj, true);
-                const inFlashlightBeam = intersects.length > 0 && intersects[0].distance < 30;
-                if (inFlashlightBeam) {
-                    behavior = "FLEEING";
-                }
-            }
-        }
-        
-        function worldToGrid(worldPos) {
-             const j = Math.floor((worldPos.x / wallSize) + mazeLayout[0].length / 2);
-             const i = Math.floor((worldPos.z / wallSize) + mazeLayout.length / 2);
-             return { x: j, y: i };
-        }
-
-        function gridToWorld(gridPos) {
-            const x = (gridPos.x - mazeLayout[0].length / 2) * wallSize + wallSize / 2;
-            const z = (gridPos.y - mazeLayout.length / 2) * wallSize + wallSize / 2;
-            return new THREE.Vector3(x, 0, z);
         }
 
         // --- RENDER LOOP ---
         function animate() {
             requestAnimationFrame(animate);
 
-            // Always render the scene
             renderer.render(scene, camera);
 
-            // Only run game logic if game has started
             if (!gameStarted) {
                 return;
             }
-
-            /* Game over logic is saved for later
-            if (battery <= 0 && flashlightOn === false) {
-                 showEndScreen("GAME OVER", "The darkness consumed you.");
-            }
-            */
 
             updatePlayer();
             updateFlashlight();
@@ -917,9 +850,8 @@ initMenu()
 
         // --- INITIALIZATION ---
         createWorld();
-        animate(); // Start rendering immediately
+        animate(); 
 
-        // Handle window resizing
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -933,130 +865,140 @@ initMenu()
         let quizInProgress = false;
 
 function openQuiz() {
-    // 1. Free the mouse so the user can click
-    document.exitPointerLock();
-    
-    // 2. Disable game controls so the player doesn't walk around while answering
-    controlsEnabled = false; 
+            document.exitPointerLock();
+            controlsEnabled = false; 
+            
+            // Link the selected category data
+            currentQuiz = quizCategories[selectedQuizCategory];
+            
+            // Reset the counters so it starts at Question 1 every time
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
 
-    // 3. Show the modal
-    const quizModal = document.getElementById('quiz-modal');
-    if (quizModal) {
-        quizModal.style.display = 'block';
-    }
-    
-    // (Add your logic to load the actual question here)
-}
-
-function closeQuiz() {
-    // 1. Hide the modal
-    const quizModal = document.getElementById('quiz-modal');
-    if (quizModal) {
-        quizModal.style.display = 'none';
-    }
-
-    // 2. Re-lock the mouse so the player can look around the 3D scene again
-    document.body.requestPointerLock();
-    
-    // 3. Re-enable game controls
-    controlsEnabled = true;
-}
-
-        function loadQuestion() {
-            if (!currentQuiz || currentQuestionIndex >= currentQuiz.questions.length) {
-                endQuiz();
-                return;
+            const quizModal = document.getElementById('quiz-modal');
+            if (quizModal) {
+                quizModal.style.display = 'block';
             }
 
-            const question = currentQuiz.questions[currentQuestionIndex];
+            // Update the modal title if it exists in the JSON
+            if (currentQuiz && currentQuiz.title) {
+                document.getElementById('quiz-title').textContent = currentQuiz.title;
+            }
+
+            // THIS IS THE CRITICAL MISSING PIECE:
+            // Actually call the function to draw the text/images onto the HTML buttons
+            if (currentQuiz && currentQuiz.questions && currentQuiz.questions.length > 0) {
+                loadQuestion();
+            } else {
+                console.error("No questions found for this category!");
+                document.getElementById('quiz-question-text').textContent = "Error: No questions found.";
+            }
+        }
+
+        function closeQuiz() {
+            const quizModal = document.getElementById('quiz-modal');
+            if (quizModal) {
+                quizModal.style.display = 'none';
+            }
+
+            document.body.requestPointerLock();
+            controlsEnabled = true;
+        }
+
+function loadQuestion() {
+            if (!currentQuiz || !currentQuiz.questions || currentQuiz.questions.length === 0) return;
+
+            // 1. Pick a completely random question from the category
+            const randomIndex = Math.floor(Math.random() * currentQuiz.questions.length);
+            const question = currentQuiz.questions[randomIndex];
             
-            // Update image
+            // Update image and text
             document.getElementById('quiz-image').src = question.image;
             document.getElementById('quiz-image').alt = question.question;
-            
-            // Update question text
             document.getElementById('quiz-question-text').textContent = question.question;
             
-            // Update options
-            const options = document.querySelectorAll('.quiz-option');
-            options.forEach((option, index) => {
-                option.textContent = question.options[index];
-                option.className = 'quiz-option';
-                option.disabled = false;
-                option.onclick = () => selectAnswer(index);
+            // 2. Map the options so we remember which one was originally correct
+            let optionsArray = question.options.map((text, index) => {
+                return { 
+                    text: text, 
+                    isCorrect: (index === question.correct) 
+                };
+            });
+
+            // 3. Shuffle the options array randomly
+            optionsArray.sort(() => Math.random() - 0.5);
+
+            // 4. Find where the correct answer ended up after the shuffle
+            const correctIndex = optionsArray.findIndex(opt => opt.isCorrect);
+            const correctText = optionsArray[correctIndex].text;
+
+            // 5. Draw the shuffled options to the HTML buttons
+            const optionsElements = document.querySelectorAll('.quiz-options .quiz-option');
+            optionsElements.forEach((optionEl, index) => {
+                optionEl.textContent = optionsArray[index].text;
+                optionEl.className = 'quiz-option';
+                optionEl.disabled = false;
+                
+                // Pass the necessary data into the click event
+                optionEl.onclick = () => selectAnswer(index, correctIndex, correctText);
             });
             
-            // Clear feedback
+            // Clear feedback messages
             document.getElementById('quiz-feedback').textContent = '';
             document.getElementById('quiz-feedback').className = 'quiz-feedback';
             
-            // Update progress
-            const progress = ((currentQuestionIndex + 1) / 5) * 100;
-            document.getElementById('quiz-progress-fill').style.width = `${Math.min(progress, 100)}%`;
-            document.getElementById('quiz-progress-text').textContent = `Question ${currentQuestionIndex + 1} of 5`;
+            // 6. Update the progress bar to show Current Battery instead of Question Count
+            document.getElementById('quiz-progress-fill').style.width = `${battery}%`;
+            document.getElementById('quiz-progress-text').textContent = `Flashlight Battery: ${Math.floor(battery)}%`;
         }
 
-        function selectAnswer(selectedIndex) {
-            if (!currentQuiz || currentQuestionIndex >= currentQuiz.questions.length) return;
-
-            const question = currentQuiz.questions[currentQuestionIndex];
-            const isCorrect = selectedIndex === question.correct;
+function selectAnswer(selectedIndex, correctIndex, correctText) {
+            const isCorrect = selectedIndex === correctIndex;
             
-            // Disable all options
-            const options = document.querySelectorAll('.quiz-option');
-            options.forEach((option, index) => {
-                option.disabled = true;
-                if (index === question.correct) {
-                    option.classList.add('correct');
+            // Disable all options and show the right/wrong colors
+            const optionsElements = document.querySelectorAll('.quiz-options .quiz-option');
+            optionsElements.forEach((optionEl, index) => {
+                optionEl.disabled = true;
+                if (index === correctIndex) {
+                    optionEl.classList.add('correct');
                 } else if (index === selectedIndex && !isCorrect) {
-                    option.classList.add('incorrect');
+                    optionEl.classList.add('incorrect');
                 }
             });
             
-            // Update feedback
+            // Update feedback and apply battery immediately
             const feedback = document.getElementById('quiz-feedback');
             if (isCorrect) {
                 feedback.textContent = 'Correct! +20% Battery';
                 feedback.classList.add('correct');
-                correctAnswers++;
+                
+                // Instantly recharge battery and update the UI
+                battery = Math.min(100, battery + 20);
+                updateBatteryDisplay();
+                
+                // Update the modal's internal battery bar
+                document.getElementById('quiz-progress-fill').style.width = `${battery}%`;
+                document.getElementById('quiz-progress-text').textContent = `Flashlight Battery: ${Math.floor(battery)}%`;
             } else {
-                feedback.textContent = `Incorrect! The correct answer was: ${question.options[question.correct]}`;
+                feedback.textContent = `Incorrect! The correct answer was: ${correctText}`;
                 feedback.classList.add('incorrect');
             }
             
-            // Move to next question after delay
+            // 7. Loop indefinitely! Load a new random question after 2 seconds.
             setTimeout(() => {
-                currentQuestionIndex++;
-                if (currentQuestionIndex < 5) {
+                const quizModal = document.getElementById('quiz-modal');
+                // Only load the next question if the player hasn't closed the window
+                if (quizModal && quizModal.style.display !== 'none') {
                     loadQuestion();
-                } else {
-                    endQuiz();
                 }
             }, 2000);
         }
 
-        function endQuiz() {
-            // Calculate battery recharge based on correct answers
-            const batteryRecharge = correctAnswers * 20; // 20% per correct answer
-            battery = Math.min(100, battery + batteryRecharge);
-            
-            // Update battery display
-            updateBatteryDisplay();
-            
-            // Show final feedback
-            const feedback = document.getElementById('quiz-feedback');
-            feedback.textContent = `Quiz Complete! You got ${correctAnswers}/5 correct. +${batteryRecharge}% Battery!`;
-            feedback.className = 'quiz-feedback correct';
-            
-            // Close quiz after delay
-            setTimeout(() => {
-                closeQuiz();
-            }, 3000);
-        }
-
         function updateBatteryDisplay() {
             const batteryLevel = document.getElementById('battery-level');
-            batteryLevel.style.width = `${battery}%`;
+            if (batteryLevel) {
+                batteryLevel.style.width = `${battery}%`;
+            }
         }
 
         // Quiz Selection Functions
@@ -1071,8 +1013,6 @@ function closeQuiz() {
             document.getElementById('quiz-selection-modal').style.display = 'none';
         }
 
-
-        // Event listeners for quiz
         document.getElementById('quiz-close').onclick = closeQuiz;
         document.getElementById('quiz-modal').onclick = function(event) {
             if (event.target === this) {
@@ -1080,30 +1020,23 @@ function closeQuiz() {
             }
         };
 
-        // Event listeners for quiz selection
         document.getElementById('quiz-selection-close').onclick = function() {
-            // Don't allow closing without selecting a category
             alert('Please select a quiz category to start the game!');
         };
         
         document.getElementById('quiz-selection-modal').onclick = function(event) {
             if (event.target === this) {
-                // Don't allow closing without selecting a category
                 alert('Please select a quiz category to start the game!');
             }
         };
 
-
-        // Set up event listeners immediately
         setupEventListeners();
 
-        // Show quiz selection modal when page loads
         window.addEventListener('load', function() {
             showQuizSelection();
         });
 
         function setupEventListeners() {
-            // Add click listeners to category buttons
             const categoryButtons = document.querySelectorAll('.quiz-category-btn');
             categoryButtons.forEach(btn => {
                 btn.onclick = function() {
@@ -1111,68 +1044,12 @@ function closeQuiz() {
                 };
             });
 
-            // Start game button
             const startBtn = document.getElementById('start-game-btn');
             if (startBtn) {
                 startBtn.onclick = startGame;
             }
         }
 
-        // Set up keyboard event listeners after DOM is loaded (backup)
-        window.addEventListener('load', function() {
-            console.log('Window loaded - setting up additional event listeners');
-            
-            // Initial debug display update
-        });
-
-        function worldToGrid(worldPos) {
-             const j = Math.floor((worldPos.x / wallSize) + mazeLayout[0].length / 2);
-             const i = Math.floor((worldPos.z / wallSize) + mazeLayout.length / 2);
-             return { x: j, y: i };
-        }
-
-        function gridToWorld(gridPos) {
-            const x = (gridPos.x - mazeLayout[0].length / 2) * wallSize + wallSize / 2;
-            const z = (gridPos.y - mazeLayout.length / 2) * wallSize + wallSize / 2;
-            return new THREE.Vector3(x, 0, z);
-        }
-
-
-
-        // --- RENDER LOOP ---
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Always render the scene
-            renderer.render(scene, camera);
-
-            // Only run game logic if game has started
-            if (!gameStarted) {
-                return;
-            }
-
-            /* Game over logic is saved for later
-            if (battery <= 0 && flashlightOn === false) {
-                 showEndScreen("GAME OVER", "The darkness consumed you.");
-            }
-            */
-
-            updatePlayer();
-            updateFlashlight();
-            updateCreature();
-        }
-
-        // --- INITIALIZATION ---
-        createWorld();
-        animate(); // Start rendering immediately
-
-        // Handle window resizing
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }, false);
     </script>
 </body>
 </html>
-
