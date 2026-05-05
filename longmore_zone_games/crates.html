@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASL Vocab Sorting Game</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<style>
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background-color: #f5f6fa; 
+        text-align: center; 
+        margin: 0; 
+        padding: 20px; 
+    }
+    h1 { color: #2c3e50; }
+    #start-screen, #certificate-screen { 
+        background: white; 
+        max-width: 600px; 
+        margin: 40px auto; 
+        padding: 30px; 
+        border-radius: 15px; 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+    }
+    input[type="text"] { 
+        font-size: 18px; 
+        padding: 10px; 
+        width: 80%; 
+        margin-bottom: 20px; 
+        border: 2px solid #bdc3c7; 
+        border-radius: 8px; 
+    }
+    .topic-btn { 
+        display: block; 
+        width: 80%; 
+        margin: 10px auto; 
+        padding: 12px; 
+        font-size: 16px; 
+        background-color: #3498db; 
+        color: white; 
+        border: none; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        transition: background 0.3s; 
+    }
+    .topic-btn:hover { background-color: #2980b9; }
+    
+    #game-wrapper {
+        display: none;
+        width: 800px;
+        margin: 0 auto;
+    }
+    #game-ui { 
+        display: flex; 
+        align-items: center;
+        justify-content: space-between; 
+        margin-bottom: 10px;
+    }
+    #game-instructions-ui {
+        background: #e8f4f8;
+        border-left: 5px solid #3498db;
+        padding: 10px 15px;
+        font-size: 15px;
+        text-align: left;
+        color: #2c3e50;
+        flex-grow: 1;
+        margin-right: 20px;
+        border-radius: 4px;
+    }
+    .stats-panel {
+        font-size: 20px; 
+        font-weight: bold; 
+        color: #2c3e50; 
+        text-align: right;
+        min-width: 150px;
+    }
+    #game-container { 
+        position: relative; 
+        width: 800px; 
+        height: 600px; 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
+        border-radius: 10px; 
+        overflow: hidden; 
+        background: #ecf0f1; 
+    }
+    
+    .bin-label { 
+        position: absolute; 
+        bottom: 30px; 
+        font-weight: bold; 
+        font-size: 20px; 
+        pointer-events: none; 
+        color: white;
+    }
+    .bin-accept { left: 80px; }
+    .bin-reject { left: 560px; }
+    .staging-label {
+        position: absolute;
+        top: 380px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: bold;
+        color: #7f8c8d;
+        pointer-events: none;
+        font-size: 18px;
+    }
+
+    #gif-modal { 
+        position: fixed; 
+        top: 0; left: 0; 
+        width: 100%; height: 100%; 
+        background: rgba(0,0,0,0.8); 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        z-index: 1000; 
+    }
+    .modal-content { 
+        background: white; 
+        padding: 20px; 
+        border-radius: 10px; 
+        position: relative; 
+        max-width: 90%; 
+        max-height: 90%; 
+    }
+    .modal-content img { 
+        max-width: 100%; 
+        max-height: 70vh; 
+        border-radius: 5px; 
+    }
+    #close-modal { 
+        position: absolute; 
+        top: -15px; right: -15px; 
+        background: #e74c3c; 
+        color: white; 
+        font-size: 24px; 
+        font-weight: bold; 
+        border-radius: 50%; 
+        width: 35px; height: 35px; 
+        line-height: 35px; 
+        cursor: pointer; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3); 
+    }
+
+    #certificate-screen { border: 10px solid #f1c40f; background: #fffcf0; }
+    #cert-name { font-size: 36px; color: #2980b9; margin: 10px 0; text-decoration: underline; }
+    #cert-accuracy { font-size: 48px; color: #27ae60; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div id="start-screen">
+    <h1>ASL Vocab Sorting Challenge</h1>
+    <p style="color: #7f8c8d; font-size: 16px; margin-bottom: 20px;">
+        Enter your name and pick a topic to start playing!
+    </p>
+    <input type="text" id="player-name" placeholder="Enter your Name">
+    <div id="topics-container">Loading topics...</div>
+</div>
+
+<div id="game-wrapper">
+    <div id="game-ui">
+        <div id="game-instructions-ui">
+            <b>Directions:</b> <b>Double-click</b> a box to see its hidden GIF. <br>
+            Drag boxes with <b>Correct Matches</b> to the <b>ACCEPT Bin</b>, and boxes with <b>Mismatched Words</b> to the <b>REJECT Bin</b>. 
+        </div>
+        <div class="stats-panel">
+            <div>Player: <span id="hud-name"></span></div>
+            <div>Score: <span id="hud-score">0</span> / <span id="hud-total">0</span></div>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <div id="canvas-container"></div>
+        <div class="bin-label bin-accept">ACCEPT (Match)</div>
+        <div class="bin-label bin-reject">REJECT (No Match)</div>
+        <div class="staging-label">STAGING AREA</div>
+    </div>
+</div>
+
+<div id="gif-modal" style="display: none;">
+    <div class="modal-content">
+        <span id="close-modal">&times;</span>
+        <img id="modal-img" src="" alt="Sign GIF">
+    </div>
+</div>
+
+<div id="certificate-screen" style="display: none;">
+    <h1>Certificate of Achievement</h1>
+    <p>This certifies that</p>
+    <h2 id="cert-name"></h2>
+    <p>has completed the vocab challenge with an accuracy of</p>
+    <h3 id="cert-accuracy"></h3>
+    <button class="topic-btn" onclick="location.reload()">Play Again</button>
+</div>
+
+<script>
+const Engine = Matter.Engine,
+      Render = Matter.Render,
+      Runner = Matter.Runner,
+      Bodies = Matter.Bodies,
+      Composite = Matter.Composite,
+      Events = Matter.Events,
+      MouseConstraint = Matter.MouseConstraint,
+      Mouse = Matter.Mouse,
+      Body = Matter.Body;
+
+let engine, render, runner, mouse, mouseConstraint;
+let vocabData = null;
+let currentBoxIndex = 0;
+let gameBoxes = []; // Will hold the data for all generated boxes
+let score = 0;
+let totalSorted = 0;
+let activeBoxes = 0;
+let playerName = "";
+let totalExpectedBoxes = 20; // 5 rounds of 4 boxes
+
+// 1. Fetch vocab.json and initialize buttons
+fetch('../vocab.json')
+    .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+    })
+    .then(data => {
+        vocabData = data;
+        const container = document.getElementById('topics-container');
+        container.innerHTML = '';
+        
+        for (const key in data) {
+            const btn = document.createElement('button');
+            btn.className = 'topic-btn';
+            btn.innerText = data[key].title || key;
+            btn.onclick = () => startGame(key);
+            container.appendChild(btn);
+        }
+    })
+    .catch(err => {
+        document.getElementById('topics-container').innerHTML = `<p style="color:red;">Error loading vocab.json. Please make sure the file is in the same directory and you are running a local web server.</p>`;
+    });
+
+// 2. Start the game logic
+function startGame(topicKey) {
+    const nameInput = document.getElementById('player-name').value.trim();
+    playerName = nameInput === "" ? "Guest" : nameInput;
+    
+    // Generate the random mixture of boxes
+    gameBoxes = [];
+    const boxesPerRound = 4;
+    const rounds = totalExpectedBoxes / boxesPerRound;
+    
+    for(let r = 0; r < rounds; r++) {
+        // Pick 4 unique questions for this round so GIFs are different
+        let shuffledQ = [...vocabData[topicKey].questions].sort(() => 0.5 - Math.random());
+        let roundQ = shuffledQ.slice(0, Math.min(boxesPerRound, shuffledQ.length));
+        
+        roundQ.forEach(q => {
+            // Randomly decide if this box will be a correct match or incorrect match
+            let isCorrectMatch = Math.random() > 0.5;
+            let displayedWord = "";
+            
+            if (isCorrectMatch) {
+                displayedWord = q.options[q.correct];
+            } else {
+                // Pick an option that is NOT the correct answer
+                let wrongOptions = q.options.filter((opt, idx) => idx !== q.correct);
+                displayedWord = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+            }
+            
+            gameBoxes.push({
+                gifUrl: q.image,
+                vocabText: displayedWord,
+                isCorrect: isCorrectMatch
+            });
+        });
+    }
+    
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-wrapper').style.display = 'block';
+    document.getElementById('hud-name').innerText = playerName;
+    
+    updateHUD();
+    initMatter();
+    
+    currentBoxIndex = 0;
+    nextRound();
+}
+
+// 3. Initialize Matter.js Physics Engine
+function initMatter() {
+    engine = Engine.create();
+    const container = document.getElementById('canvas-container');
+    container.innerHTML = ''; 
+    
+    render = Render.create({
+        element: container,
+        engine: engine,
+        options: {
+            width: 800,
+            height: 600,
+            wireframes: false,
+            background: 'transparent'
+        }
+    });
+
+    const acceptColor = { fillStyle: '#2ecc71', strokeStyle: '#27ae60', lineWidth: 2 };
+    const rejectColor = { fillStyle: '#e74c3c', strokeStyle: '#c0392b', lineWidth: 2 };
+    const platformColor = { fillStyle: '#bdc3c7', strokeStyle: '#95a5a6', lineWidth: 2 };
+
+    // Accept Bin
+    const accBottom = Bodies.rectangle(150, 590, 260, 20, { isStatic: true, render: acceptColor });
+    const accLeft = Bodies.rectangle(30, 480, 20, 220, { isStatic: true, render: acceptColor });
+    const accRight = Bodies.rectangle(270, 480, 20, 220, { isStatic: true, render: acceptColor });
+
+    // Reject Bin
+    const rejBottom = Bodies.rectangle(650, 590, 260, 20, { isStatic: true, render: rejectColor });
+    const rejLeft = Bodies.rectangle(530, 480, 20, 220, { isStatic: true, render: rejectColor });
+    const rejRight = Bodies.rectangle(770, 480, 20, 220, { isStatic: true, render: rejectColor });
+
+    // Center Staging Area Platform
+    const centerPlatform = Bodies.rectangle(400, 400, 200, 20, { 
+        isStatic: true, 
+        render: platformColor,
+        label: 'platform'
+    });
+
+    Composite.add(engine.world, [
+        accBottom, accLeft, accRight, 
+        rejBottom, rejLeft, rejRight,
+        centerPlatform
+    ]);
+
+    mouse = Mouse.create(render.canvas);
+    mouseConstraint = MouseConstraint.create(engine, {
+        mouse: mouse,
+        constraint: { stiffness: 0.2, render: { visible: false } }
+    });
+    Composite.add(engine.world, mouseConstraint);
+    render.mouse = mouse;
+
+    // Custom render event to draw Text on Boxes
+    Events.on(render, 'afterRender', function() {
+        const context = render.context;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+
+        for (let body of Composite.allBodies(engine.world)) {
+            if (body.label === 'vocabBox') {
+                context.save();
+                context.translate(body.position.x, body.position.y);
+                context.fillStyle = "white";
+                if (body.vocabText.length > 12) {
+                    context.font = "bold 11px Arial";
+                } else {
+                    context.font = "bold 14px Arial";
+                }
+                context.fillText(body.vocabText, 0, 0);
+                context.restore();
+            }
+        }
+    });
+
+    let lastClickedBody = null;
+    let lastClickTime = 0;
+    
+    // Stabilize box when grabbed or clicked, and handle double-click
+    Events.on(mouseConstraint, 'mousedown', function() {
+        const body = mouseConstraint.body;
+        if (body && body.label === 'vocabBox') {
+            // Instantly stop momentum
+            Body.setVelocity(body, { x: 0, y: 0 }); 
+            Body.setAngularVelocity(body, 0);
+
+            const now = Date.now();
+            if (body === lastClickedBody && (now - lastClickTime) < 300) {
+                // FORCE RELEASE: Completely sever the mouse connection before opening modal
+                mouseConstraint.body = null;
+                if (mouseConstraint.constraint) {
+                    mouseConstraint.constraint.bodyB = null;
+                }
+                showModal(body.gifUrl);
+            }
+            lastClickedBody = body;
+            lastClickTime = now;
+        }
+    });
+
+    // When the mouse is RELEASED, immediately kill all velocity
+    Events.on(mouseConstraint, 'enddrag', function(event) {
+        if (event.body && event.body.label === 'vocabBox') {
+            Body.setVelocity(event.body, { x: 0, y: 0 });
+            Body.setAngularVelocity(event.body, 0);
+        }
+    });
+
+    // Checking collision logic (dropping in bins)
+    Events.on(engine, 'beforeUpdate', function() {
+        let bodiesToRemove = [];
+        for (let body of Composite.allBodies(engine.world)) {
+            if (body.label === 'vocabBox') {
+                if (body.position.y > 500) {
+                    let sorted = false;
+                    let correctSort = false;
+
+                    if (body.position.x < 300) { 
+                        sorted = true; 
+                        correctSort = body.isCorrect;
+                    } 
+                    else if (body.position.x > 500) { 
+                        sorted = true; 
+                        correctSort = !body.isCorrect; // Reject means it was INCORRECT
+                    }
+
+                    if (sorted) {
+                        bodiesToRemove.push(body);
+                        if (correctSort) score++;
+                    }
+                } else if (body.position.y > 650) {
+                    bodiesToRemove.push(body); 
+                }
+            }
+        }
+
+        bodiesToRemove.forEach(body => {
+            Composite.remove(engine.world, body);
+            activeBoxes--;
+            totalSorted++;
+            updateHUD();
+            
+            if (activeBoxes === 0) nextRound();
+        });
+    });
+
+    Render.run(render);
+    runner = Runner.create();
+    Runner.run(runner, engine);
+}
+
+// 4. Spawn boxes 4 at a time
+function nextRound() {
+    if (currentBoxIndex >= gameBoxes.length) {
+        endGame();
+        return;
+    }
+    
+    // Take the next 4 boxes from our generated array
+    let roundBoxes = gameBoxes.slice(currentBoxIndex, currentBoxIndex + 4);
+
+    roundBoxes.forEach((boxData, i) => {
+        const x = 400 + (Math.random() * 4 - 2); 
+        const y = -60 - (i * 70); 
+        
+        const box = Bodies.rectangle(x, y, 140, 60, {
+            label: 'vocabBox',
+            vocabText: boxData.vocabText,
+            gifUrl: boxData.gifUrl,
+            isCorrect: boxData.isCorrect,
+            render: { fillStyle: '#3498db', strokeStyle: '#2980b9', lineWidth: 2 },
+            frictionAir: 0.05, 
+            friction: 1, 
+            restitution: 0 
+        });
+        
+        Body.setInertia(box, Infinity); 
+        Composite.add(engine.world, box);
+        activeBoxes++;
+    });
+    
+    currentBoxIndex += 4;
+}
+
+// 5. Game Utilities
+function updateHUD() {
+    document.getElementById('hud-score').innerText = score;
+    document.getElementById('hud-total').innerText = totalExpectedBoxes;
+}
+
+function showModal(url) {
+    if(runner) Runner.stop(runner); 
+    
+    // Completely remove the mouse constraint from the physics world so it can't track dragging
+    Composite.remove(engine.world, mouseConstraint);
+
+    document.getElementById('modal-img').src = url;
+    document.getElementById('gif-modal').style.display = 'flex';
+}
+
+document.getElementById('close-modal').onclick = () => {
+    document.getElementById('gif-modal').style.display = 'none';
+    
+    // Reset mouse button state internally before plugging it back in
+    mouse.button = -1;
+    
+    // Re-add the mouse constraint back to the world
+    Composite.add(engine.world, mouseConstraint);
+
+    if(runner) Runner.run(runner, engine); 
+};
+
+// 6. Game Over
+function endGame() {
+    if(runner) Runner.stop(runner);
+    if(render) Render.stop(render);
+    
+    document.getElementById('game-wrapper').style.display = 'none';
+    
+    const accuracy = totalExpectedBoxes > 0 ? Math.round((score / totalExpectedBoxes) * 100) : 0;
+    
+    document.getElementById('cert-name').innerText = playerName;
+    document.getElementById('cert-accuracy').innerText = accuracy + '%';
+    document.getElementById('certificate-screen').style.display = 'block';
+}
+</script>
+</body>
+</html>
