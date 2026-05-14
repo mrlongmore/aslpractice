@@ -165,17 +165,64 @@ body {
     color: #c0392b;
     margin-top: 12px;
 }
-.option-button {
-    background-color: white;
-    border: 2px solid #007bff;
-    padding: 10px 20px;
-    margin: 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.2s;
+/* This targets the container we added to your HTML */
+/* Container layout */
+#multiSelectArea {
+    display: flex;
+    flex-direction: column; /* Stack buttons on top, submit on bottom */
+    align-items: center;    /* This centers the children horizontally */
+    width: 100%;
+    gap: 15px;
+}
+#multiSelectButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+    width: 100%;
 }
 
+/* Base button style - "The Ugly Fix" */
+.option-button {
+    background-color: #ffffff;
+    border: 2px solid #3498db; /* Blue border */
+    color: #3498db;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 30px; /* Rounded pill shape */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 100px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Hover state */
+.option-button:hover {
+    background-color: #ebf5ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* CLICKED/SELECTED STATE - "The Visual Feedback Fix" */
 .option-button.selected {
-    background-color: #007bff !important; /* Force the color */
-    color: white !important;
+    background-color: #3498db !important; /* Blue background */
+    color: white !important;             /* White text */
+    border-color: #2980b9 !important;
+    transform: scale(0.95);              /* Slight "pressed" shrink effect */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+#submitMultiBtn {
+    background-color: #3498db; /* Blue */
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+#submitMultiBtn:hover {
+    background-color: #2980b9;
 }

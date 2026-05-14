@@ -184,22 +184,37 @@ function showQuestion() {
         multiSelectButtons.innerHTML = ''; // Clear previous
         selectedMultiOptions = []; 
         
-        currentQ.options.forEach(optionText => {
-            const btn = document.createElement('button');
-            btn.className = 'option-button'; // Style this in CSS
-            btn.textContent = optionText;
-            btn.addEventListener('click', () => {
-                // Toggle selection
-                if (selectedMultiOptions.includes(optionText)) {
-                    selectedMultiOptions = selectedMultiOptions.filter(i => i !== optionText);
-                    btn.classList.remove('selected');
-                } else {
-                    selectedMultiOptions.push(optionText);
-                    btn.classList.add('selected');
-                }
-            });
-            multiSelectButtons.appendChild(btn);
-        });
+currentQ.options.forEach(optionText => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = optionText;
+    
+    // Apply "Ugly Fix" Base Styles directly via JS
+    btn.style.padding = "12px 24px";
+    btn.style.margin = "5px";
+    btn.style.borderRadius = "8px";
+    btn.style.border = "2px solid #dee2e6";
+    btn.style.backgroundColor = "#f8f9fa";
+    btn.style.cursor = "pointer";
+    btn.style.transition = "all 0.2s";
+
+    btn.onclick = () => {
+        if (selectedMultiOptions.includes(optionText)) {
+            // Unselect logic
+            selectedMultiOptions = selectedMultiOptions.filter(i => i !== optionText);
+            btn.style.backgroundColor = "#f8f9fa";
+            btn.style.color = "black";
+            btn.style.borderColor = "#dee2e6";
+        } else {
+            // Select logic
+            selectedMultiOptions.push(optionText);
+            btn.style.backgroundColor = "#28a745"; // Success Green
+            btn.style.color = "white";
+            btn.style.borderColor = "#1e7e34";
+        }
+    };
+    multiSelectButtons.appendChild(btn);
+});
     } 
     else {
         // Standard multiple-choice
