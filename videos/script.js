@@ -23,6 +23,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const textInputArea = document.getElementById('textInputArea');
     const textAnswer = document.getElementById('textAnswer');
     const submitAnswerBtn = document.getElementById('submitAnswer');
+    const multiSelectArea = document.getElementById('multiSelectArea');
+    const multiSelectButtons = document.getElementById('multiSelectButtons');
+    const submitMultiBtn = document.getElementById('submitMultiBtn');
+    let selectedMultiOptions = []; // To track clicks
 
     let userName = '';
     let allTopics = [];
@@ -161,24 +165,51 @@ document.addEventListener('DOMContentLoaded', () => {
         showQuestion();
     }
 
-    function showQuestion() {
-        const currentQ = quizData[currentVideoIndex].questions[currentQuestionIndex];
-        questionText.textContent = currentQ.question;
+function showQuestion() {
+    const currentQ = quizData[currentVideoIndex].questions[currentQuestionIndex];
+    questionText.textContent = currentQ.question;
+    
+    // Hide all areas initially
+    document.getElementById('options').style.display = 'none';
+    textInputArea.style.display = 'none';
+    multiSelectArea.style.display = 'none';
 
-        if (currentQ.type === 'text') {
-            document.getElementById('options').style.display = 'none';
-            textInputArea.style.display = 'block';
-            textAnswer.value = '';
-            textAnswer.focus();
-        } else {
-            document.getElementById('options').style.display = 'flex';
-            textInputArea.style.display = 'none';
-            shuffleArray(currentQ.options);
-            options.forEach((option, index) => {
-                option.textContent = currentQ.options[index] || '';
+    if (currentQ.type === 'text') {
+        textInputArea.style.display = 'block';
+        textAnswer.value = '';
+        textAnswer.focus();
+    } 
+    else if (currentQ.type === 'multi-select') {
+        multiSelectArea.style.display = 'block';
+        multiSelectButtons.innerHTML = ''; // Clear previous
+        selectedMultiOptions = []; 
+        
+        currentQ.options.forEach(optionText => {
+            const btn = document.createElement('button');
+            btn.className = 'option-button'; // Style this in CSS
+            btn.textContent = optionText;
+            btn.addEventListener('click', () => {
+                // Toggle selection
+                if (selectedMultiOptions.includes(optionText)) {
+                    selectedMultiOptions = selectedMultiOptions.filter(i => i !== optionText);
+                    btn.classList.remove('selected');
+                } else {
+                    selectedMultiOptions.push(optionText);
+                    btn.classList.add('selected');
+                }
             });
-        }
+            multiSelectButtons.appendChild(btn);
+        });
+    } 
+    else {
+        // Standard multiple-choice
+        document.getElementById('options').style.display = 'flex';
+        shuffleArray(currentQ.options);
+        options.forEach((option, index) => {
+            option.textContent = currentQ.options[index] || '';
+        });
     }
+}
 
     function nextQuestion() {
         currentQuestionIndex++;
@@ -283,6 +314,24 @@ document.addEventListener('DOMContentLoaded', () => {
         textAnswer.value = '';
         nextQuestion();
     });
+    
+    submitMultiBtn.addEventListener('click', () => {
+    const currentQ = quizData[currentVideoIndex].questions[currentQuestionIndex];
+    
+    // Sort both to compare content regardless of click order
+    const userAnswers = selectedMultiOptions.slice().sort();
+    const correctAnswers = currentQ.correct.slice().sort();
+
+    const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(correctAnswers);
+
+    if (isCorrect) {
+        score++;
+        alert('Correct!');
+    } else {
+        alert(`Incorrect! Correct answers were: ${currentQ.correct.join(', ')}`);
+    }
+    nextQuestion();
+});
 
     restartQuizBtn.addEventListener('click', resetQuiz);
 });

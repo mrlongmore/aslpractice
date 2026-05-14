@@ -149,8 +149,50 @@
             { "question": "What direction does the signer have to turn to get to the destination?", "type": "multiple-choice", "options": ["left", "right", "straight", "up (transforming time)"], "correct": "left" },
             { "question": "What location is the destination?", "type": "multiple-choice", "options": ["clothing store", "clothing shop", "dress store", "dress shop"], "correct": "clothing store" }
           ]
+        },
+                {
+          "video": "Directions2.mp4",
+          "questions": [
+            { "question": "What place does the signer describe in the story?", "type": "multiple-choice", "options": ["school", "library", "store", "college"], "correct": "school" },
+            { "question": "Where is the office if the signer is looking at the front of the school?", "type": "multiple-choice", "options": ["in the front on the left", "in the front on the right", "in the back on the left", "in the back on the right"], "correct": "in the front on the left" },
+            { "question": "Where are the classrooms if the signer is looking at the front of the school?", "type": "multiple-choice", "options": ["in the front on the left", "in the front on the right", "in the back on the left", "in the back on the right"], "correct": "in the front on the right" },
+            { "question": "Where is the pool if the signer is looking at the front of the school?", "type": "multiple-choice", "options": ["in the front on the left", "in the front on the right", "in the back on the left", "in the back on the right"], "correct": "in the back on the right" },
+            { "question": "Where is the football field if the signer is looking at the front of the school?", "type": "multiple-choice", "options": ["in the front on the left", "in the front on the right", "in the back on the left", "in the back on the right"], "correct": "in the back on the left" },
+            { "question": "The locker room is located where?", "type": "multiple-choice", "options": ["to the left of the football field", "to the right of the football field", "to the left of the classroom", "to the right of the classroom"], "correct": "to the left of the football field" },
+            { "question": "Which places have the cafeteria between them?", "type": "multiple-choice", "options": ["classrooms and office", "classrooms and pool", "pool and football field", "locker room and office"], "correct": "locker room and office" }
+          ]
         }
       ]
+    },
+    {
+      "name": "Weather 1",
+      "videos": [
+        {
+          "video": "Weather1.mp4",
+          "questions": [
+            { "question": "What city does the signer describe first (capitalize city)?", "type": "text", "correct": "Fallbrook" },
+            { "question": "What is the temperature in the first city (just the number)?", "type": "text", "correct": "75" },
+            { "question": "How would one describe the weather in the first city?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["warm","sunny"]},
+            { "question": "What city does the signer describe second (capitalize city)?", "type": "text", "correct": "San Diego" },
+            { "question": "What is the temperature in the second city (just the number)?", "type": "text", "correct": "68" },
+            { "question": "What city does the signer describe third (capitalize city)?", "type": "text", "correct": "Oceanside" },
+            { "question": "What is the temperature in the third city (just the number)?", "type": "text", "correct": "61" },
+            { "question": "What city does the signer describe fourth (capitalize city)?", "type": "text", "correct": "Temecula" },
+            { "question": "What is the temperature in the fourth city (just the number)?", "type": "text", "correct": "86" },
+            { "question": "What is the first street in the intersection mentioned?", "type": "multiple-choice", "options": ["salami street", "salamance street", "salami road", "salamance road"], "correct": "salami street"},
+            { "question": "What is the second street in the intersection mentioned?", "type": "multiple-choice", "options": ["bongo drive", "bingo drive", "bongo road", "salamance road"], "correct": "bongo drive" }
+          ]
+        },
+        {
+          "video": "Weather2.mp4",
+          "questions": [
+            { "question": "What item does the signer ask if the person wants?", "type": "multiple-choice", "options": ["new clothes", "dress clothes", "new paper", "new place"], "correct": "new clothes" },
+            { "question": "What are the directions for 3 intersections?", "type": "multiple-choice", "options": ["go straight", "go right", "go right, then left, then right", "go right, then left, then left"], "correct": "go straight" },
+            { "question": "What direction does the signer have to turn to get to the destination?", "type": "multiple-choice", "options": ["left", "right", "straight", "up (transforming time)"], "correct": "left" },
+            { "question": "What location is the destination?", "type": "multiple-choice", "options": ["clothing store", "clothing shop", "dress store", "dress shop"], "correct": "clothing store" }
+          ]
+        }
+      ]    
     }
   ]
 }
