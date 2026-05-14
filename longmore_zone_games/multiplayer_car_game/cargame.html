@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Nitro Racers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="ui-layer">
+        <div id="health-container">
+            <div id="health-bar"></div>
+            <span>HEALTH</span>
+        </div>
+        <div id="leaderboard">
+            <h3>Race Standings</h3>
+            <ul id="player-list"></ul>
+        </div>
+    </div>
+
+    <div id="quiz-modal" class="hidden">
+        <div class="modal-content">
+            <h2>CRASHED! Solve to Repair</h2>
+            <img id="asl-gif" src="" alt="ASL Sign">
+            <div id="options-grid"></div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+            }
+        }
+    </script>
+    <script type="module" src="game.js"></script>
+</body>
+</html>
