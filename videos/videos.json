@@ -172,24 +172,26 @@
           "questions": [
             { "question": "What city does the signer describe first (capitalize city)?", "type": "text", "correct": "Fallbrook" },
             { "question": "What is the temperature in the first city (just the number)?", "type": "text", "correct": "75" },
-            { "question": "How would one describe the weather in the first city?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["warm","sunny"]},
+            { "question": "How would one describe the weather in the first city (select all that apply)?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["warm","sunny"]},
             { "question": "What city does the signer describe second (capitalize city)?", "type": "text", "correct": "San Diego" },
             { "question": "What is the temperature in the second city (just the number)?", "type": "text", "correct": "68" },
+            { "question": "How would one describe the weather in the second city (select all that apply)?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["cool","sunny"]},
             { "question": "What city does the signer describe third (capitalize city)?", "type": "text", "correct": "Oceanside" },
             { "question": "What is the temperature in the third city (just the number)?", "type": "text", "correct": "61" },
+            { "question": "How would one describe the weather in the third city (select all that apply)?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["cool","cloudy"]},
             { "question": "What city does the signer describe fourth (capitalize city)?", "type": "text", "correct": "Temecula" },
             { "question": "What is the temperature in the fourth city (just the number)?", "type": "text", "correct": "86" },
-            { "question": "What is the first street in the intersection mentioned?", "type": "multiple-choice", "options": ["salami street", "salamance street", "salami road", "salamance road"], "correct": "salami street"},
-            { "question": "What is the second street in the intersection mentioned?", "type": "multiple-choice", "options": ["bongo drive", "bingo drive", "bongo road", "salamance road"], "correct": "bongo drive" }
+            { "question": "How would one describe the weather in the fourth city (select all that apply)?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["hot","sunny"]}
           ]
         },
         {
           "video": "Weather2.mp4",
           "questions": [
-            { "question": "What item does the signer ask if the person wants?", "type": "multiple-choice", "options": ["new clothes", "dress clothes", "new paper", "new place"], "correct": "new clothes" },
-            { "question": "What are the directions for 3 intersections?", "type": "multiple-choice", "options": ["go straight", "go right", "go right, then left, then right", "go right, then left, then left"], "correct": "go straight" },
-            { "question": "What direction does the signer have to turn to get to the destination?", "type": "multiple-choice", "options": ["left", "right", "straight", "up (transforming time)"], "correct": "left" },
-            { "question": "What location is the destination?", "type": "multiple-choice", "options": ["clothing store", "clothing shop", "dress store", "dress shop"], "correct": "clothing store" }
+            { "question": "What is the weather like Monday (select all that apply)?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["hot","sunny"]},
+            { "question": "What is the weather like Wednesday (select all that apply)?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["warm","rainy"]},
+            { "question": "What is the weather like Tuesday (select all that apply)?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["cold","rainy"]},
+            { "question": "What is the weather like Friday (select all that apply)?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["cold","snowy"]},
+            { "question": "What is the weather like Thursday (select all that apply)?", "type": "multi-select", "options": ["sunny", "cloudy", "rainy", "snowy","hot","warm","cool","cold"], "correct": ["cool","cloudy"]}
           ]
         }
       ]    
