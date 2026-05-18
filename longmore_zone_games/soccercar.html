@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Jet Fighter Striker - Fixed AI vs Mode</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0d0e15;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Overlays */
+        .overlay-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        /* Async Loading Screen */
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0f172a;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border-left-color: #3b82f6;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Dynamic Topic Selection Screen */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 150;
+            background: rgba(10, 15, 30, 0.9);
+            display: none; 
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Win Condition Match Over Screen */
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 180;
+            background: rgba(10, 15, 30, 0.95);
+            display: none; 
+            justify-content: center;
+            align-items: center;
+        }
+
+        .setup-box {
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .topic-list {
+            margin: 20px 0;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .topic-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 4px;
+            font-size: 16px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .topic-item:last-child { border-bottom: none; }
+        .topic-item input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+        }
+
+        /* Master UI Buttons */
+        .action-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        .action-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        /* In-game HUD Layout */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            color: white;
+            background: rgba(15, 23, 42, 0.75);
+            padding: 15px 25px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            pointer-events: none;
+            display: none;
+        }
+
+        .score-board {
+            display: flex;
+            gap: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .team-blue { color: #38bdf8; }
+        .team-orange { color: #fb923c; }
+        
+        .fuel-container {
+            width: 180px;
+            background: #334155;
+            height: 14px;
+            border-radius: 7px;
+            overflow: hidden;
+            margin-top: 5px;
+            border: 1px solid #475569;
+        }
+
+        #fuel-bar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #eab308, #22c55e);
+            transition: width 0.1s linear;
+        }
+
+        .hint-section {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        #quiz-trigger-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transition: all 0.2s ease;
+            display: none;
+        }
+        #quiz-trigger-btn:hover { background: #1d4ed8; transform: translateY(-2px); }
+
+        /* Fullscreen Pop-up Quiz Modal */
+        #quiz-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #quiz-modal.active { opacity: 1; pointer-events: auto; }
+
+        .category-tag {
+            font-size: 12px;
+            color: #38bdf8;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .sign-gif {
+            width: 100%;
+            max-height: 220px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin: 15px 0;
+            background: #0f172a;
+            border: 1px solid #334155;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            background: #334155;
+            color: white;
+            border: 1px solid #475569;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover { background: #475569; border-color: #64748b; }
+
+        /* Goal Alerts */
+        #goal-alert {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            z-index: 50;
+            font-size: 64px;
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(255,255,255,0.6);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #goal-alert.show { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div id="loading-text">Fetching live vocabulary categories...</div>
+    </div>
+
+    <div id="start-screen">
+        <div class="overlay-card setup-box">
+            <h1 style="margin-top: 0; font-size: 26px; color: #38bdf8;">Rocket Jet Striker</h1>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Select the vocabulary quiz topics to include in this match:</p>
+            
+            <div class="topic-list" id="topic-checkboxes-container">
+                </div>
+
+            <button class="action-btn" onclick="confirmSelectedTopics()">Start Match</button>
+        </div>
+    </div>
+
+    <div id="game-over-screen">
+        <div class="overlay-card setup-box">
+            <h1 id="win-title" style="margin-top: 0; font-size: 32px; color: #facc15;">MATCH OVER</h1>
+            <p id="win-details" style="color: #94a3b8; font-size: 18px; margin-bottom: 20px;"></p>
+            <button class="action-btn" onclick="restartMatch()">Play Again</button>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div id="hud">
+        <div class="score-board">
+            <span class="team-blue">BLUE (AI): <span id="score-blue">0</span></span>
+            <span style="color:#64748b;">|</span>
+            <span class="team-orange">ORANGE (YOU): <span id="score-orange">0</span></span>
+        </div>
+        <div><strong>ROCKET PROPULSION FUEL:</strong></div>
+        <div class="fuel-container">
+            <div id="fuel-bar"></div>
+        </div>
+        <div class="hint-section">
+            Ground Drive: <strong>W/S</strong> (Drive Forward/Reverse), <strong>A/D</strong> (Steer Left/Right)<br>
+            Airplane Flight: Hold <strong>SPACEBAR</strong> to Fire Jet Thrusters!<br>
+            Flight Steering Controls: <strong>W/S</strong> (Pitch Nose Up/Down), <strong>A/D</strong> (Steer Left/Right)<br>
+            Goal Limit: First to <strong>5 Points</strong> wins!
+        </div>
+    </div>
+
+    <button id="quiz-trigger-btn" onclick="openQuiz()">💡 Refill Fuel Quiz</button>
+
+    <div id="goal-alert">GOAL!</div>
+
+    <div id="quiz-modal">
+        <div class="overlay-card quiz-card">
+            <div id="quiz-category" class="category-tag">CATEGORY</div>
+            <h2 id="quiz-question" style="margin-top: 0; font-size: 20px;">Loading Question...</h2>
+            <img id="quiz-image" class="sign-gif" src="" alt="ASL Sign Animation">
+            <div class="options-grid" id="quiz-options">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA SYSTEM GLOBALS ---
+        let rawJsonData = null;
+        let questionsMasterList = [];
+        const JSON_URL = '../vocab.json'; 
+
+        // --- GAME RUNTIME STATE ---
+        let matchActive = false;
+        let scoreBlue = 0;       // Blue = AI Team (Aims for Orange Goal at +Z)
+        let scoreOrange = 0;     // Orange = Player Team (Aims for Blue Goal at -Z)
+        const WIN_LIMIT = 5;     
+        let fuel = 100; 
+        let isQuizOpen = false;
+
+        // Arena Boundaries
+        const fieldWidth = 50;
+        const fieldLength = 90;
+
+        // Steering Control Inputs Tracking Maps
+        const keys = { w: false, a: false, s: false, d: false, Space: false };
+        const aiKeys = { w: false, a: false, s: false, d: false, Space: false };
+
+        // Kinematics Configuration (Both cars share identical performance parameters)
+        let playerPos = new THREE.Vector3(0, 0.6, 25);
+        let playerVelocity3D = new THREE.Vector3(0, 0, 0);
+
+        let aiPos = new THREE.Vector3(0, 0.6, -25);
+        let aiVelocity3D = new THREE.Vector3(0, 0, 0);
+
+        const accel = 0.012;
+        const friction = 0.96;
+        const turnSpeed = 0.045; 
+        const carRadius = 2.2; 
+
+        // Ball 3D Physics Configuration
+        let ballPos = new THREE.Vector3(0, 1.3, 0);
+        let ballVelocity = new THREE.Vector3(0, 0, 0);
+        const ballRadius = 1.3;
+        const gravity = -0.012;         
+        const carGravity = -0.028;     
+        const groundBounce = 0.72;     
+        const wallBounce = 0.85;       
+        const airResistance = 0.992;   
+
+        // Three.js Core Global Objects
+        let scene, camera, renderer;
+        let playerGroup, aiGroup, ballMesh;
+
+        // --- STEP 1: FETCH JSON & MAP CHECKBOXES ---
+        async function fetchVocabularyStructure() {
+            try {
+                const response = await fetch(JSON_URL);
+                if (!response.ok) throw new Error(`HTTP Error Status: ${response.status}`);
+                
+                rawJsonData = await response.json();
+                const checkboxContainer = document.getElementById('topic-checkboxes-container');
+                checkboxContainer.innerHTML = '';
+
+                let activeCategoryCount = 0;
+
+                for (const key in rawJsonData) {
+                    if (rawJsonData.hasOwnProperty(key) && rawJsonData[key].questions) {
+                        activeCategoryCount++;
+                        const category = rawJsonData[key];
+                        
+                        const wrapper = document.createElement('label');
+                        wrapper.className = 'topic-item';
+                        
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.value = key;
+                        checkbox.checked = false;
+                        
+                        const textSpan = document.createElement('span');
+                        textSpan.innerText = `${category.title} (${category.questions.length} items)`;
+                        
+                        wrapper.appendChild(checkbox);
+                        wrapper.appendChild(textSpan);
+                        checkboxContainer.appendChild(wrapper);
+                    }
+                }
+
+                if (activeCategoryCount === 0) throw new Error("JSON structure is empty.");
+
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('start-screen').style.display = 'flex';
+
+            } catch (error) {
+                console.error("Asset initialization error: ", error);
+                document.getElementById('loading-text').innerHTML = `
+                    <span style="color: #ef4444;">Failed to Load JSON Schema</span><br>
+                    <span style="font-size: 14px; font-weight: normal; color: #94a3b8;">
+                        Verify vocab.json resides inside your designated workspace path.
+                    </span>
+                `;
+            }
+        }
+
+        // --- STEP 2: PARSE FILTERED SELECTIONS & LAUNCH ---
+        function confirmSelectedTopics() {
+            const checkboxes = document.querySelectorAll('#topic-checkboxes-container input[type="checkbox"]');
+            questionsMasterList = [];
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const targetCategory = rawJsonData[cb.value];
+                    targetCategory.questions.forEach(q => {
+                        questionsMasterList.push({
+                            category: targetCategory.title,
+                            question: q.question,
+                            image: q.image,
+                            options: q.options,
+                            correct: q.correct
+                        });
+                    });
+                }
+            });
+
+            if (questionsMasterList.length === 0) {
+                alert("Please select at least one topic category to populate the quiz pool!");
+                return;
+            }
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('hud').style.display = 'block';
+            document.getElementById('quiz-trigger-btn').style.display = 'block';
+            
+            matchActive = true;
+        }
+
+        // --- STEP 3: ENVIRONMENT SETUP ---
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color('#0b0f19');
+            scene.fog = new THREE.FogExp2('#0b0f19', 0.008);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Lighting Setup
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(20, 40, 20);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            // Colored Arena Spotlights
+            const blueSpot = new THREE.SpotLight(0x00aaff, 3, 80, Math.PI/4, 0.5, 1);
+            blueSpot.position.set(0, 30, -fieldLength/2);
+            scene.add(blueSpot);
+
+            const orangeSpot = new THREE.SpotLight(0xffaa00, 3, 80, Math.PI/4, 0.5, 1);
+            orangeSpot.position.set(0, 30, fieldLength/2);
+            scene.add(orangeSpot);
+
+            buildArena();
+            playerGroup = createVehicleMesh(0xe11d48); // Red/Orange Player Car
+            aiGroup = createVehicleMesh(0xa855f7);     // Purple AI Car
+            createBall();
+
+            // Setup Initial Spawn Positions
+            playerGroup.position.copy(playerPos);
+            playerGroup.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+            scene.add(playerGroup);
+
+            aiPos.set(0, 0.6, -25);
+            aiGroup.position.copy(aiPos);
+            aiGroup.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), 0);
+            scene.add(aiGroup);
+
+            // Event Hooks
+            window.addEventListener('keydown', (e) => handleKey(e, true));
+            window.addEventListener('keyup', (e) => handleKey(e, false));
+            window.addEventListener('resize', onWindowResize);
+
+            fetchVocabularyStructure();
+            animate();
+        }
+
+        function buildArena() {
+            const groundGeo = new THREE.PlaneGeometry(fieldWidth * 2, fieldLength * 2);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            const gridHelper = new THREE.GridHelper(200, 40, 0x475569, 0x334155);
+            gridHelper.position.y = 0.01;
+            scene.add(gridHelper);
+
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, transparent: true, opacity: 0.4 });
+            const sideWallGeo = new THREE.BoxGeometry(2, 40, fieldLength * 2);
+            
+            const leftWall = new THREE.Mesh(sideWallGeo, wallMat);
+            leftWall.position.set(-fieldWidth, 20, 0);
+            scene.add(leftWall);
+
+            const rightWall = leftWall.clone();
+            rightWall.position.x = fieldWidth;
+            scene.add(rightWall);
+
+            const endWallSegmentGeo = new THREE.BoxGeometry((fieldWidth - 12), 40, 2);
+            
+            const wallBL = new THREE.Mesh(endWallSegmentGeo, wallMat);
+            wallBL.position.set(-(fieldWidth/2 + 6), 20, -fieldLength);
+            scene.add(wallBL);
+
+            const wallBR = wallBL.clone();
+            wallBR.position.x = (fieldWidth/2 + 6);
+            scene.add(wallBR);
+
+            const wallFL = wallBL.clone();
+            wallFL.position.z = fieldLength;
+            scene.add(wallFL);
+
+            const wallFR = wallBR.clone();
+            wallFR.position.z = fieldLength;
+            scene.add(wallFR);
+
+            // Blue Goal Net Center Profile (-Z side)
+            const blueGoalGroup = new THREE.Group();
+            blueGoalGroup.position.set(0, 5, -fieldLength - 4);
+            const goalNetBlue = new THREE.Mesh(new THREE.BoxGeometry(24, 10, 8), new THREE.MeshBasicMaterial({ color: 0x00d2ff, wireframe: true }));
+            blueGoalGroup.add(goalNetBlue);
+            scene.add(blueGoalGroup);
+
+            // Orange Goal Net Center Profile (+Z side)
+            const orangeGoalGroup = new THREE.Group();
+            orangeGoalGroup.position.set(0, 5, fieldLength + 4);
+            const goalNetOrange = new THREE.Mesh(new THREE.BoxGeometry(24, 10, 8), new THREE.MeshBasicMaterial({ color: 0xff6c00, wireframe: true }));
+            orangeGoalGroup.add(goalNetOrange);
+            scene.add(orangeGoalGroup);
+        }
+
+        function createVehicleMesh(bodyColorHex) {
+            const group = new THREE.Group();
+            const bodyMesh = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.0, 4.2), new THREE.MeshStandardMaterial({ color: bodyColorHex, roughness: 0.2, metalness: 0.8 }));
+            bodyMesh.castShadow = true;
+            group.add(bodyMesh);
+
+            const cabinMesh = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.7, 2.2), new THREE.MeshStandardMaterial({ color: 0x111827 }));
+            cabinMesh.position.set(0, 0.8, -0.4);
+            group.add(cabinMesh);
+
+            const lightGeo = new THREE.SphereGeometry(0.25, 16, 16);
+            const lightMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+            const leftLight = new THREE.Mesh(lightGeo, lightMat); leftLight.position.set(0.9, 0.1, 2.1); group.add(leftLight);
+            const rightLight = leftLight.clone(); rightLight.position.x = -0.9; group.add(rightLight);
+
+            const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16);
+            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+            const wheelPositions = [[1.3, -0.3, 1.3], [1.3, -0.3, -1.3], [-1.3, -0.3, 1.3], [-1.3, -0.3, -1.3]];
+            wheelPositions.forEach(pos => {
+                const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+                wheel.rotation.z = Math.PI / 2; wheel.position.set(pos[0], pos[1], pos[2]);
+                group.add(wheel);
+            });
+            return group;
+        }
+
+        function createBall() {
+            ballMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(ballRadius, 24, 24),
+                new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.3, metalness: 0.4, emissive: 0x1d4ed8, emissiveIntensity: 0.2 })
+            );
+            ballMesh.castShadow = true;
+            ballMesh.position.copy(ballPos);
+            scene.add(ballMesh);
+        }
+
+        // --- INPUT ENGINE ---
+        function handleKey(e, isDown) {
+            if (isQuizOpen || !matchActive) return;
+            if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowUp') keys.w = isDown;
+            if (e.key === 's' || e.key === 'S' || e.key === 'ArrowDown') keys.s = isDown;
+            if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') keys.a = isDown;
+            if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') keys.d = isDown;
+            
+            if (e.key === ' ' || e.key === 'Spacebar') {
+                keys.Space = isDown;
+                e.preventDefault(); 
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- FUEL GAUGE CONFIGURATION ---
+        function consumeFuel(amount) {
+            fuel = Math.max(0, fuel - amount);
+            document.getElementById('fuel-bar').style.width = fuel + '%';
+            if (fuel <= 0 && !isQuizOpen) openQuiz();
+        }
+
+        function openQuiz() {
+            if (!matchActive) return;
+            isQuizOpen = true;
+            keys.w = keys.s = keys.a = keys.d = keys.Space = false; 
+
+            const randIndex = Math.floor(Math.random() * questionsMasterList.length);
+            const qData = questionsMasterList[randIndex];
+
+            document.getElementById('quiz-category').innerText = qData.category;
+            document.getElementById('quiz-question').innerText = qData.question;
+            document.getElementById('quiz-image').src = qData.image;
+
+            const optionsBox = document.getElementById('quiz-options');
+            optionsBox.innerHTML = ''; 
+
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => submitAnswer(idx, qData.correct);
+                optionsBox.appendChild(btn);
+            });
+
+            document.getElementById('quiz-modal').className = 'active';
+        }
+
+        function submitAnswer(chosenIdx, correctIdx) {
+            if (chosenIdx === correctIdx) {
+                fuel = Math.min(100, fuel + 60);
+                document.getElementById('fuel-bar').style.width = fuel + '%';
+                alert("Correct! Rocket Booster Fuel Refilled!");
+            } else {
+                alert("Incorrect! Quiz refill failed.");
+            }
+            document.getElementById('quiz-modal').className = '';
+            isQuizOpen = false;
+        }
+
+        // --- GOAL-AWARE INTELLIGENT AI ENGINE ---
+        function processAIIntelligence() {
+            aiKeys.w = aiKeys.s = aiKeys.a = aiKeys.d = aiKeys.Space = false;
+
+            // Objective Goal: AI (Blue Team) aims exclusively for the ORANGE net at +fieldLength
+            const orangeGoalPos = new THREE.Vector3(0, 0, fieldLength);
+            
+            // Strike Vector: Points from the ball directly into the opponent's Orange goal
+            let ballToGoal = new THREE.Vector3().subVectors(orangeGoalPos, ballPos).normalize();
+            
+            // Calculate optimal target coordinates directly behind the ball relative to the Orange goal
+            let targetPos = ballPos.clone().addScaledVector(ballToGoal, -4.5);
+
+            // DEFENSIVE DEFLECTION/FLANKING RECOVERY:
+            // If the ball has broken past the AI (ball is closer to the Blue Net at -Z than the AI is),
+            // driving straight at targetPos would push the ball further backward into its own goal.
+            // AI must perform a looping flank detour to clear it out safely.
+            if (aiPos.z > ballPos.z) {
+                if (Math.abs(aiPos.x - ballPos.x) < 8) {
+                    targetPos.copy(ballPos);
+                    targetPos.z -= 6; // Aim to sweep under the ball
+                    targetPos.x += (ballPos.x > 0) ? -12 : 12; // Outflank via the clear side of pitch
+                }
+            }
+
+            // Air Flight Trigger: Jump/Fly up if ball is airborne
+            const isAirborne = aiPos.y > 0.65;
+            if (ballPos.y > 3.0 || (isAirborne && ballPos.y > aiPos.y)) {
+                aiKeys.Space = true;
+            }
+
+            let toTarget = targetPos.clone().sub(aiPos);
+            let distToTarget = toTarget.length();
+            
+            // Fetch local reference framework coordinates for Flight adjustments
+            let localTarget = targetPos.clone().sub(aiPos).applyQuaternion(aiGroup.quaternion.clone().invert());
+
+            if (!isAirborne && !aiKeys.Space) {
+                // --- GROUND NAVIGATION STEERING MATRIX ---
+                let aiForward = new THREE.Vector3(0, 0, 1).applyQuaternion(aiGroup.quaternion);
+                aiForward.y = 0; aiForward.normalize();
+                
+                let targetDirGround = toTarget.clone();
+                targetDirGround.y = 0; targetDirGround.normalize();
+                
+                let cross = aiForward.clone().cross(targetDirGround);
+                let dot = aiForward.dot(targetDirGround);
+
+                if (dot < -0.4 && distToTarget < 12) {
+                    // Target is sharply behind; engage reverse precision gear
+                    aiKeys.s = true;
+                    if (cross.y > 0) aiKeys.d = true; 
+                    else aiKeys.a = true;
+                } else {
+                    // Drive forward and track target heading
+                    aiKeys.w = true;
+                    if (cross.y > 0.04) aiKeys.a = true;  // Turn Left
+                    if (cross.y < -0.04) aiKeys.d = true; // Turn Right
+                }
+
+                // INTENTIONAL OVERDRIVE BOOST: If lined up perfectly for a clean strike on the Orange net, activate jet propulsion!
+                let ballForward = new THREE.Vector3().subVectors(ballPos, aiPos).normalize();
+                let alignmentFactor = ballForward.dot(ballToGoal);
+                if (alignmentFactor > 0.82 && distToTarget < 30 && Math.abs(cross.y) < 0.15) {
+                    aiKeys.Space = true; 
+                }
+            } else {
+                // --- SIMULATED AIRPLANE FLIGHT STEERING MATRIX ---
+                if (localTarget.y > 0.2) aiKeys.w = true;  // Pitch Nose Up (Climb)
+                if (localTarget.y < -0.2) aiKeys.s = true; // Pitch Nose Down (Dive)
+
+                if (localTarget.x > 0.15) aiKeys.d = true;  // Yaw Turn Right
+                if (localTarget.x < -0.15) aiKeys.a = true; // Yaw Turn Left
+            }
+        }
+
+        // --- CORE RUNTIME KINEMATICS MATRIX ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (matchActive && !isQuizOpen) {
+                updateCarPhysics(playerPos, playerVelocity3D, playerGroup, keys, true);
+                processAIIntelligence();
+                updateCarPhysics(aiPos, aiVelocity3D, aiGroup, aiKeys, false);
+                
+                updateBall3DPhysics();
+                checkCollisions();
+                checkGoalScored();
+            }
+
+            updateCameraPosition();
+            renderer.render(scene, camera);
+        }
+
+        function updateCarPhysics(pos, vel, group, inputMap, isPlayerControlled) {
+            const isAirborne = pos.y > 0.65;
+
+            if (isAirborne) {
+                vel.y += carGravity;
+                
+                const speed = vel.length();
+                if (speed > 0.02) {
+                    const localForward = new THREE.Vector3(0, 0, 1).applyQuaternion(group.quaternion);
+                    vel.lerp(localForward.setLength(speed), 0.05); 
+                }
+                vel.multiplyScalar(0.992);
+            } else {
+                pos.y = 0.6;
+                if (vel.y < 0) vel.y = 0;
+                vel.x *= friction;
+                vel.z *= friction;
+            }
+
+            if (!isAirborne && !inputMap.Space) {
+                const usesFuel = isPlayerControlled && fuel <= 0;
+                if (inputMap.w && !usesFuel) {
+                    const forwardGround = new THREE.Vector3(0, 0, 1).applyQuaternion(group.quaternion);
+                    forwardGround.y = 0; forwardGround.normalize();
+                    vel.addScaledVector(forwardGround, accel);
+                    if (isPlayerControlled) consumeFuel(0.06);
+                } else if (inputMap.s && !usesFuel) {
+                    const forwardGround = new THREE.Vector3(0, 0, 1).applyQuaternion(group.quaternion);
+                    forwardGround.y = 0; forwardGround.normalize();
+                    vel.addScaledVector(forwardGround, -accel * 0.6);
+                    if (isPlayerControlled) consumeFuel(0.04);
+                }
+                
+                if (inputMap.a) group.rotateY(turnSpeed);
+                if (inputMap.d) group.rotateY(-turnSpeed);
+
+                const currentEuler = new THREE.Euler().setFromQuaternion(group.quaternion, 'YXZ');
+                const flatYawQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), currentEuler.y);
+                group.quaternion.slerp(flatYawQuat, 0.15);
+            } else {
+                if (inputMap.w) group.rotateX(-turnSpeed);  
+                if (inputMap.s) group.rotateX(turnSpeed);   
+                if (inputMap.a) group.rotateY(turnSpeed);   
+                if (inputMap.d) group.rotateY(-turnSpeed);  
+
+                const flightEuler = new THREE.Euler().setFromQuaternion(group.quaternion, 'YXZ');
+                flightEuler.z = 0; 
+                group.quaternion.setFromEuler(flightEuler);
+            }
+
+            if (inputMap.Space && (!isPlayerControlled || fuel > 0)) {
+                const forward3D = new THREE.Vector3(0, 0, 1).applyQuaternion(group.quaternion);
+                vel.addScaledVector(forward3D, 0.032);
+                if (isPlayerControlled) consumeFuel(0.45);
+            }
+
+            const structuralSpeedLimit = 0.95;
+            if (vel.length() > structuralSpeedLimit) vel.setLength(structuralSpeedLimit);
+
+            pos.add(vel);
+
+            if (pos.x < -fieldWidth + 2) { pos.x = -fieldWidth + 2; vel.x *= -0.3; }
+            if (pos.x > fieldWidth - 2) { pos.x = fieldWidth - 2; vel.x *= -0.3; }
+            if (pos.z < -fieldLength + 2) { pos.z = -fieldLength + 2; vel.z *= -0.3; }
+            if (pos.z > fieldLength - 2) { pos.z = fieldLength - 2; vel.z *= -0.3; }
+            if (pos.y > 45) { pos.y = 45; vel.y = 0; }
+
+            group.position.copy(pos);
+        }
+
+        function updateBall3DPhysics() {
+            ballVelocity.y += gravity;
+            ballPos.add(ballVelocity);
+            ballVelocity.multiplyScalar(airResistance);
+
+            if (ballPos.y < ballRadius) {
+                ballPos.y = ballRadius;
+                ballVelocity.y *= -groundBounce; 
+                ballVelocity.x *= 0.96;
+                ballVelocity.z *= 0.96;
+            }
+
+            if (Math.abs(ballPos.x) > fieldWidth - ballRadius) {
+                ballVelocity.x *= -wallBounce;
+                ballPos.x = Math.sign(ballPos.x) * (fieldWidth - ballRadius);
+            }
+
+            if (Math.abs(ballPos.z) > fieldLength - ballRadius) {
+                if (Math.abs(ballPos.x) > 12) {
+                    ballVelocity.z *= -wallBounce;
+                    ballPos.z = Math.sign(ballPos.z) * (fieldLength - ballRadius);
+                } 
+                else if (ballPos.y > 10 - ballRadius && ballPos.y < 10.5) {
+                    ballVelocity.z *= -wallBounce;
+                    ballVelocity.y *= -0.5;
+                    ballPos.z = Math.sign(ballPos.z) * (fieldLength - ballRadius);
+                }
+            }
+            
+            ballMesh.position.copy(ballPos);
+            ballMesh.rotation.x += ballVelocity.z * 0.4;
+            ballMesh.rotation.z -= ballVelocity.x * 0.4;
+        }
+
+        function checkCollisions() {
+            const minCollideDist = carRadius + ballRadius;
+
+            // Player -> Ball Impact
+            let distPlayerBall = playerPos.distanceTo(ballPos);
+            if (distPlayerBall < minCollideDist) {
+                const normal = new THREE.Vector3().subVectors(ballPos, playerPos).normalize();
+                ballPos.addScaledVector(normal, minCollideDist - distPlayerBall);
+                ballVelocity.copy(normal).multiplyScalar(playerVelocity3D.length() * 1.8 + 0.25);
+                ballVelocity.y += 0.08;
+                playerVelocity3D.multiplyScalar(0.4);
+            }
+
+            // AI -> Ball Impact
+            let distAIBall = aiPos.distanceTo(ballPos);
+            if (distAIBall < minCollideDist) {
+                const normal = new THREE.Vector3().subVectors(ballPos, aiPos).normalize();
+                ballPos.addScaledVector(normal, minCollideDist - distAIBall);
+                ballVelocity.copy(normal).multiplyScalar(aiVelocity3D.length() * 1.8 + 0.25);
+                ballVelocity.y += 0.08;
+                aiVelocity3D.multiplyScalar(0.4);
+            }
+
+            // Vehicle-to-Vehicle Collisions
+            let distCars = playerPos.distanceTo(aiPos);
+            if (distCars < carRadius * 2) {
+                const normal = new THREE.Vector3().subVectors(aiPos, playerPos).normalize();
+                const overlap = (carRadius * 2) - distCars;
+                playerPos.addScaledVector(normal, -overlap * 0.5);
+                aiPos.addScaledVector(normal, overlap * 0.5);
+                
+                let tempVel = playerVelocity3D.clone();
+                playerVelocity3D.lerp(aiVelocity3D, 0.5);
+                aiVelocity3D.lerp(tempVel, 0.5);
+            }
+        }
+
+        function checkGoalScored() {
+            if (Math.abs(ballPos.x) < 12 && ballPos.y < 10) {
+                if (ballPos.z < -fieldLength - 1) {
+                    // Ball goes into Blue Net (-Z) -> Player (Orange Team) Scores!
+                    scoreOrange++; 
+                    evaluateScores("ORANGE TEAM SCORES!");
+                }
+                else if (ballPos.z > fieldLength + 1) {
+                    // Ball goes into Orange Net (+Z) -> AI (Blue Team) Scores!
+                    scoreBlue++; 
+                    evaluateScores("BLUE TEAM SCORES!");
+                }
+            }
+        }
+
+        function evaluateScores(alertText) {
+            document.getElementById('score-blue').innerText = scoreBlue;
+            document.getElementById('score-orange').innerText = scoreOrange;
+
+            const alertDiv = document.getElementById('goal-alert');
+            alertDiv.innerText = alertText;
+            alertDiv.className = 'show';
+
+            if (scoreBlue >= WIN_LIMIT) {
+                setTimeout(() => endGameSequence("BLUE TEAM WINS THE MATCH!"), 800);
+                return;
+            } else if (scoreOrange >= WIN_LIMIT) {
+                setTimeout(() => endGameSequence("ORANGE TEAM WINS THE MATCH!"), 800);
+                return;
+            }
+
+            resetPositions();
+            setTimeout(() => { alertDiv.className = ''; }, 2000);
+        }
+
+        function resetPositions() {
+            ballPos.set(0, 8, 0); 
+            ballVelocity.set(0, 0, 0);
+            
+            playerPos.set(0, 0.6, 25);
+            playerVelocity3D.set(0, 0, 0);
+            playerGroup.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+
+            aiPos.set(0, 0.6, -25);
+            aiVelocity3D.set(0, 0, 0);
+            aiGroup.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), 0);
+        }
+
+        function endGameSequence(winnerText) {
+            matchActive = false;
+            document.getElementById('goal-alert').className = '';
+            document.getElementById('win-title').innerText = winnerText;
+            document.getElementById('win-details').innerText = `Final Scoreline - Blue (AI): ${scoreBlue} | Orange (You): ${scoreOrange}`;
+            document.getElementById('game-over-screen').style.display = 'flex';
+        }
+
+        function restartMatch() {
+            scoreBlue = 0;
+            scoreOrange = 0;
+            fuel = 100;
+            document.getElementById('score-blue').innerText = '0';
+            document.getElementById('score-orange').innerText = '0';
+            document.getElementById('fuel-bar').style.width = '100%';
+            document.getElementById('game-over-screen').style.display = 'none';
+            resetPositions();
+            matchActive = true;
+        }
+
+        function updateCameraPosition() {
+            const backOffset = new THREE.Vector3(0, 4.5, -15).applyQuaternion(playerGroup.quaternion);
+            const targetCamPos = playerPos.clone().add(backOffset);
+            
+            camera.position.lerp(targetCamPos, 0.08);
+            camera.lookAt(new THREE.Vector3(playerPos.x, playerPos.y + 1, playerPos.z));
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
