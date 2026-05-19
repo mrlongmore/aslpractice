@@ -112,7 +112,7 @@
                 <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">S</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">▼</span> Reverse Gear</p>
                 <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">A</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">◀</span> Steer Left</p>
                 <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">D</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">▶</span> Steer Right</p>
-                <div class="pt-1.5 border-t border-white/5 text-amber-400 font-medium">Clear the map layout! Secure all boxes to reach your shift target before time expires. More crates held reduce speed and drain extra power reserves.</div>
+                <div class="pt-1.5 border-t border-white/5 text-amber-400 font-medium">Clear the map layout! Secure all boxes to reach your shift target before time expires. Avoid collision with static pillars and patrolling logistics security drones!</div>
             </div>
 
             <div class="w-full md:w-96 glass interactive rounded-2xl overflow-hidden flex flex-col border border-white/10 self-center md:self-end shadow-2xl">
@@ -132,7 +132,7 @@
 
         <div class="w-full flex justify-between items-center text-[10px] text-gray-500 font-mono tracking-wider">
             <div>MULTI-SHIFT GENERATION SYSTEM CORE ONLINE</div>
-            <div class="hidden sm:block">GRID TRANSLATORS RUNNING // FUEL CONSUMPTION SCALING ACTIVE // DELIVER TO NEON FIELDS</div>
+            <div class="hidden sm:block">GRID TRANSLATORS RUNNING // PATH MATRIX ENCODER ENABLED // ROBOT OVERLAYS LIVE</div>
         </div>
 
     </div>
@@ -215,6 +215,7 @@
         let dropZone = null;
         let cargoItems = [];
         let carriedBoxes = [];
+        let activeRobots = [];
         const obstacles = [];
 
         let currentLevelIdx = 0;
@@ -234,7 +235,7 @@
         // --- CONNECT DATA INFRASTRUCTURE ---
         async function fetchVocabularyData() {
             try {
-                const res = await fetch('./vocab.json');
+                const res = await fetch('../vocab.json');
                 if(!res.ok) throw new Error("CORS limit hit.");
                 vocabDatabase = await res.json();
             } catch(e) {
@@ -395,6 +396,8 @@
         // =========================================================================
         // --- MULTI-LEVEL GRID SYSTEM DATA CONTROLLER ---
         // =========================================================================
+        // Legend Key: 
+        // 0=Empty, 1=Pillar, 2=DropZone, 3=Cargo Box, 4=Robot Spawn, 5=Robot Path Track
         const LEVELS_DATA = [
             {
                 name: "Shift 1: Storage Bay Alpha",
@@ -437,7 +440,7 @@
             {
                 name: "Shift 3: Tight Terminal Maze",
                 timeLimit: 60,
-                targetDeliveries: 6,
+                targetDeliveries: 4,
                 grid: [
                     [1, 3, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -447,10 +450,48 @@
                     [1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1],
                     [1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1],
                     [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-                    [0, 3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
                     [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [1, 3, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1]
+                ]
+            },
+            {
+                name: "Shift 4: Robot Patrol Zone",
+                timeLimit: 85,
+                targetDeliveries: 4,
+                grid: [
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+                    [0, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0], // Contains 1 Robot (4) with 9 connected horizontal path tiles (5)
+                    [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+                ]
+            },
+            {
+                name: "Shift 5: Automated Depot Core",
+                timeLimit: 95,
+                targetDeliveries: 5,
+                grid: [
+                    [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1],
+                    [0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 4, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0], // Robot 1 Spawn (4) leading into a vertical track path down below
+                    [0, 5, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0],
+                    [1, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [1, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 0], // Intersection: Robot 1 Path (5) crosses Robot 2 Spawn (4) + track (5s)
+                    [0, 5, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1]
                 ]
             }
         ];
@@ -576,6 +617,35 @@
             });
         }
 
+        function buildRobotMesh() {
+            const group = new THREE.Group();
+            
+            // Lower heavy mechanical base
+            const baseGeo = new THREE.CylinderGeometry(0.6, 0.7, 0.4, 16);
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6, roughness: 0.3 });
+            const base = new THREE.Mesh(baseGeo, baseMat);
+            base.position.y = 0.2;
+            group.add(base);
+
+            // Upper warning dome/scanner
+            const domeGeo = new THREE.SphereGeometry(0.35, 16, 16, 0, Math.PI*2, 0, Math.PI/2);
+            const domeMat = new THREE.MeshBasicMaterial({ color: 0xef4444 }); 
+            const dome = new THREE.Mesh(domeGeo, domeMat);
+            dome.position.y = 0.4;
+            group.add(dome);
+
+            // Glowing red hazard perimeter ring
+            const ringGeo = new THREE.TorusGeometry(0.65, 0.03, 8, 24);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = 0.2;
+            group.add(ring);
+
+            scene.add(group);
+            return group;
+        }
+
         // --- LEVEL TRANSITIONS INFRASTRUCTURE ENGINE ---
         function loadLevel(idx) {
             currentLevelIdx = idx;
@@ -587,7 +657,7 @@
             document.getElementById('level-name-txt').innerText = lvl.name;
             document.getElementById('goal-txt').innerText = `0 / ${lvl.targetDeliveries}`;
 
-            // Clean previous obstacles
+            // Clean previous obstacles / paths
             obstacles.forEach(obs => { if (obs.meshGroup) scene.remove(obs.meshGroup); });
             obstacles.length = 0;
 
@@ -600,44 +670,100 @@
             carriedBoxes.length = 0;
             document.getElementById('stack-txt').innerText = 0;
 
+            // Clean previous patrol robots
+            activeRobots.forEach(bot => { if (bot.mesh) scene.remove(bot.mesh); });
+            activeRobots.length = 0;
+
             if (dropZone) {
                 scene.remove(dropZone);
                 dropZone = null;
             }
 
-            // Find spawn layout metrics from matrix mapping config loop
             let spawnX = 0;
             let spawnZ = 2;
             
+            // Build level matrix layout layers
             for (let r = 0; r < GRID_SIZE; r++) {
                 for (let c = 0; c < GRID_SIZE; c++) {
                     const itemType = lvl.grid[r][c];
                     if (itemType === 0) continue;
                     const world = gridToWorldCoords(r, c);
 
-                    if (itemType === 1) buildPillarObstacle(world.x, world.z);
-                    else if (itemType === 2) {
+                    if (itemType === 1) {
+                        buildPillarObstacle(world.x, world.z);
+                    } else if (itemType === 2) {
                         dropZone = buildDropZoneMesh();
                         dropZone.position.set(world.x, 0, world.z);
-                        // Default position forklift right over its newly registered target drop zone
                         spawnX = world.x;
                         spawnZ = world.z;
                     } else if (itemType === 3) {
                         const crate = createCargoBoxMesh();
                         crate.position.set(world.x, 0.55, world.z);
                         cargoItems.push(crate);
+                    } else if (itemType === 5) {
+                        // Dynamic Path Highlight Plate Mesh
+                        const padGeo = new THREE.PlaneGeometry(CELL_SIZE * 0.95, CELL_SIZE * 0.95);
+                        const padMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.05, side: THREE.DoubleSide });
+                        const pad = new THREE.Mesh(padGeo, padMat);
+                        pad.rotation.x = Math.PI / 2; pad.position.set(world.x, 0.01, world.z);
+                        scene.add(pad);
+                        obstacles.push({ position: new THREE.Vector3(world.x, -100, world.z), radius: 0, meshGroup: pad });
+                    } else if (itemType === 4) {
+                        // Dynamic Robot Vector Track Inference
+                        // Render path indicator beneath spawn tile
+                        const padGeo = new THREE.PlaneGeometry(CELL_SIZE * 0.95, CELL_SIZE * 0.95);
+                        const padMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.05, side: THREE.DoubleSide });
+                        const pad = new THREE.Mesh(padGeo, padMat);
+                        pad.rotation.x = Math.PI / 2; pad.position.set(world.x, 0.01, world.z);
+                        scene.add(pad);
+                        obstacles.push({ position: new THREE.Vector3(world.x, -100, world.z), radius: 0, meshGroup: pad });
+
+                        // Trace horizontal continuity span limits
+                        let minCol = c, maxCol = c;
+                        while (minCol - 1 >= 0 && (lvl.grid[r][minCol - 1] === 5 || lvl.grid[r][minCol - 1] === 4)) minCol--;
+                        while (maxCol + 1 < GRID_SIZE && (lvl.grid[r][maxCol + 1] === 5 || lvl.grid[r][maxCol + 1] === 4)) maxCol++;
+
+                        // Trace vertical continuity span limits
+                        let minRow = r, maxRow = r;
+                        while (minRow - 1 >= 0 && (lvl.grid[minRow - 1][c] === 5 || lvl.grid[minRow - 1][c] === 4)) minRow--;
+                        while (maxRow + 1 < GRID_SIZE && (lvl.grid[maxRow + 1][c] === 5 || lvl.grid[maxRow + 1][c] === 4)) maxRow++;
+
+                        let startRow = r, endRow = r, startCol = c, endCol = c;
+                        if ((maxCol - minCol) > (maxRow - minRow)) {
+                            startCol = minCol; endCol = maxCol;
+                        } else {
+                            startRow = minRow; endRow = maxRow;
+                        }
+
+                        const startPos = gridToWorldCoords(startRow, startCol);
+                        const endPos = gridToWorldCoords(endRow, endCol);
+                        const botMesh = buildRobotMesh();
+                        
+                        // Scale standard speed slightly deeper into level cycles
+                        const botSpeed = 0.35 + (currentLevelIdx * 0.04);
+
+                        activeRobots.push({
+                            mesh: botMesh,
+                            startX: startPos.x,
+                            startZ: startPos.z,
+                            endX: endPos.x,
+                            endZ: endPos.z,
+                            speed: botSpeed,
+                            progress: 0,
+                            direction: 1
+                        });
                     }
                 }
             }
 
-            // Reset Forklift position safely - SNAP TELEPORT IMMEDIATELY 
+            // Reset Forklift position safely
             if (forklift) {
                 forklift.position.set(spawnX, 0, spawnZ);
                 forklift.rotation.set(0, 0, 0);
                 rotationAngle = 0;
                 speed = 0;
                 
-                // FORCE SNAP CAMERA COORDINATES TO INSTANTLY BREAK INTERPOLATION OVERLAPS
+                // Force break camera tracking interpolation boundaries instantly
                 camera.position.set(spawnX, forklift.position.y + 4.5, spawnZ - 7);
                 camera.lookAt(forklift.position);
             }
@@ -748,8 +874,9 @@
                 forklift.rotation.y = rotationAngle;
             }
 
-            // 3. OBSTACLE INTERACTION COLLISION ENGINE
+            // 3. STATIC PILLAR OBSTACLE INTERACTION COLLISION ENGINE
             obstacles.forEach(obs => {
+                if (obs.radius <= 0) return; // Skip non-physical path line models
                 const distanceToObstacle = forklift.position.distanceTo(obs.position);
                 const combinedRadiusThreshold = 1.4 + obs.radius;
                 
@@ -758,6 +885,41 @@
                     const depthOverlap = combinedRadiusThreshold - distanceToObstacle;
                     forklift.position.addScaledVector(pushNormal, depthOverlap);
                     speed *= -0.25; 
+                }
+            });
+
+            // 4. AUTOMATED PATROL ROBOTS ANIMATION AND PHYSICS INTERACTIONS LOOP
+            activeRobots.forEach(bot => {
+                // Animate linear track loops back and forth
+                bot.progress += delta * bot.speed * bot.direction;
+                if (bot.progress >= 1) {
+                    bot.progress = 1; bot.direction = -1;
+                } else if (bot.progress <= 0) {
+                    bot.progress = 0; bot.direction = 1;
+                }
+
+                const currX = THREE.MathUtils.lerp(bot.startX, bot.endX, bot.progress);
+                const currZ = THREE.MathUtils.lerp(bot.startZ, bot.endZ, bot.progress);
+                bot.mesh.position.set(currX, 0, currZ);
+
+                // Run active collision hazard response processing checks
+                if (gameState === "PLAYING") {
+                    const distanceToRobot = forklift.position.distanceTo(bot.mesh.position);
+                    const robotCollisionThreshold = 1.4 + 0.65; // Boundaries radius match
+
+                    if (distanceToRobot < robotCollisionThreshold) {
+                        const pushNormal = new THREE.Vector3().subVectors(forklift.position, bot.mesh.position).setY(0).normalize();
+                        const depthOverlap = robotCollisionThreshold - distanceToRobot;
+                        
+                        // Push forklift out of the robot's capsule grid allocation space
+                        forklift.position.addScaledVector(pushNormal, depthOverlap);
+                        speed *= -0.4; // Bounce impact velocity reversal
+                        
+                        // Burn auxiliary power reserves upon collision damage hits
+                        fuel = Math.max(0, fuel - delta * 25); 
+                        updateFuelGauge();
+                        triggerForkliftRefuelFlash(0xef4444); // Warning chassis flash
+                    }
                 }
             });
 
@@ -770,7 +932,7 @@
                 dropZone.children[1].scale.y = 1 + Math.sin(Date.now() * 0.003) * 0.05;
             }
 
-            // 4. PICKUP INTERACTION OVERLAPS REGISTRY
+            // 5. PICKUP INTERACTION OVERLAPS REGISTRY
             if (gameState === "PLAYING") {
                 for (let i = 0; i < cargoItems.length; i++) {
                     const box = cargoItems[i];
@@ -780,13 +942,12 @@
                         carriedBoxes.push(box);
                         cargoItems.splice(i, 1);
                         document.getElementById('stack-txt').innerText = carriedBoxes.length;
-                        // spawnDynamicCargoCrate REMOVED HERE -> Boxes are finite now!
                         break;
                     }
                 }
             }
 
-            // Stack spacing updates
+            // Stack vertical distribution updates
             carriedBoxes.forEach((box, index) => {
                 const calculatedBoxHeightY = 0.22 + 0.55 + (index * 1.1);
                 box.position.set(
@@ -797,7 +958,7 @@
                 box.rotation.y = forklift.rotation.y;
             });
 
-            // 5. UNLOAD DELIVERIES TARGET VERIFICATION CHECKS
+            // 6. UNLOAD DELIVERIES TARGET VERIFICATION CHECKS
             if (carriedBoxes.length > 0 && dropZone && gameState === "PLAYING") {
                 const stackFrontLocation = new THREE.Vector3(
                     forklift.position.x + Math.sin(rotationAngle) * 2.2,
@@ -835,7 +996,7 @@
                 }
             }
 
-            // Camera Tracking Loop
+            // Camera Viewport Tracking Loop
             if (forklift && gameState === "PLAYING") {
                 const targetCamX = forklift.position.x - Math.sin(rotationAngle) * 7;
                 const targetCamZ = forklift.position.z - Math.cos(rotationAngle) * 7;
