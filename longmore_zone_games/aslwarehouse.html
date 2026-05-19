@@ -52,7 +52,7 @@
 
     <div class="ui-layer flex flex-col justify-between p-6 h-full">
         
-        <div class="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="w-full flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
             <div class="glass interactive px-5 py-3 rounded-2xl flex items-center gap-4">
                 <span class="text-3xl">🚜</span>
                 <div>
@@ -61,30 +61,45 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-4 w-full md:w-auto justify-end">
-                <div class="glass px-5 py-3 rounded-2xl flex flex-col w-48 md:w-56">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs font-bold tracking-wider text-gray-400 uppercase">Forklift Fuel</span>
+            <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-start xl:justify-end">
+                <div class="glass px-4 py-2.5 rounded-2xl min-w-[140px]">
+                    <p class="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Active Shift</p>
+                    <p id="level-name-txt" class="text-xs font-black text-white truncate max-w-[155px]">Level 1</p>
+                </div>
+
+                <div class="glass px-4 py-2.5 rounded-2xl text-center min-w-[90px]">
+                    <p class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Time Left</p>
+                    <p id="timer-txt" class="text-lg font-black text-red-400">00:00</p>
+                </div>
+
+                <div class="glass px-4 py-2.5 rounded-2xl text-center min-w-[100px]">
+                    <p class="text-[10px] font-bold text-sky-400 uppercase tracking-wider">Shift Goal</p>
+                    <p id="goal-txt" class="text-lg font-black text-sky-400">0 / 3</p>
+                </div>
+
+                <div class="glass px-4 py-3 rounded-2xl flex flex-col w-36">
+                    <div class="flex justify-between items-center mb-0.5">
+                        <span class="text-[10px] font-bold tracking-wider text-gray-400 uppercase">Fuel</span>
                         <span id="fuel-pct" class="text-xs font-black text-emerald-400">100%</span>
                     </div>
-                    <div class="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
                         <div id="fuel-bar" class="bg-gradient-to-r from-emerald-500 to-green-400 h-full transition-all duration-100" style="width: 100%;"></div>
                     </div>
                 </div>
 
-                <div class="glass px-4 py-3 rounded-2xl text-center min-w-[80px]">
+                <div class="glass px-4 py-2.5 rounded-2xl text-center min-w-[70px]">
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Carried</p>
-                    <p id="stack-txt" class="text-xl font-black text-sky-400">0</p>
+                    <p id="stack-txt" class="text-lg font-black text-sky-400">0</p>
                 </div>
 
-                <div class="glass px-5 py-3 rounded-2xl text-center min-w-[100px]">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Delivered</p>
-                    <p id="score-txt" class="text-xl font-black text-amber-400">0</p>
+                <div class="glass px-4 py-2.5 rounded-2xl text-center min-w-[85px]">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Score</p>
+                    <p id="score-txt" class="text-lg font-black text-amber-400">0</p>
                 </div>
 
-                <div class="glass px-4 py-3 rounded-2xl text-center">
+                <div class="glass px-4 py-2.5 rounded-2xl text-center">
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Streak</p>
-                    <p id="streak-txt" class="text-xl font-black text-orange-400">0🔥</p>
+                    <p id="streak-txt" class="text-lg font-black text-orange-400">0🔥</p>
                 </div>
             </div>
         </div>
@@ -97,7 +112,7 @@
                 <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">S</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">▼</span> Reverse Gear</p>
                 <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">A</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">◀</span> Steer Left</p>
                 <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">D</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">▶</span> Steer Right</p>
-                <div class="pt-1.5 border-t border-white/5 text-amber-400 font-medium">Stack infinitely! Beware: more boxes slow you down and burn fuel much faster. Answer dashboard questions to refuel!</div>
+                <div class="pt-1.5 border-t border-white/5 text-amber-400 font-medium">Clear the map layout! Secure all boxes to reach your shift target before time expires. More crates held reduce speed and drain extra power reserves.</div>
             </div>
 
             <div class="w-full md:w-96 glass interactive rounded-2xl overflow-hidden flex flex-col border border-white/10 self-center md:self-end shadow-2xl">
@@ -116,10 +131,42 @@
         </div>
 
         <div class="w-full flex justify-between items-center text-[10px] text-gray-500 font-mono tracking-wider">
-            <div>INFINITE LOGISTICS INFRASTRUCTURE GENERATION ACTIVE</div>
-            <div class="hidden sm:block">GRID MATRICES PARSED // DYNAMIC MASS ON FORK ACTIVE</div>
+            <div>MULTI-SHIFT GENERATION SYSTEM CORE ONLINE</div>
+            <div class="hidden sm:block">GRID TRANSLATORS RUNNING // FUEL CONSUMPTION SCALING ACTIVE // DELIVER TO NEON FIELDS</div>
         </div>
 
+    </div>
+
+    <div id="win-screen" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex flex-col justify-center items-center text-center hidden p-6">
+        <div class="glass p-8 rounded-3xl max-w-md border border-amber-500/30 shadow-2xl space-y-6 animate-bounce-short">
+            <span class="text-6xl">🏆</span>
+            <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 uppercase tracking-wide">Logistics Master!</h2>
+            <p class="text-gray-300 text-sm">You completed all operational warehouse shifts safely, navigated advanced grid obstacles, and satisfied your target quotas under extreme time criteria!</p>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4 grid grid-cols-2 gap-4 text-left">
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">Total Deliveries</p>
+                    <p id="final-score" class="text-xl font-black text-amber-400">0</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase">Highest Answer Streak</p>
+                    <p id="final-streak" class="text-xl font-black text-orange-400">0🔥</p>
+                </div>
+            </div>
+            <button onclick="restartGame()" class="w-full interactive bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-black py-3 px-6 rounded-xl transition duration-150 text-sm tracking-wider uppercase">
+                Start New Shift Sequence
+            </button>
+        </div>
+    </div>
+
+    <div id="game-over-screen" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex flex-col justify-center items-center text-center hidden p-6">
+        <div class="glass p-8 rounded-3xl max-w-md border border-red-500/30 shadow-2xl space-y-5">
+            <span class="text-6xl">🚨</span>
+            <h2 class="text-3xl font-black text-red-500 uppercase tracking-wide">Shift Timeout</h2>
+            <p class="text-gray-300 text-sm">The shift time limit expired before target cargo delivery requirements could be successfully reached. Keep practicing signs to speed up operations!</p>
+            <button onclick="retryCurrentLevel()" class="w-full interactive bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-black py-3 px-6 rounded-xl transition duration-150 text-sm tracking-wider uppercase">
+                Retry Shift
+            </button>
+        </div>
     </div>
 
     <script>
@@ -151,7 +198,29 @@
         let fuel = 100;
         let score = 0;
         let answerStreak = 0;
+        let highestStreak = 0;
         let isQuizLocked = false;
+
+        // --- APPARATUS PHYSICS MECHANICS VALUES ---
+        let speed = 0;
+        const maxSpeed = 0.16;
+        const acceleration = 0.006;
+        const friction = 0.003;
+        let rotationAngle = 0;
+        const turnSpeed = 0.035;
+
+        // --- THREE.JS GLOBALS & SCENE REPO ARRAY MATRICES ---
+        let forkliftChassisMesh = null;
+        let forklift = null;
+        let dropZone = null;
+        let cargoItems = [];
+        let carriedBoxes = [];
+        const obstacles = [];
+
+        let currentLevelIdx = 0;
+        let levelDeliveries = 0;
+        let timeLeft = 0;
+        let gameState = "PLAYING";
 
         // --- KEYBOARD LISTENER ARRAYS ---
         const keys = { w: false, s: false, a: false, d: false, ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
@@ -165,11 +234,11 @@
         // --- CONNECT DATA INFRASTRUCTURE ---
         async function fetchVocabularyData() {
             try {
-                const res = await fetch('../vocab.json');
-                if(!res.ok) throw new Error("CORS or pipeline limits hit.");
+                const res = await fetch('./vocab.json');
+                if(!res.ok) throw new Error("CORS limit hit.");
                 vocabDatabase = await res.json();
             } catch(e) {
-                console.warn("Direct JSON pipeline unavailable, routing payload from optimized data array backups...", e);
+                console.warn("Routing payload from backup datasets...", e);
                 vocabDatabase = localVocabBackup;
             }
             openTopicMenu();
@@ -256,6 +325,7 @@
             if(idx === item.correct) {
                 targetBtn.className = "p-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500 text-left text-xs font-bold text-emerald-400";
                 answerStreak++;
+                if (answerStreak > highestStreak) highestStreak = answerStreak;
                 const fuelGain = 25 + (answerStreak > 3 ? 15 : 0);
                 fuel = Math.min(100, fuel + fuelGain);
                 updateFuelGauge();
@@ -296,17 +366,20 @@
         scene.background = new THREE.Color(0x0c0d14);
         scene.fog = new THREE.FogExp2(0x0c0d14, 0.02);
 
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const viewW = window.innerWidth || 800;
+        const viewH = window.innerHeight || 600;
+        const camera = new THREE.PerspectiveCamera(50, viewW / viewH, 0.1, 1000);
+        
         const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(viewW, viewH);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
         // Environment Lights
-        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        const ambient = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambient);
 
-        const coreLight = new THREE.PointLight(0xf59e0b, 1.2, 40);
+        const coreLight = new THREE.PointLight(0xf59e0b, 1.5, 40);
         coreLight.position.set(0, 8, 0);
         scene.add(coreLight);
 
@@ -314,57 +387,85 @@
         directional.position.set(10, 15, 10);
         scene.add(directional);
 
-        // Ground Floor Warehouse Grid Mesh
+        // Warehouse Floor Grid
         const warehouseFloor = new THREE.GridHelper(50, 50, 0x334155, 0x1e293b);
         warehouseFloor.position.y = 0;
         scene.add(warehouseFloor);
 
-        // --- GLOBAL MESH POINTERS & SCENE ARRAYS ---
-        let forkliftChassisMesh = null;
-        let forklift = null;
-        let dropZone = null;
-        let cargoItems = [];
-        let carriedBoxes = [];
-        const obstacles = [];
-
         // =========================================================================
-        // --- LEVEL GRID SYSTEM CONFIGURATION ---
-        // Edit numbers below to build new levels easily!
-        // Dimensions: 12x12 grid representing coordinates from -22 to +22 on map
-        // 0 = Empty floor space
-        // 1 = Obstacle pillar column
-        // 2 = Delivery neon zone target pad
-        // 3 = Item spawn point locations
+        // --- MULTI-LEVEL GRID SYSTEM DATA CONTROLLER ---
         // =========================================================================
-        const LEVEL_GRID = [
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
-            [0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0],
-            [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+        const LEVELS_DATA = [
+            {
+                name: "Shift 1: Storage Bay Alpha",
+                timeLimit: 90, 
+                targetDeliveries: 3,
+                grid: [
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+                ]
+            },
+            {
+                name: "Shift 2: Distribution Corridor",
+                timeLimit: 75,
+                targetDeliveries: 5,
+                grid: [
+                    [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1],
+                    [0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 3, 0, 1, 0, 2, 0, 0, 1, 0, 3, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 3, 0, 0, 0, 0, 0, 0, 3, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1]
+                ]
+            },
+            {
+                name: "Shift 3: Tight Terminal Maze",
+                timeLimit: 60,
+                targetDeliveries: 6,
+                grid: [
+                    [1, 3, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0],
+                    [0, 0, 1, 2, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+                    [0, 3, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+                    [1, 3, 0, 0, 0, 1, 1, 0, 0, 0, 3, 1]
+                ]
+            }
         ];
 
-        const GRID_SIZE = LEVEL_GRID.length;
-        const MAP_RANGE = 44; // Spans from -22 to +22
+        const GRID_SIZE = LEVELS_DATA[0].grid.length;
+        const MAP_RANGE = 44; 
         const CELL_SIZE = MAP_RANGE / GRID_SIZE;
 
-        // Translate grid indexes directly to 3D world vectors
         function gridToWorldCoords(row, col) {
             const x = -MAP_RANGE / 2 + (col * CELL_SIZE) + CELL_SIZE / 2;
             const z = -MAP_RANGE / 2 + (row * CELL_SIZE) + CELL_SIZE / 2;
             return { x, z };
         }
 
-        // --- PROCEDURAL ENGINE ASSEMBLY FACTORIES ---
-        
-        // 1. FORKLIFT VEHICLE UNIT BUILDER
+        // --- PROCEDURAL 3D MESH GENERATION FACTORIES ---
         function buildForkliftMesh() {
             const group = new THREE.Group();
 
@@ -393,14 +494,7 @@
             // Cylindrical Drive Wheels Assemblies
             const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.3, 16);
             const wheelMat = new THREE.MeshStandardMaterial({ color: 0x030712, roughness: 0.9 });
-            
-            const offsets = [
-                [-0.85, 0.35, 0.8],  // Front Left
-                [0.85, 0.35, 0.8],   // Front Right
-                [-0.85, 0.35, -0.8], // Rear Left
-                [0.85, 0.35, -0.8]   // Rear Right
-            ];
-            
+            const offsets = [[-0.85, 0.35, 0.8], [0.85, 0.35, 0.8], [-0.85, 0.35, -0.8], [0.85, 0.35, -0.8]];
             offsets.forEach(pos => {
                 const wh = new THREE.Mesh(wheelGeo, wheelMat);
                 wh.rotation.z = Math.PI / 2;
@@ -408,26 +502,20 @@
                 group.add(wh);
             });
 
-            // Front Mast Vertical Lifting Rails
+            // Front Lift Mast
             const mastGeo = new THREE.BoxGeometry(1.2, 2.0, 0.15);
             const mastMat = new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.7 });
             const mast = new THREE.Mesh(mastGeo, mastMat);
             mast.position.set(0, 1.2, 1.35);
             group.add(mast);
 
-            // Front Metal Carrier Forks Prongs Support Group
+            // Carrier Forks Support Group
             const forksGroup = new THREE.Group();
-            forksGroup.name = "forksAssembly";
             forksGroup.position.set(0, 0.15, 1.45);
-
             const prongGeo = new THREE.BoxGeometry(0.2, 0.05, 1.1);
             const prongMat = new THREE.MeshStandardMaterial({ color: 0x9ca3af, metalness: 0.9, roughness: 0.1 });
-            
-            const leftProng = new THREE.Mesh(prongGeo, prongMat);
-            leftProng.position.set(-0.35, 0, 0.55);
-            const rightProng = new THREE.Mesh(prongGeo, prongMat);
-            rightProng.position.set(0.35, 0, 0.55);
-
+            const leftProng = new THREE.Mesh(prongGeo, prongMat); leftProng.position.set(-0.35, 0, 0.55);
+            const rightProng = new THREE.Mesh(prongGeo, prongMat); rightProng.position.set(0.35, 0, 0.55);
             forksGroup.add(leftProng, rightProng);
             group.add(forksGroup);
 
@@ -435,29 +523,23 @@
             return group;
         }
 
-        // 2. INDUSTRIAL CARGO BOX BUILDER
         function createCargoBoxMesh() {
             const boxGeo = new THREE.BoxGeometry(1.1, 1.1, 1.1);
             const boxMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
             const mesh = new THREE.Mesh(boxGeo, boxMat);
-            
             const bandsGeo = new THREE.BoxGeometry(1.12, 1.12, 1.12);
             const bandsMat = new THREE.MeshStandardMaterial({ color: 0x78350f, wireframe: true });
             mesh.add(new THREE.Mesh(bandsGeo, bandsMat));
-            
             scene.add(mesh);
             return mesh;
         }
 
-        // 3. LOGISTICS GLOWING DELIVERY PAD
         function buildDropZoneMesh() {
             const zoneGroup = new THREE.Group();
-            
             const floorRingGeo = new THREE.RingGeometry(2.0, 2.3, 32);
             const floorRingMat = new THREE.MeshBasicMaterial({ color: 0x10b981, side: THREE.DoubleSide });
             const ring = new THREE.Mesh(floorRingGeo, floorRingMat);
-            ring.rotation.x = Math.PI / 2;
-            ring.position.y = 0.02;
+            ring.rotation.x = Math.PI / 2; ring.position.y = 0.02;
             zoneGroup.add(ring);
 
             const beamGeo = new THREE.CylinderGeometry(2.0, 2.0, 4.0, 16, 1, true);
@@ -470,55 +552,77 @@
             return zoneGroup;
         }
 
-        // 4. MAP OBSTACLE SYSTEM FACTORY
         function buildPillarObstacle(x, z) {
             const group = new THREE.Group();
-            
             const baseGeo = new THREE.CylinderGeometry(1.2, 1.2, 1.0, 12);
             const baseMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 });
-            const base = new THREE.Mesh(baseGeo, baseMat);
-            base.position.y = 0.5;
-            group.add(base);
+            const base = new THREE.Mesh(baseGeo, baseMat); base.position.y = 0.5; group.add(base);
             
             const pillarGeo = new THREE.CylinderGeometry(0.8, 0.8, 8.0, 12);
             const pillarMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
-            const pillar = new THREE.Mesh(pillarGeo, pillarMat);
-            pillar.position.y = 4.0;
-            group.add(pillar);
+            const pillar = new THREE.Mesh(pillarGeo, pillarMat); pillar.position.y = 4.0; group.add(pillar);
             
             const stripeGeo = new THREE.CylinderGeometry(1.22, 1.22, 0.4, 12);
             const stripeMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
-            const stripe = new THREE.Mesh(stripeGeo, stripeMat);
-            stripe.position.y = 0.5;
-            group.add(stripe);
+            const stripe = new THREE.Mesh(stripeGeo, stripeMat); stripe.position.y = 0.5; group.add(stripe);
 
             group.position.set(x, 0, z);
             scene.add(group);
             
             obstacles.push({
                 position: new THREE.Vector3(x, 0, z),
-                radius: 1.2
+                radius: 1.2,
+                meshGroup: group 
             });
         }
 
-        // --- RUN INITIAL GENERATOR INTERNALS VIA MATRIX SYSTEM ---
-        function initializeMapFromGrid() {
+        // --- LEVEL TRANSITIONS INFRASTRUCTURE ENGINE ---
+        function loadLevel(idx) {
+            currentLevelIdx = idx;
+            levelDeliveries = 0;
+            
+            const lvl = LEVELS_DATA[currentLevelIdx];
+            timeLeft = lvl.timeLimit;
+            
+            document.getElementById('level-name-txt').innerText = lvl.name;
+            document.getElementById('goal-txt').innerText = `0 / ${lvl.targetDeliveries}`;
+
+            // Clean previous obstacles
+            obstacles.forEach(obs => { if (obs.meshGroup) scene.remove(obs.meshGroup); });
+            obstacles.length = 0;
+
+            // Clean floor crates
+            cargoItems.forEach(box => scene.remove(box));
+            cargoItems.length = 0;
+
+            // Clean stack
+            carriedBoxes.forEach(box => scene.remove(box));
+            carriedBoxes.length = 0;
+            document.getElementById('stack-txt').innerText = 0;
+
+            if (dropZone) {
+                scene.remove(dropZone);
+                dropZone = null;
+            }
+
+            // Find spawn layout metrics from matrix mapping config loop
+            let spawnX = 0;
+            let spawnZ = 2;
+            
             for (let r = 0; r < GRID_SIZE; r++) {
                 for (let c = 0; c < GRID_SIZE; c++) {
-                    const itemType = LEVEL_GRID[r][c];
+                    const itemType = lvl.grid[r][c];
                     if (itemType === 0) continue;
-
                     const world = gridToWorldCoords(r, c);
 
-                    if (itemType === 1) {
-                        // Spawn Column Obstacle
-                        buildPillarObstacle(world.x, world.z);
-                    } else if (itemType === 2) {
-                        // Spawn Glowing Delivery Pad Target
+                    if (itemType === 1) buildPillarObstacle(world.x, world.z);
+                    else if (itemType === 2) {
                         dropZone = buildDropZoneMesh();
                         dropZone.position.set(world.x, 0, world.z);
+                        // Default position forklift right over its newly registered target drop zone
+                        spawnX = world.x;
+                        spawnZ = world.z;
                     } else if (itemType === 3) {
-                        // Spawn Box Cargo Target Instance
                         const crate = createCargoBoxMesh();
                         crate.position.set(world.x, 0.55, world.z);
                         cargoItems.push(crate);
@@ -526,171 +630,163 @@
                 }
             }
 
-            // Fallback generation failsafes if grid lacked mandatory configurations
+            // Reset Forklift position safely - SNAP TELEPORT IMMEDIATELY 
+            if (forklift) {
+                forklift.position.set(spawnX, 0, spawnZ);
+                forklift.rotation.set(0, 0, 0);
+                rotationAngle = 0;
+                speed = 0;
+                
+                // FORCE SNAP CAMERA COORDINATES TO INSTANTLY BREAK INTERPOLATION OVERLAPS
+                camera.position.set(spawnX, forklift.position.y + 4.5, spawnZ - 7);
+                camera.lookAt(forklift.position);
+            }
+
             if (!dropZone) {
                 dropZone = buildDropZoneMesh();
                 dropZone.position.set(-15, 0, -15);
             }
-            if (cargoItems.length === 0) {
-                spawnDynamicCargoCrate();
-            }
+
+            gameState = "PLAYING";
+            document.getElementById('win-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
         }
 
-        function spawnDynamicCargoCrate() {
-            const crate = createCargoBoxMesh();
-            let rx, rz;
-            let isValid = false;
-
-            while(!isValid) {
-                rx = (Math.random() - 0.5) * 38;
-                rz = (Math.random() - 0.5) * 38;
-                isValid = true;
-
-                if(Math.abs(rx - dropZone.position.x) < 5 && Math.abs(rz - dropZone.position.z) < 5) {
-                    isValid = false;
-                    continue;
-                }
-
-                for(let obs of obstacles) {
-                    let distance = new THREE.Vector2(rx, rz).distanceTo(new THREE.Vector2(obs.position.x, obs.position.z));
-                    if(distance < (obs.radius + 2.0)) {
-                        isValid = false;
-                        break;
-                    }
-                }
-            }
-
-            crate.position.set(rx, 0.55, rz);
-            cargoItems.push(crate);
+        function restartGame() {
+            score = 0;
+            document.getElementById('score-txt').innerText = score;
+            highestStreak = 0;
+            answerStreak = 0;
+            document.getElementById('streak-txt').innerText = "0🔥";
+            fuel = 100;
+            updateFuelGauge();
+            loadLevel(0);
         }
 
-        // Build Forklift Player Vehicle Instance
+        function retryCurrentLevel() {
+            fuel = 100;
+            updateFuelGauge();
+            loadLevel(currentLevelIdx);
+        }
+
+        // --- LIFE SYNC ENGINE INITIALIZATION ---
         forklift = buildForkliftMesh();
-        forklift.position.set(0, 0, 4);
+        loadLevel(0);
 
-        // Run Grid System Setup Loader
-        initializeMapFromGrid();
-
-        // --- APPARATUS PHYSICS MECHANICS VALUES ---
-        let speed = 0;
-        const maxSpeed = 0.16;
-        const acceleration = 0.006;
-        const friction = 0.003;
-        let rotationAngle = 0;
-        const turnSpeed = 0.035;
+        const clock = new THREE.Clock();
+        camera.position.set(0, 12, -14);
 
         function triggerForkliftRefuelFlash(hexColor) {
             if (forkliftChassisMesh) {
                 const originalColor = 0xd97706;
                 forkliftChassisMesh.material.color.setHex(hexColor);
-                setTimeout(() => {
-                    forkliftChassisMesh.material.color.setHex(originalColor);
-                }, 800);
+                setTimeout(() => { forkliftChassisMesh.material.color.setHex(originalColor); }, 800);
             }
         }
 
-        // --- ENGINE TICK LOGICS MATRIX ANIMATION LOOP ---
-        const clock = new THREE.Clock();
-
+        // --- ENGINE TICK LOGICS ANIMATION LOOP ---
         function tick() {
             requestAnimationFrame(tick);
             const delta = Math.min(clock.getDelta(), 0.1);
 
-            // 1. VEHICLE CONTROLS & RESTRAINTS PHYSICS EXECUTION
+            // 1. SHIFT COUNTDOWN MANAGEMENT 
+            if (gameState === "PLAYING") {
+                timeLeft -= delta;
+                if (timeLeft <= 0) {
+                    timeLeft = 0;
+                    gameState = "GAMEOVER";
+                    document.getElementById('game-over-screen').classList.remove('hidden');
+                }
+                const min = Math.floor(timeLeft / 60);
+                const sec = Math.floor(timeLeft % 60);
+                document.getElementById('timer-txt').innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            }
+
+            // 2. VEHICLE CONTROLS & RESTRAINTS PHYSICS EXECUTION
             const isDrivingForward = keys.w || keys.ArrowUp;
             const isDrivingBackward = keys.s || keys.ArrowDown;
             const isSteeringLeft = keys.a || keys.ArrowLeft;
             const isSteeringRight = keys.d || keys.ArrowRight;
 
-            if(fuel <= 0) {
-                fuel = 0;
-            }
+            if (gameState === "PLAYING") {
+                if(fuel <= 0) fuel = 0;
 
-            // --- INFINITE BOX PHYSICS WEIGHT SCALING SCANNERS ---
-            // Speed Penalty: Each box drops engine throttle by 15%, bottoming out at 20% max capacity performance
-            const speedPenaltyFactor = Math.max(0.20, 1.0 - (carriedBoxes.length * 0.15));
-            const activeMaxSpeed = maxSpeed * speedPenaltyFactor;
+                const speedPenaltyFactor = Math.max(0.20, 1.0 - (carriedBoxes.length * 0.15));
+                const activeMaxSpeed = maxSpeed * speedPenaltyFactor;
+                const fuelBurnFactor = 1.0 + (carriedBoxes.length * 0.30);
 
-            // Fuel Consumption Scaling: Base consumption rate + 30% added drain per box carried 
-            const fuelBurnFactor = 1.0 + (carriedBoxes.length * 0.30);
+                if(fuel > 0) {
+                    if (isDrivingForward) speed = Math.min(speed + acceleration, activeMaxSpeed);
+                    else if (isDrivingBackward) speed = Math.max(speed - acceleration, -activeMaxSpeed * 0.6);
+                    else {
+                        if (speed > 0) speed = Math.max(speed - friction, 0);
+                        if (speed < 0) speed = Math.min(speed + friction, 0);
+                    }
 
-            if(fuel > 0) {
-                if (isDrivingForward) speed = Math.min(speed + acceleration, activeMaxSpeed);
-                else if (isDrivingBackward) speed = Math.max(speed - acceleration, -activeMaxSpeed * 0.6);
-                else {
-                    if (speed > 0) speed = Math.max(speed - friction, 0);
-                    if (speed < 0) speed = Math.min(speed + friction, 0);
+                    if (speed > activeMaxSpeed) speed = activeMaxSpeed;
+                    if (speed < -activeMaxSpeed * 0.6) speed = -activeMaxSpeed * 0.6;
+
+                    if (Math.abs(speed) > 0.01) {
+                        const directionMultiplier = speed > 0 ? 1 : -1;
+                        if (isSteeringLeft) rotationAngle += turnSpeed * directionMultiplier;
+                        if (isSteeringRight) rotationAngle -= turnSpeed * directionMultiplier;
+                        
+                        fuel -= delta * (1.2 + Math.abs(speed) * 35) * fuelBurnFactor;
+                        updateFuelGauge();
+                    }
+                } else {
+                    speed *= 0.85;
                 }
 
-                if (speed > activeMaxSpeed) speed = activeMaxSpeed;
-                if (speed < -activeMaxSpeed * 0.6) speed = -activeMaxSpeed * 0.6;
-
-                if (Math.abs(speed) > 0.01) {
-                    const directionMultiplier = speed > 0 ? 1 : -1;
-                    if (isSteeringLeft) rotationAngle += turnSpeed * directionMultiplier;
-                    if (isSteeringRight) rotationAngle -= turnSpeed * directionMultiplier;
-                    
-                    // Apply expanded dynamic fuel burn factor formula
-                    fuel -= delta * (1.2 + Math.abs(speed) * 35) * fuelBurnFactor;
-                    updateFuelGauge();
-                }
+                forklift.position.x += Math.sin(rotationAngle) * speed;
+                forklift.position.z += Math.cos(rotationAngle) * speed;
+                forklift.rotation.y = rotationAngle;
             } else {
                 speed *= 0.85;
+                forklift.position.x += Math.sin(rotationAngle) * speed;
+                forklift.position.z += Math.cos(rotationAngle) * speed;
+                forklift.rotation.y = rotationAngle;
             }
 
-            // Apply calculated movement vectors
-            forklift.position.x += Math.sin(rotationAngle) * speed;
-            forklift.position.z += Math.cos(rotationAngle) * speed;
-            forklift.rotation.y = rotationAngle;
-
-            // 2. COLUMN OBSTACLE PHYSICAL COLLISION ENGINE
+            // 3. OBSTACLE INTERACTION COLLISION ENGINE
             obstacles.forEach(obs => {
                 const distanceToObstacle = forklift.position.distanceTo(obs.position);
                 const combinedRadiusThreshold = 1.4 + obs.radius;
                 
                 if (distanceToObstacle < combinedRadiusThreshold) {
-                    const pushNormal = new THREE.Vector3()
-                        .subVectors(forklift.position, obs.position)
-                        .setY(0)
-                        .normalize();
-                    
+                    const pushNormal = new THREE.Vector3().subVectors(forklift.position, obs.position).setY(0).normalize();
                     const depthOverlap = combinedRadiusThreshold - distanceToObstacle;
                     forklift.position.addScaledVector(pushNormal, depthOverlap);
-                    speed *= -0.25; // Impact deflection bounce kickback
+                    speed *= -0.25; 
                 }
             });
 
-            // Outer Retaining Boundary Walls
             const bound = 24;
             forklift.position.x = Math.max(-bound, Math.min(bound, forklift.position.x));
             forklift.position.z = Math.max(-bound, Math.min(bound, forklift.position.z));
 
-            // 3. REVOLVING DECORATIONS LIFTS RADIAL PULSE CHANNELS
             if(dropZone) {
                 dropZone.children[0].rotation.z += 0.005;
                 dropZone.children[1].scale.y = 1 + Math.sin(Date.now() * 0.003) * 0.05;
             }
 
-            // 4. TOWING CODES COLLISION INTERFACES (INFINITE BOX LIFTER REGISTRY)
-            for (let i = 0; i < cargoItems.length; i++) {
-                const box = cargoItems[i];
-                const distance = forklift.position.distanceTo(box.position);
+            // 4. PICKUP INTERACTION OVERLAPS REGISTRY
+            if (gameState === "PLAYING") {
+                for (let i = 0; i < cargoItems.length; i++) {
+                    const box = cargoItems[i];
+                    const distance = forklift.position.distanceTo(box.position);
 
-                // Check collision intersection context against the front fork prongs tips
-                if (distance < 2.3) {
-                    carriedBoxes.push(box);
-                    cargoItems.splice(i, 1);
-                    
-                    // Dynamically refresh HUD monitor element tracker counter text layout
-                    document.getElementById('stack-txt').innerText = carriedBoxes.length;
-                    
-                    // Spawn another crate replacement elsewhere on grid map layouts automatically
-                    spawnDynamicCargoCrate();
-                    break;
+                    if (distance < 2.3) {
+                        carriedBoxes.push(box);
+                        cargoItems.splice(i, 1);
+                        document.getElementById('stack-txt').innerText = carriedBoxes.length;
+                        // spawnDynamicCargoCrate REMOVED HERE -> Boxes are finite now!
+                        break;
+                    }
                 }
             }
 
-            // Real-time iteration handler loop to update stacked structures vertically
+            // Stack spacing updates
             carriedBoxes.forEach((box, index) => {
                 const calculatedBoxHeightY = 0.22 + 0.55 + (index * 1.1);
                 box.position.set(
@@ -701,58 +797,71 @@
                 box.rotation.y = forklift.rotation.y;
             });
 
-            // Unloading processes drop target triggers verification checks
-            if (carriedBoxes.length > 0 && dropZone) {
+            // 5. UNLOAD DELIVERIES TARGET VERIFICATION CHECKS
+            if (carriedBoxes.length > 0 && dropZone && gameState === "PLAYING") {
                 const stackFrontLocation = new THREE.Vector3(
                     forklift.position.x + Math.sin(rotationAngle) * 2.2,
                     0.55,
                     forklift.position.z + Math.cos(rotationAngle) * 2.2
                 );
 
-                const distanceToDropZone = stackFrontLocation.distanceTo(dropZone.position);
-                if(distanceToDropZone < 2.4) {
+                if(stackFrontLocation.distanceTo(dropZone.position) < 2.4) {
                     const stackTotalCount = carriedBoxes.length;
-                    
-                    carriedBoxes.forEach(box => {
-                        scene.remove(box);
-                    });
+                    carriedBoxes.forEach(box => scene.remove(box));
                     carriedBoxes = [];
-                    
-                    // Reset HUD element counts trackers
                     document.getElementById('stack-txt').innerText = 0;
                     
-                    // Adjust metrics data pools values updates loops
                     score += stackTotalCount;
+                    levelDeliveries += stackTotalCount;
                     document.getElementById('score-txt').innerText = score;
                     
+                    const lvl = LEVELS_DATA[currentLevelIdx];
+                    document.getElementById('goal-txt').innerText = `${levelDeliveries} / ${lvl.targetDeliveries}`;
+
                     const card = document.getElementById('score-txt').parentElement;
                     card.classList.add('scale-110', 'border-amber-500');
                     setTimeout(() => card.classList.remove('scale-110', 'border-amber-500'), 150);
+
+                    if (levelDeliveries >= lvl.targetDeliveries) {
+                        if (currentLevelIdx + 1 < LEVELS_DATA.length) {
+                            loadLevel(currentLevelIdx + 1);
+                        } else {
+                            gameState = "WIN";
+                            document.getElementById('final-score').innerText = score;
+                            document.getElementById('final-streak').innerText = highestStreak;
+                            document.getElementById('win-screen').classList.remove('hidden');
+                        }
+                    }
                 }
             }
 
-            // 5. THIRD-PERSON SMOOTH FOLLOW CAMERA LERP VECTOR CALCULATIONS
-            const targetCamX = forklift.position.x - Math.sin(rotationAngle) * 7;
-            const targetCamZ = forklift.position.z - Math.cos(rotationAngle) * 7;
-            const targetCamY = forklift.position.y + 4.5;
+            // Camera Tracking Loop
+            if (forklift && gameState === "PLAYING") {
+                const targetCamX = forklift.position.x - Math.sin(rotationAngle) * 7;
+                const targetCamZ = forklift.position.z - Math.cos(rotationAngle) * 7;
+                const targetCamY = forklift.position.y + 4.5;
 
-            camera.position.x += (targetCamX - camera.position.x) * 0.08;
-            camera.position.y += (targetCamY - camera.position.y) * 0.08;
-            camera.position.z += (targetCamZ - camera.position.z) * 0.08;
-            camera.lookAt(forklift.position.x, forklift.position.y + 0.8, forklift.position.z);
+                camera.position.x += (targetCamX - camera.position.x) * 0.08;
+                camera.position.y += (targetCamY - camera.position.y) * 0.08;
+                camera.position.z += (targetCamZ - camera.position.z) * 0.08;
+                camera.lookAt(forklift.position.x, forklift.position.y + 0.8, forklift.position.z);
+            }
 
             renderer.render(scene, camera);
         }
 
-        // --- OBSERVER HANDLERS VISUAL MATRIX ---
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            camera.aspect = w / h;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(w, h);
         });
 
-        // Initialize Core System Loops Execution Pipelines
+        // Initialize Vocabulary Data Engine
         fetchVocabularyData();
+        
+        // Execute primary render loop
         tick();
     </script>
 </body>
