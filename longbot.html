@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Learning Robot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f4f8;
+            overflow-x: hidden;
+            padding: 1rem;
+        }
+
+        /* Robot Animation */
+        @keyframes hover {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+        
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        @keyframes lookAround {
+            0%, 40%, 100% { transform: translateX(0); }
+            50%, 60% { transform: translateX(-4px); } /* Look left */
+            70%, 90% { transform: translateX(4px); }  /* Look right */
+        }
+
+        /* Conversational Animations */
+        @keyframes happy-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.05); }
+        }
+
+        @keyframes dance-move {
+            0%, 100% { transform: rotate(0) translateX(0); }
+            25% { transform: rotate(-5deg) translateX(-5px); }
+            75% { transform: rotate(5deg) translateX(5px); }
+        }
+
+        .robot-container {
+            animation: hover 3s ease-in-out infinite;
+        }
+        
+        .eye {
+            animation: blink 3.5s ease-in-out infinite;
+        }
+
+        .pupil {
+            animation: lookAround 5s ease-in-out infinite;
+            background-color: #3b82f6; /* Match head color */
+            box-shadow: 0 0 8px #60a5fa; /* Glowing effect */
+        }
+
+        .robot-head {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Typing State */
+        #app-container.is-typing .robot-container,
+        #app-container.is-typing .pupil {
+            animation: none;
+        }
+
+        #app-container.is-typing .robot-head {
+            transform: rotate(-15deg);
+        }
+
+        /* Happy State */
+        #app-container.is-happy .robot-container {
+            animation: happy-bounce 0.5s ease-in-out 2;
+        }
+
+        /* Sad State */
+        #app-container.is-sad .robot-head {
+            transform: rotate(10deg) translateY(10px);
+            transition: transform 0.4s ease-in-out;
+        }
+         #app-container.is-sad .antenna-light {
+            background-color: #3b82f6; /* Sad blue */
+            animation: none;
+        }
+
+        /* Dancing State */
+        #app-container.is-dancing .robot-container {
+            animation: dance-move 0.4s ease-in-out infinite;
+        }
+
+
+        /* Speech Bubble Tail */
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border: 20px solid transparent;
+            border-top-color: #ffffff;
+            border-bottom: 0;
+            margin-bottom: -20px;
+        }
+
+        /* GIF Loader */
+        .gif-loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div id="app-container" class="relative flex flex-col items-center space-y-4 w-full max-w-md">
+        
+        <div class="w-full">
+            <!-- Speech Bubble -->
+            <div id="speech-bubble" class="speech-bubble relative w-full h-56 sm:h-64 bg-white rounded-2xl shadow-xl p-3 flex justify-center items-center">
+                <div id="loader" class="gif-loader hidden"></div>
+                <img id="gif-display" src="" alt="Dynamic GIF" class="w-full h-full object-cover rounded-lg hidden">
+                <div id="welcome-message" class="text-center text-gray-500">
+                    <p class="text-base sm:text-lg font-semibold">Welcome!</p>
+                    <p class="text-sm sm:text-base">Type a term below to learn the ASL sign.</p>
+                </div>
+                <div id="typing-indicator" class="hidden text-7xl sm:text-8xl font-bold text-gray-300">?</div>
+            </div>
+        </div>
+
+        <!-- Robot -->
+        <div class="robot-container">
+            <div class="flex flex-col items-center">
+                <!-- Head -->
+                <div class="robot-head w-20 h-20 sm:w-24 sm:h-24 bg-blue-500 rounded-full flex justify-center items-center shadow-lg border-4 border-gray-200 relative">
+                    <!-- Eyes -->
+                    <div class="flex space-x-3 sm:space-x-4">
+                        <div class="eye w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full flex justify-center items-center overflow-hidden">
+                            <div class="pupil w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"></div>
+                        </div>
+                        <div class="eye w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full flex justify-center items-center overflow-hidden" style="animation-delay: 0.2s;">
+                            <div class="pupil w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style="animation-delay: 0.2s;"></div>
+                        </div>
+                    </div>
+                    <!-- Antenna -->
+                    <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-1 h-6 bg-gray-400"></div>
+                    <div class="antenna-light absolute -top-8 left-1/2 -translate-x-1/2 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                    <div class="antenna-light absolute -top-8 left-1/2 -translate-x-1/2 w-3 h-3 bg-red-500 rounded-full"></div>
+                </div>
+                <!-- Body -->
+                <div class="w-28 h-36 sm:w-32 sm:h-40 bg-gray-700 rounded-2xl shadow-lg border-4 border-gray-200 relative -mt-2">
+                    <!-- Control Panel -->
+                     <div class="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-14 sm:w-24 sm:h-16 bg-gray-900 rounded-lg p-2 flex flex-wrap gap-2 justify-center items-center">
+                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                        <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                        <div class="w-16 h-1 bg-gray-600 rounded-full"></div>
+                         <div class="w-12 h-1 bg-gray-600 rounded-full"></div>
+                    </div>
+                    <!-- Added Letter L -->
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-4xl sm:text-5xl font-bold text-blue-300" style="text-shadow: 0 0 8px #60a5fa;">L</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="chat-form" class="w-full flex items-center space-x-2 p-4 bg-white rounded-full shadow-md">
+            <input id="chat-input" type="text" placeholder="Search for a term..." class="flex-grow bg-transparent focus:outline-none px-2 text-base sm:text-lg">
+            <button type="submit" class="bg-blue-500 text-white rounded-full px-6 py-2 font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors">Send</button>
+        </form>
+
+    </div>
+<script>
+// This memory object will store words pointing strictly to their CORRECT gif
+let globalTermBank = {};
+
+// 1. Fetch JSON asynchronously from your GitHub Pages workspace folder
+async function loadVocab() {
+    try {
+        const response = await fetch('./vocab.json');
+        if (!response.ok) throw new Error('Failed to fetch vocab data');
+        
+        const data = await response.json();
+        
+        // Build the dictionary securely using correct options
+        globalTermBank = parseVocabIntoSearchBank(data);
+        console.log("Successfully indexed correct terms:", Object.keys(globalTermBank));
+    } catch (error) {
+        console.error("Error loading vocab configuration:", error);
+    }
+}
+
+// 2. Parsers look up ONLY the correct answers, ignoring wrong options
+function parseVocabIntoSearchBank(jsonData) {
+    const termBank = {};
+
+    // Cycle through your root objects (fingerspelling, fingerspelling_numbers, etc.)
+    for (const categoryKey in jsonData) {
+        const category = jsonData[categoryKey];
+        
+        if (category && Array.isArray(category.questions)) {
+            category.questions.forEach(item => {
+                
+                // Validate required fields exist safely
+                if (item.options && typeof item.correct === 'number') {
+                    
+                    // GET THE CORRECT VALUE EXCLUSIVELY BY ITS INDEX
+                    const correctOptionString = item.options[item.correct];
+                    
+                    if (correctOptionString) {
+                        // Standardize string formatting for clean matching matches
+                        const cleanTerm = correctOptionString.trim().toUpperCase();
+                        
+                        // Extract target asset url (handling both item.image and item.gif definitions)
+                        const assetUrl = item.image || item.gif;
+
+                        // Associate the term with its verified target image asset
+                        if (assetUrl && !termBank[cleanTerm]) {
+                            termBank[cleanTerm] = {
+                                gif: assetUrl,
+                                original: correctOptionString
+                            };
+                        }
+                    }
+                }
+            });
+        }
+    }
+    return termBank;
+}
+
+// 3. Simple Distance Algorithm to absorb human typos
+function getLevenshteinDistance(a, b) {
+    const tmp = [];
+    for (let i = 0; i <= a.length; i++) tmp[i] = [i];
+    for (let j = 0; j <= b.length; j++) tmp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            tmp[i][j] = Math.min(
+                tmp[i - 1][j] + 1,
+                tmp[i][j - 1] + 1,
+                tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+            );
+        }
+    }
+    return tmp[a.length][b.length];
+}
+
+// 4. Input handling algorithm
+function findTerm(userInput) {
+    const processedInput = userInput.trim().toUpperCase();
+    if (!processedInput) return null;
+
+    // Direct Match
+    if (globalTermBank[processedInput]) {
+        return globalTermBank[processedInput];
+    }
+
+    // Fuzzy Match (Failsafe for minor spelling variations)
+    let bestMatchKey = null;
+    let lowestDistance = Infinity;
+    const maxTypoThreshold = processedInput.length <= 4 ? 1 : 2;
+
+    for (const dictionaryKey in globalTermBank) {
+        const distance = getLevenshteinDistance(processedInput, dictionaryKey);
+        if (distance < lowestDistance) {
+            lowestDistance = distance;
+            bestMatchKey = dictionaryKey;
+        }
+    }
+
+    if (lowestDistance <= maxTypoThreshold && bestMatchKey) {
+        return globalTermBank[bestMatchKey];
+    }
+
+    return null;
+}
+
+// 5. Update Chat Interface without reloading the page
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const gifDisplay = document.getElementById('gif-display');
+const welcomeMessage = document.getElementById('welcome-message');
+
+chatForm.addEventListener('submit', (e) => {
+    e.preventDefault(); // Blocks the browser from refreshing the tab
+    
+    const userInput = chatInput.value;
+    const termData = findTerm(userInput);
+    
+    if (termData) {
+        welcomeMessage.classList.add('hidden');
+        gifDisplay.src = termData.gif;
+        gifDisplay.classList.remove('hidden');
+    } else {
+        gifDisplay.classList.add('hidden');
+        welcomeMessage.innerHTML = `<p class="text-lg font-semibold">Not Found</p><p>Sorry, I couldn't find a sign for "${userInput}".</p>`;
+        welcomeMessage.classList.remove('hidden');
+    }
+
+    chatInput.value = ''; // Clears input box for the next search
+});
+
+// Execute the async network fetch immediately when script runs
+loadVocab();
+</script>
+
+</body>
+</html>
+
+
+
+
