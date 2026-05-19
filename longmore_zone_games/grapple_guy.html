@@ -197,6 +197,115 @@
             transition: opacity 0.3s ease;
             pointer-events: none;
         }
+
+        /* Win Screen Modal */
+        #win-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 195;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #win-screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .win-card {
+            text-align: center;
+            color: white;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .win-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #22c55e;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        }
+
+        .win-subtitle {
+            font-size: 28px;
+            color: #38bdf8;
+            margin-bottom: 30px;
+        }
+
+        .win-stats {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+        }
+
+        .stat-value {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .win-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .win-btn {
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-try-again {
+            background: #22c55e;
+            color: #0f172a;
+        }
+        .btn-try-again:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-replay {
+            background: #38bdf8;
+            color: #0f172a;
+        }
+        .btn-replay:hover {
+            background: #0ea5e9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(56, 189, 248, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -231,6 +340,31 @@
         </div>
     </div>
 
+    <div id="win-screen">
+        <div class="win-card">
+            <div class="win-title">🎉 YOU DID IT!</div>
+            <div class="win-subtitle">All Levels Conquered!</div>
+            <div class="win-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Levels Completed:</span>
+                    <span class="stat-value" id="win-stats-level">5</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Grapples Used:</span>
+                    <span class="stat-value" id="win-stats-grapples">42</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Difficulty:</span>
+                    <span class="stat-value" id="win-stats-difficulty">Hard</span>
+                </div>
+            </div>
+            <div class="win-buttons">
+                <button class="win-btn btn-replay" onclick="replayCurrentTopic()">Replay Topic</button>
+                <button class="win-btn btn-try-again" onclick="selectNewTopic()">Select New Topic</button>
+            </div>
+        </div>
+    </div>
+
     <div id="quiz-modal">
         <div class="overlay-card quiz-card" style="max-width: 450px; width: 90%;">
             <div id="quiz-category" class="category-tag">CATEGORY</div>
@@ -249,7 +383,7 @@
         // Note: The player always spawns securely on the top-left item [0][0]
         const LEVELS_CONFIG = {
             1: {
-                goalHeight: 5, // Peak goal platform height in meters
+                goalHeight: 5,
                 grid: [
                     [1, 0, 1, 0],
                     [0, 2, 0, 1],
@@ -258,7 +392,7 @@
                 ]
             },
             2: {
-                goalHeight: 11, // Progressively climbing higher with more open-air gaps
+                goalHeight: 11,
                 grid: [
                     [1, 0, 0, 1, 0],
                     [0, 2, 0, 0, 1],
@@ -268,7 +402,7 @@
                 ]
             },
             3: {
-                goalHeight: 18, // Highest custom challenge requires swinging up vertical segments
+                goalHeight: 18,
                 grid: [
                     [1, 0, 1, 0, 0, 1],
                     [0, 2, 0, 2, 0, 0],
@@ -276,6 +410,577 @@
                     [1, 0, 2, 0, 0, 2],
                     [0, 2, 0, 0, 0, 0],
                     [0, 0, 3, 0, 1, 0]  
+                ]
+            },
+            4: {
+                goalHeight: 14,
+                grid: [
+                    [1, 1, 0, 0],
+                    [0, 1, 2, 0],
+                    [0, 0, 2, 1],
+                    [0, 0, 0, 3]
+                ]
+            },
+            5: {
+                goalHeight: 16,
+                grid: [
+                    [1, 0, 1, 0],
+                    [2, 0, 2, 0],
+                    [0, 1, 0, 1],
+                    [0, 2, 0, 3]
+                ]
+            },
+            6: {
+                goalHeight: 19,
+                grid: [
+                    [1, 0, 0, 0, 1],
+                    [1, 2, 0, 2, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 2, 0, 2, 1],
+                    [0, 0, 0, 0, 3]
+                ]
+            },
+            7: {
+                goalHeight: 22,
+                grid: [
+                    [1, 1, 1, 0, 0],
+                    [0, 0, 2, 0, 0],
+                    [1, 0, 0, 2, 1],
+                    [0, 2, 0, 0, 0],
+                    [3, 0, 0, 1, 1]
+                ]
+            },
+            8: {
+                goalHeight: 24,
+                grid: [
+                    [1, 0, 1, 0, 1],
+                    [0, 2, 0, 2, 0],
+                    [1, 0, 2, 0, 1],
+                    [0, 2, 0, 2, 0],
+                    [0, 0, 3, 0, 0]
+                ]
+            },
+            9: {
+                goalHeight: 26,
+                grid: [
+                    [1, 0, 0, 1, 0],
+                    [0, 2, 1, 0, 2],
+                    [0, 1, 0, 2, 0],
+                    [2, 0, 1, 0, 0],
+                    [3, 0, 0, 2, 1]
+                ]
+            },
+            10: {
+                goalHeight: 28,
+                grid: [
+                    [1, 1, 0, 1, 1],
+                    [0, 2, 0, 2, 0],
+                    [1, 0, 0, 0, 1],
+                    [0, 2, 0, 2, 0],
+                    [1, 0, 3, 0, 1]
+                ]
+            },
+            11: {
+                goalHeight: 31,
+                grid: [
+                    [1, 0, 1, 0, 1, 0],
+                    [0, 2, 0, 2, 0, 1],
+                    [1, 0, 0, 0, 2, 0],
+                    [0, 2, 0, 1, 0, 0],
+                    [0, 0, 2, 0, 2, 1],
+                    [1, 0, 0, 0, 0, 3]
+                ]
+            },
+            12: {
+                goalHeight: 33,
+                grid: [
+                    [1, 1, 0, 0, 1, 1],
+                    [0, 0, 2, 2, 0, 0],
+                    [1, 0, 0, 0, 0, 1],
+                    [0, 2, 0, 0, 2, 0],
+                    [1, 0, 2, 2, 0, 1],
+                    [3, 0, 0, 0, 0, 1]
+                ]
+            },
+            13: {
+                goalHeight: 35,
+                grid: [
+                    [1, 0, 0, 1, 0, 0],
+                    [0, 2, 0, 0, 2, 1],
+                    [0, 0, 2, 1, 0, 0],
+                    [1, 0, 0, 2, 0, 2],
+                    [0, 2, 0, 0, 0, 0],
+                    [1, 0, 1, 0, 0, 3]
+                ]
+            },
+            14: {
+                goalHeight: 37,
+                grid: [
+                    [1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0],
+                    [2, 0, 2, 0, 2, 0],
+                    [0, 1, 0, 1, 0, 1],
+                    [0, 0, 0, 0, 0, 0],
+                    [3, 0, 1, 0, 1, 0]
+                ]
+            },
+            15: {
+                goalHeight: 39,
+                grid: [
+                    [1, 0, 1, 0, 1, 0],
+                    [0, 2, 0, 2, 0, 2],
+                    [1, 0, 1, 0, 1, 0],
+                    [0, 2, 0, 2, 0, 2],
+                    [1, 0, 1, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 3]
+                ]
+            },
+            16: {
+                goalHeight: 41,
+                grid: [
+                    [1, 0, 0, 0, 0, 1],
+                    [0, 2, 1, 0, 2, 0],
+                    [0, 0, 2, 2, 0, 0],
+                    [1, 0, 0, 0, 2, 0],
+                    [0, 2, 0, 1, 0, 2],
+                    [3, 0, 0, 0, 0, 1]
+                ]
+            },
+            17: {
+                goalHeight: 43,
+                grid: [
+                    [1, 1, 0, 0, 1, 1],
+                    [0, 0, 2, 2, 0, 0],
+                    [0, 2, 0, 0, 2, 0],
+                    [1, 0, 0, 0, 0, 1],
+                    [0, 2, 2, 2, 2, 0],
+                    [0, 0, 0, 3, 0, 0]
+                ]
+            },
+            18: {
+                goalHeight: 45,
+                grid: [
+                    [1, 0, 0, 1, 0, 0],
+                    [0, 2, 0, 0, 2, 0],
+                    [1, 0, 0, 1, 0, 0],
+                    [0, 2, 0, 0, 2, 0],
+                    [1, 0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 3]
+                ]
+            },
+            19: {
+                goalHeight: 47,
+                grid: [
+                    [1, 1, 1, 0, 0, 1],
+                    [0, 0, 2, 0, 2, 0],
+                    [1, 0, 0, 0, 0, 0],
+                    [0, 2, 0, 2, 0, 1],
+                    [0, 0, 0, 0, 2, 0],
+                    [3, 1, 0, 0, 0, 1]
+                ]
+            },
+            20: {
+                goalHeight: 49,
+                grid: [
+                    [1, 0, 1, 0, 1, 0],
+                    [2, 0, 2, 0, 2, 0],
+                    [0, 1, 0, 1, 0, 1],
+                    [0, 2, 0, 2, 0, 2],
+                    [1, 0, 1, 0, 1, 0],
+                    [3, 0, 0, 0, 0, 0]
+                ]
+            },
+            21: {
+                goalHeight: 51,
+                grid: [
+                    [1, 0, 0, 1, 0, 0, 1],
+                    [0, 2, 0, 0, 2, 0, 0],
+                    [0, 0, 2, 0, 0, 2, 0],
+                    [1, 0, 0, 1, 0, 0, 1],
+                    [0, 2, 0, 0, 2, 0, 0],
+                    [0, 0, 2, 0, 0, 2, 0],
+                    [0, 0, 0, 0, 0, 0, 3]
+                ]
+            },
+            22: {
+                goalHeight: 53,
+                grid: [
+                    [1, 1, 0, 0, 0, 1, 1],
+                    [0, 0, 2, 1, 2, 0, 0],
+                    [0, 0, 0, 2, 0, 0, 0],
+                    [1, 2, 0, 0, 0, 2, 1],
+                    [0, 0, 0, 2, 0, 0, 0],
+                    [0, 0, 2, 1, 2, 0, 0],
+                    [3, 0, 0, 0, 0, 0, 1]
+                ]
+            },
+            23: {
+                goalHeight: 55,
+                grid: [
+                    [1, 0, 1, 0, 1, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [2, 0, 2, 0, 2, 0, 2],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 1, 0, 1, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 3, 0, 0, 0]
+                ]
+            },
+            24: {
+                goalHeight: 57,
+                grid: [
+                    [1, 1, 1, 1, 0, 0, 0],
+                    [0, 0, 0, 2, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0],
+                    [1, 0, 0, 0, 0, 2, 0],
+                    [0, 2, 0, 0, 0, 0, 2],
+                    [0, 0, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 3]
+                ]
+            },
+            25: {
+                goalHeight: 59,
+                grid: [
+                    [1, 0, 0, 0, 0, 0, 1],
+                    [0, 2, 0, 0, 0, 2, 0],
+                    [0, 0, 2, 0, 2, 0, 0],
+                    [0, 0, 0, 1, 0, 0, 0],
+                    [0, 0, 2, 0, 2, 0, 0],
+                    [0, 2, 0, 0, 0, 2, 0],
+                    [3, 0, 0, 0, 0, 0, 1]
+                ]
+            },
+            26: {
+                goalHeight: 61,
+                grid: [
+                    [1, 1, 0, 1, 0, 1, 1],
+                    [0, 2, 0, 2, 0, 2, 0],
+                    [1, 0, 0, 0, 0, 0, 1],
+                    [0, 2, 0, 1, 0, 2, 0],
+                    [1, 0, 0, 0, 0, 0, 1],
+                    [0, 2, 0, 2, 0, 2, 0],
+                    [1, 1, 0, 3, 0, 1, 1]
+                ]
+            },
+            27: {
+                goalHeight: 63,
+                grid: [
+                    [1, 0, 0, 0, 0, 0, 0],
+                    [2, 2, 0, 0, 0, 0, 0],
+                    [0, 0, 2, 2, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 2, 0],
+                    [0, 0, 0, 0, 0, 0, 2],
+                    [1, 0, 1, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 3]
+                ]
+            },
+            28: {
+                goalHeight: 65,
+                grid: [
+                    [1, 1, 1, 0, 1, 1, 1],
+                    [0, 0, 2, 0, 2, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 2, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 2, 0, 2, 0, 0],
+                    [3, 1, 1, 0, 1, 1, 1]
+                ]
+            },
+            29: {
+                goalHeight: 67,
+                grid: [
+                    [1, 0, 0, 1, 0, 0, 1],
+                    [0, 2, 0, 2, 0, 2, 0],
+                    [1, 0, 0, 0, 0, 0, 1],
+                    [0, 0, 2, 1, 2, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 1],
+                    [0, 2, 0, 2, 0, 2, 0],
+                    [0, 0, 0, 0, 0, 0, 3]
+                ]
+            },
+            30: {
+                goalHeight: 69,
+                grid: [
+                    [1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [2, 2, 2, 0, 2, 2, 2],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [3, 0, 0, 0, 0, 0, 0]
+                ]
+            },
+            31: {
+                goalHeight: 71,
+                grid: [
+                    [1, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 2, 0, 0, 0, 0, 2, 0],
+                    [0, 0, 2, 0, 0, 2, 0, 0],
+                    [0, 0, 0, 2, 2, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 0, 0, 0],
+                    [0, 0, 2, 0, 0, 2, 0, 0],
+                    [0, 2, 0, 0, 0, 0, 2, 0],
+                    [3, 0, 0, 0, 0, 0, 0, 1]
+                ]
+            },
+            32: {
+                goalHeight: 73,
+                grid: [
+                    [1, 1, 0, 0, 0, 0, 1, 1],
+                    [0, 0, 2, 0, 0, 2, 0, 0],
+                    [0, 0, 0, 2, 2, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 2, 2, 0, 0, 2, 2, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 1, 1],
+                    [0, 0, 0, 3, 0, 0, 0, 0]
+                ]
+            },
+            33: {
+                goalHeight: 75,
+                grid: [
+                    [1, 0, 1, 0, 1, 0, 1, 0],
+                    [0, 2, 0, 2, 0, 2, 0, 2],
+                    [1, 0, 1, 0, 1, 0, 1, 0],
+                    [0, 2, 0, 2, 0, 2, 0, 2],
+                    [1, 0, 1, 0, 1, 0, 1, 0],
+                    [0, 2, 0, 2, 0, 2, 0, 2],
+                    [1, 0, 1, 0, 1, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 3]
+                ]
+            },
+            34: {
+                goalHeight: 77,
+                grid: [
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 0, 2, 0, 2, 0, 2, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 2, 0, 2, 0, 2, 0, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [3, 0, 0, 0, 0, 0, 0, 0]
+                ]
+            },
+            35: {
+                goalHeight: 79,
+                grid: [
+                    [1, 0, 0, 1, 0, 0, 1, 0],
+                    [0, 2, 0, 0, 2, 0, 0, 2],
+                    [0, 0, 2, 0, 0, 2, 0, 0],
+                    [1, 0, 0, 1, 0, 0, 1, 0],
+                    [0, 2, 0, 0, 2, 0, 0, 2],
+                    [0, 0, 2, 0, 0, 2, 0, 0],
+                    [1, 0, 0, 1, 0, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 3]
+                ]
+            },
+            36: {
+                goalHeight: 81,
+                grid: [
+                    [1, 1, 0, 0, 0, 0, 1, 1],
+                    [2, 0, 0, 0, 0, 0, 0, 2],
+                    [0, 2, 0, 0, 0, 0, 2, 0],
+                    [0, 0, 2, 0, 0, 2, 0, 0],
+                    [0, 0, 0, 2, 2, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [3, 0, 0, 1, 1, 0, 0, 0]
+                ]
+            },
+            37: {
+                goalHeight: 83,
+                grid: [
+                    [1, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 2, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 2, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 2, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 2, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 3]
+                ]
+            },
+            38: {
+                goalHeight: 85,
+                grid: [
+                    [1, 1, 1, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 2, 2, 0, 0, 2, 2, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 2, 2, 0, 0, 2, 2, 2],
+                    [3, 0, 0, 0, 0, 0, 0, 0]
+                ]
+            },
+            39: {
+                goalHeight: 87,
+                grid: [
+                    [1, 0, 1, 0, 1, 0, 1, 1],
+                    [0, 2, 0, 2, 0, 2, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 1, 0],
+                    [0, 2, 0, 1, 0, 2, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 1, 0],
+                    [0, 2, 0, 2, 0, 2, 0, 0],
+                    [1, 1, 0, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 3]
+                ]
+            },
+            40: {
+                goalHeight: 89,
+                grid: [
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [2, 2, 2, 2, 2, 2, 2, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [2, 2, 2, 2, 2, 2, 2, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1],
+                    [3, 0, 0, 0, 0, 0, 0, 0]
+                ]
+            },
+            41: {
+                goalHeight: 91,
+                grid: [
+                    [1, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 2, 0, 0, 0, 0, 0, 2, 0],
+                    [0, 0, 2, 0, 0, 0, 2, 0, 0],
+                    [0, 0, 0, 2, 0, 2, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 2, 0, 2, 0, 0, 0],
+                    [0, 0, 2, 0, 0, 0, 2, 0, 0],
+                    [0, 2, 0, 0, 0, 0, 0, 2, 0],
+                    [3, 0, 0, 0, 0, 0, 0, 0, 1]
+                ]
+            },
+            42: {
+                goalHeight: 92,
+                grid: [
+                    [1, 1, 0, 0, 0, 0, 0, 1, 1],
+                    [0, 0, 2, 0, 0, 0, 2, 0, 0],
+                    [0, 0, 0, 2, 0, 2, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 2, 0, 2, 0, 0, 0],
+                    [0, 0, 2, 0, 0, 0, 2, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 0, 3, 1]
+                ]
+            },
+            43: {
+                goalHeight: 93,
+                grid: [
+                    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+                    [0, 2, 0, 2, 0, 2, 0, 2, 0],
+                    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+                    [0, 2, 0, 2, 0, 2, 0, 2, 0],
+                    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+                    [0, 2, 0, 2, 0, 2, 0, 2, 0],
+                    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+                    [0, 2, 0, 2, 0, 2, 0, 2, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3]
+                ]
+            },
+            44: {
+                goalHeight: 94,
+                grid: [
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 0, 2, 0, 2, 0, 2, 0, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 0, 2, 0, 2, 0, 2, 0, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [3, 0, 0, 0, 0, 0, 0, 0, 0]
+                ]
+            },
+            45: {
+                goalHeight: 95,
+                grid: [
+                    [1, 0, 0, 1, 0, 0, 1, 0, 0],
+                    [0, 2, 0, 0, 2, 0, 0, 2, 0],
+                    [0, 0, 2, 0, 0, 2, 0, 0, 2],
+                    [1, 0, 0, 1, 0, 0, 1, 0, 0],
+                    [0, 2, 0, 0, 2, 0, 0, 2, 0],
+                    [0, 0, 2, 0, 0, 2, 0, 0, 2],
+                    [1, 0, 0, 1, 0, 0, 1, 0, 0],
+                    [0, 2, 0, 0, 2, 0, 0, 2, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 3]
+                ]
+            },
+            46: {
+                goalHeight: 96,
+                grid: [
+                    [1, 1, 1, 0, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 2, 0, 2, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 2, 0, 2, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0],
+                    [1, 1, 1, 0, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 2, 0, 2, 0, 0, 0],
+                    [3, 0, 0, 0, 0, 0, 0, 0, 0]
+                ]
+            },
+            47: {
+                goalHeight: 97,
+                grid: [
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 2, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 2, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 2, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 2, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 2, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 2, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 3]
+                ]
+            },
+            48: {
+                goalHeight: 98,
+                grid: [
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [3, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                ]
+            },
+            49: {
+                goalHeight: 99,
+                grid: [
+                    [1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
+                    [0, 2, 0, 2, 0, 2, 0, 2, 0, 0],
+                    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                    [0, 2, 0, 1, 1, 1, 1, 2, 0, 0],
+                    [1, 0, 0, 1, 0, 0, 1, 0, 1, 0],
+                    [0, 2, 0, 1, 0, 0, 1, 2, 0, 0],
+                    [1, 0, 0, 1, 1, 1, 1, 0, 1, 0],
+                    [0, 2, 0, 0, 0, 0, 0, 2, 0, 0],
+                    [1, 1, 1, 0, 0, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 3]
+                ]
+            },
+            50: {
+                goalHeight: 100,
+                grid: [
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 2, 0, 0, 0, 0, 0, 0, 2, 0],
+                    [0, 0, 2, 0, 0, 0, 0, 2, 0, 0],
+                    [0, 0, 0, 2, 0, 0, 2, 0, 0, 0],
+                    [0, 0, 0, 0, 2, 2, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 2, 0, 0, 2, 0, 0, 0],
+                    [0, 0, 2, 0, 0, 0, 0, 2, 0, 0],
+                    [0, 2, 0, 0, 0, 0, 0, 0, 2, 0],
+                    [3, 0, 0, 0, 0, 0, 0, 0, 0, 1]
                 ]
             }
         };
@@ -292,6 +997,10 @@
         let isQuizOpen = false;
         let grapplesLeft = 3;
         let currentLevel = 1;
+        let grapplesUsedTotal = 0; // Track total grapples used for stats
+        
+        // Calculate max level dynamically from LEVELS_CONFIG
+        const MAX_LEVEL = Math.max(...Object.keys(LEVELS_CONFIG).map(Number));
 
         // Grappling Tether Parameters
         let isGrappled = false;
@@ -538,9 +1247,49 @@
 
         // --- STEP 4: RESPONDERS ---
         function triggerNextLevelSequence() {
+            if (currentLevel >= MAX_LEVEL) {
+                // Player has reached max level - show win screen
+                showWinScreen();
+                matchActive = false;
+                return;
+            }
+            
             currentLevel++;
             displayBannerNotification(`ADVANCED TO LEVEL ${currentLevel}!`);
             generateCurrentLevelGrid();
+        }
+
+        function showWinScreen() {
+            document.getElementById('win-stats-level').innerText = currentLevel;
+            document.getElementById('win-stats-grapples').innerText = grapplesUsedTotal;
+            
+            let difficulty = 'Hard';
+            if (grapplesUsedTotal < currentLevel * 5) difficulty = 'Expert';
+            else if (grapplesUsedTotal > currentLevel * 12) difficulty = 'Novice';
+            document.getElementById('win-stats-difficulty').innerText = difficulty;
+            
+            document.getElementById('win-screen').classList.add('active');
+            document.exitPointerLock();
+        }
+
+        function replayCurrentTopic() {
+            // Reset game to level 1 with the same topic
+            currentLevel = 1;
+            grapplesLeft = 3;
+            grapplesUsedTotal = 0;
+            isGrappled = false;
+            matchActive = true;
+            
+            document.getElementById('win-screen').classList.remove('active');
+            document.getElementById('grapple-counter').innerText = grapplesLeft;
+            
+            generateCurrentLevelGrid();
+            setTimeout(() => { document.body.requestPointerLock(); }, 50);
+        }
+
+        function selectNewTopic() {
+            // Go back to topic selection by navigating to parent
+            window.location.href = '../index.html';
         }
 
         function triggerVoidFallRespawn() {
@@ -583,6 +1332,7 @@
             grapplePoint.copy(camera.position).addScaledVector(cameraDirection, scaleFactor);
 
             grapplesLeft--;
+            grapplesUsedTotal++;
             document.getElementById('grapple-counter').innerText = grapplesLeft;
             isGrappled = true;
 
