@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Forklift Logistics 3D Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0c10;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            user-select: none;
+        }
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .interactive { pointer-events: auto; }
+        .glass {
+            background: rgba(15, 17, 28, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div class="ui-layer flex flex-col justify-between p-6 h-full">
+        
+        <div class="w-full flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="glass interactive px-5 py-3 rounded-2xl flex items-center gap-4">
+                <span class="text-3xl">🚜</span>
+                <div>
+                    <h1 class="text-sm font-black text-amber-400 tracking-wide uppercase">ASL Warehouse Systems</h1>
+                    <p id="active-topic-txt" class="text-xs text-gray-300 font-medium">Select a data deck below</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 w-full md:w-auto justify-end">
+                <div class="glass px-5 py-3 rounded-2xl flex flex-col w-48 md:w-56">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold tracking-wider text-gray-400 uppercase">Forklift Fuel</span>
+                        <span id="fuel-pct" class="text-xs font-black text-emerald-400">100%</span>
+                    </div>
+                    <div class="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden">
+                        <div id="fuel-bar" class="bg-gradient-to-r from-emerald-500 to-green-400 h-full transition-all duration-100" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div class="glass px-4 py-3 rounded-2xl text-center min-w-[80px]">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Carried</p>
+                    <p id="stack-txt" class="text-xl font-black text-sky-400">0</p>
+                </div>
+
+                <div class="glass px-5 py-3 rounded-2xl text-center min-w-[100px]">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Delivered</p>
+                    <p id="score-txt" class="text-xl font-black text-amber-400">0</p>
+                </div>
+
+                <div class="glass px-4 py-3 rounded-2xl text-center">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Streak</p>
+                    <p id="streak-txt" class="text-xl font-black text-orange-400">0🔥</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full flex flex-col md:flex-row justify-between items-end flex-grow my-4 gap-6">
+            
+            <div class="glass p-4 rounded-2xl text-xs text-gray-400 space-y-1.5 border border-white/5 max-w-xs hidden md:block">
+                <p class="font-bold text-gray-200 uppercase tracking-wider text-[11px] mb-2">OPERATIONAL CONTROLS</p>
+                <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">W</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">▲</span> Forward Throttle</p>
+                <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">S</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">▼</span> Reverse Gear</p>
+                <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">A</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">◀</span> Steer Left</p>
+                <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">D</span> <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-2">▶</span> Steer Right</p>
+                <div class="pt-1.5 border-t border-white/5 text-amber-400 font-medium">Stack infinitely! Beware: more boxes slow you down and burn fuel much faster. Answer dashboard questions to refuel!</div>
+            </div>
+
+            <div class="w-full md:w-96 glass interactive rounded-2xl overflow-hidden flex flex-col border border-white/10 self-center md:self-end shadow-2xl">
+                <div class="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 px-4 py-3 border-b border-white/10 flex justify-between items-center">
+                    <span class="text-xs font-black tracking-wider text-purple-300 uppercase flex items-center gap-2">
+                        <span class="inline-block w-2 h-2 rounded-full bg-purple-400 animate-ping"></span>
+                        Refuel Station Dashboard
+                    </span>
+                    <button id="change-topic-btn" onclick="openTopicMenu()" class="text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded text-white font-bold transition hidden">Switch Deck</button>
+                </div>
+
+                <div id="dashboard-content" class="p-4 flex flex-col gap-4 max-h-[360px] overflow-y-auto custom-scroll">
+                    </div>
+            </div>
+
+        </div>
+
+        <div class="w-full flex justify-between items-center text-[10px] text-gray-500 font-mono tracking-wider">
+            <div>INFINITE LOGISTICS INFRASTRUCTURE GENERATION ACTIVE</div>
+            <div class="hidden sm:block">GRID MATRICES PARSED // DYNAMIC MASS ON FORK ACTIVE</div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- ASL FALLBACK BACKUP CONFIGURATION DATA MAP ---
+        const localVocabBackup = {
+            "fingerspelling": {
+                "title": "🤟 ASL Fingerspelling",
+                "questions": [
+                    { "question": "What letter is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692311747/etvp5upjgqyoilil7rex.gif", "options": ["A", "B", "C", "D"], "correct": 0 },
+                    { "question": "What letter is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692311802/hb0qenrlxyzqlwmrlhln.gif", "options": ["A", "B", "C", "D"], "correct": 1 },
+                    { "question": "What letter is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1692311848/ndhas8eswzcnnsk5ear6.gif", "options": ["B", "C", "D", "E"], "correct": 1 }
+                ]
+            },
+            "school": {
+                "title": "🏫 School and Deaf Culture",
+                "questions": [
+                    { "question": "What sign is being shown?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695024725/lc9fqzsmwipzcszep9jn.gif", "options": ["DEAF", "HEARING", "HARD-OF-HEARING", "SIGN"], "correct": 0 },
+                    { "question": "What sign is being shown?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1695025425/jt4cpgvar1igac9xmam8.gif", "options": ["DEAF", "HARD-OF-HEARING", "HEARING", "SIGN"], "correct": 1 }
+                ]
+            }
+        };
+
+        // --- GLOBAL LOGISTICS STATE MANAGEMENT ---
+        let vocabDatabase = null;
+        let selectedCategory = null;
+        let activeQuestionPool = [];
+        let currentQuestionIdx = 0;
+        
+        let fuel = 100;
+        let score = 0;
+        let answerStreak = 0;
+        let isQuizLocked = false;
+
+        // --- KEYBOARD LISTENER ARRAYS ---
+        const keys = { w: false, s: false, a: false, d: false, ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+        window.addEventListener('keydown', e => { 
+            if(e.key in keys) { keys[e.key] = true; if(e.key.startsWith('Arrow')) e.preventDefault(); }
+        });
+        window.addEventListener('keyup', e => { 
+            if(e.key in keys) keys[e.key] = false; 
+        });
+
+        // --- CONNECT DATA INFRASTRUCTURE ---
+        async function fetchVocabularyData() {
+            try {
+                const res = await fetch('../vocab.json');
+                if(!res.ok) throw new Error("CORS or pipeline limits hit.");
+                vocabDatabase = await res.json();
+            } catch(e) {
+                console.warn("Direct JSON pipeline unavailable, routing payload from optimized data array backups...", e);
+                vocabDatabase = localVocabBackup;
+            }
+            openTopicMenu();
+        }
+
+        // --- DASHBOARD UI VIEWS GENERATION ---
+        function openTopicMenu() {
+            document.getElementById('change-topic-btn').classList.add('hidden');
+            const dash = document.getElementById('dashboard-content');
+            dash.innerHTML = `
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Choose a Deck to Begin Driving</p>
+                    <div id="deck-links-box" class="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scroll"></div>
+                </div>
+            `;
+            
+            const container = document.getElementById('deck-links-box');
+            Object.keys(vocabDatabase).forEach(key => {
+                const node = vocabDatabase[key];
+                const row = document.createElement('button');
+                row.className = "w-full text-left p-3 rounded-xl bg-white/5 border border-white/5 hover:border-amber-500/40 hover:bg-amber-500/10 text-white font-medium text-xs flex justify-between items-center transition duration-150";
+                row.onclick = () => activateDeck(key);
+                row.innerHTML = `<span>${node.title}</span><span class="text-[10px] font-mono text-amber-400">${node.questions.length} cards &rarr;</span>`;
+                container.appendChild(row);
+            });
+        }
+
+        function activateDeck(key) {
+            selectedCategory = vocabDatabase[key];
+            activeQuestionPool = [...selectedCategory.questions];
+            activeQuestionPool.sort(() => Math.random() - 0.5);
+            currentQuestionIdx = 0;
+
+            document.getElementById('active-topic-txt').innerText = selectedCategory.title;
+            document.getElementById('change-topic-btn').classList.remove('hidden');
+            renderDashboardQuestion();
+        }
+
+        function renderDashboardQuestion() {
+            const dash = document.getElementById('dashboard-content');
+            if(currentQuestionIdx >= activeQuestionPool.length) {
+                activeQuestionPool.sort(() => Math.random() - 0.5);
+                currentQuestionIdx = 0;
+            }
+
+            const item = activeQuestionPool[currentQuestionIdx];
+            isQuizLocked = false;
+
+            dash.innerHTML = `
+                <div class="flex flex-col gap-3">
+                    <div class="flex justify-between text-[10px] text-purple-400 font-bold font-mono uppercase">
+                        <span>Card Matrix ${currentQuestionIdx + 1}/${activeQuestionPool.length}</span>
+                        <span class="text-emerald-400 font-semibold">+Fuel Reward</span>
+                    </div>
+                    
+                    <div class="bg-black/40 border border-white/5 rounded-xl p-2 flex justify-center items-center h-36 relative overflow-hidden">
+                        <span class="absolute text-[10px] text-gray-600 animate-pulse">Loading Stream...</span>
+                        <img src="${item.image}" alt="ASL Sign Asset" class="max-h-full max-w-full object-contain relative z-10 rounded">
+                    </div>
+
+                    <p class="text-xs font-bold text-gray-200">${item.question}</p>
+                    
+                    <div id="dash-options-grid" class="grid grid-cols-2 gap-2"></div>
+                </div>
+            `;
+
+            const optsGrid = document.getElementById('dash-options-grid');
+            item.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-2.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 text-left text-xs font-medium text-gray-300 transition duration-150";
+                btn.onclick = () => verifyAnswer(idx, btn);
+                btn.innerText = opt;
+                optsGrid.appendChild(btn);
+            });
+        }
+
+        function verifyAnswer(idx, targetBtn) {
+            if(isQuizLocked) return;
+            isQuizLocked = true;
+
+            const item = activeQuestionPool[currentQuestionIdx];
+            const buttons = document.getElementById('dash-options-grid').getElementsByTagName('button');
+
+            if(idx === item.correct) {
+                targetBtn.className = "p-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500 text-left text-xs font-bold text-emerald-400";
+                answerStreak++;
+                const fuelGain = 25 + (answerStreak > 3 ? 15 : 0);
+                fuel = Math.min(100, fuel + fuelGain);
+                updateFuelGauge();
+                triggerForkliftRefuelFlash(0x10b981);
+            } else {
+                targetBtn.className = "p-2.5 rounded-lg bg-red-500/20 border border-red-500 text-left text-xs font-bold text-red-400";
+                buttons[item.correct].className = "p-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500/50 text-left text-xs font-medium text-emerald-400";
+                answerStreak = 0;
+                triggerForkliftRefuelFlash(0xef4444);
+            }
+
+            document.getElementById('streak-txt').innerText = `${answerStreak}🔥`;
+
+            setTimeout(() => {
+                currentQuestionIdx++;
+                renderDashboardQuestion();
+            }, 1200);
+        }
+
+        function updateFuelGauge() {
+            document.getElementById('fuel-pct').innerText = `${Math.ceil(fuel)}%`;
+            const bar = document.getElementById('fuel-bar');
+            bar.style.width = `${fuel}%`;
+            
+            if(fuel > 40) {
+                bar.className = "bg-gradient-to-r from-emerald-500 to-green-400 h-full transition-all duration-100";
+            } else if(fuel > 15) {
+                bar.className = "bg-gradient-to-r from-amber-500 to-yellow-400 h-full transition-all duration-100";
+            } else {
+                bar.className = "bg-gradient-to-r from-red-600 to-red-400 h-full transition-all duration-100 animate-pulse";
+            }
+        }
+
+
+        // --- THREE.JS 3D ENGINE WORKSPACE CONFIGURATION ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0c0d14);
+        scene.fog = new THREE.FogExp2(0x0c0d14, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // Environment Lights
+        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambient);
+
+        const coreLight = new THREE.PointLight(0xf59e0b, 1.2, 40);
+        coreLight.position.set(0, 8, 0);
+        scene.add(coreLight);
+
+        const directional = new THREE.DirectionalLight(0x6366f1, 1.2);
+        directional.position.set(10, 15, 10);
+        scene.add(directional);
+
+        // Ground Floor Warehouse Grid Mesh
+        const warehouseFloor = new THREE.GridHelper(50, 50, 0x334155, 0x1e293b);
+        warehouseFloor.position.y = 0;
+        scene.add(warehouseFloor);
+
+        // --- GLOBAL MESH POINTERS & SCENE ARRAYS ---
+        let forkliftChassisMesh = null;
+        let forklift = null;
+        let dropZone = null;
+        let cargoItems = [];
+        let carriedBoxes = [];
+        const obstacles = [];
+
+        // =========================================================================
+        // --- LEVEL GRID SYSTEM CONFIGURATION ---
+        // Edit numbers below to build new levels easily!
+        // Dimensions: 12x12 grid representing coordinates from -22 to +22 on map
+        // 0 = Empty floor space
+        // 1 = Obstacle pillar column
+        // 2 = Delivery neon zone target pad
+        // 3 = Item spawn point locations
+        // =========================================================================
+        const LEVEL_GRID = [
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+            [0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0],
+            [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+        ];
+
+        const GRID_SIZE = LEVEL_GRID.length;
+        const MAP_RANGE = 44; // Spans from -22 to +22
+        const CELL_SIZE = MAP_RANGE / GRID_SIZE;
+
+        // Translate grid indexes directly to 3D world vectors
+        function gridToWorldCoords(row, col) {
+            const x = -MAP_RANGE / 2 + (col * CELL_SIZE) + CELL_SIZE / 2;
+            const z = -MAP_RANGE / 2 + (row * CELL_SIZE) + CELL_SIZE / 2;
+            return { x, z };
+        }
+
+        // --- PROCEDURAL ENGINE ASSEMBLY FACTORIES ---
+        
+        // 1. FORKLIFT VEHICLE UNIT BUILDER
+        function buildForkliftMesh() {
+            const group = new THREE.Group();
+
+            // Main Frame Chassis
+            const bodyGeo = new THREE.BoxGeometry(1.6, 0.7, 2.6);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.3, metalness: 0.2 });
+            const chassis = new THREE.Mesh(bodyGeo, bodyMat);
+            chassis.position.y = 0.55;
+            group.add(chassis);
+            forkliftChassisMesh = chassis;
+
+            // Operator Enclosed Cabin Block
+            const cabinGeo = new THREE.BoxGeometry(1.3, 1.1, 1.2);
+            const cabinMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.5, metalness: 0.4 });
+            const cabin = new THREE.Mesh(cabinGeo, cabinMat);
+            cabin.position.set(0, 1.45, -0.2);
+            group.add(cabin);
+
+            // Rear Counterweight
+            const weightGeo = new THREE.BoxGeometry(1.6, 0.8, 0.5);
+            const weightMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.6 });
+            const weight = new THREE.Mesh(weightGeo, weightMat);
+            weight.position.set(0, 0.6, -1.35);
+            group.add(weight);
+
+            // Cylindrical Drive Wheels Assemblies
+            const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.3, 16);
+            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x030712, roughness: 0.9 });
+            
+            const offsets = [
+                [-0.85, 0.35, 0.8],  // Front Left
+                [0.85, 0.35, 0.8],   // Front Right
+                [-0.85, 0.35, -0.8], // Rear Left
+                [0.85, 0.35, -0.8]   // Rear Right
+            ];
+            
+            offsets.forEach(pos => {
+                const wh = new THREE.Mesh(wheelGeo, wheelMat);
+                wh.rotation.z = Math.PI / 2;
+                wh.position.set(...pos);
+                group.add(wh);
+            });
+
+            // Front Mast Vertical Lifting Rails
+            const mastGeo = new THREE.BoxGeometry(1.2, 2.0, 0.15);
+            const mastMat = new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.7 });
+            const mast = new THREE.Mesh(mastGeo, mastMat);
+            mast.position.set(0, 1.2, 1.35);
+            group.add(mast);
+
+            // Front Metal Carrier Forks Prongs Support Group
+            const forksGroup = new THREE.Group();
+            forksGroup.name = "forksAssembly";
+            forksGroup.position.set(0, 0.15, 1.45);
+
+            const prongGeo = new THREE.BoxGeometry(0.2, 0.05, 1.1);
+            const prongMat = new THREE.MeshStandardMaterial({ color: 0x9ca3af, metalness: 0.9, roughness: 0.1 });
+            
+            const leftProng = new THREE.Mesh(prongGeo, prongMat);
+            leftProng.position.set(-0.35, 0, 0.55);
+            const rightProng = new THREE.Mesh(prongGeo, prongMat);
+            rightProng.position.set(0.35, 0, 0.55);
+
+            forksGroup.add(leftProng, rightProng);
+            group.add(forksGroup);
+
+            scene.add(group);
+            return group;
+        }
+
+        // 2. INDUSTRIAL CARGO BOX BUILDER
+        function createCargoBoxMesh() {
+            const boxGeo = new THREE.BoxGeometry(1.1, 1.1, 1.1);
+            const boxMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.7 });
+            const mesh = new THREE.Mesh(boxGeo, boxMat);
+            
+            const bandsGeo = new THREE.BoxGeometry(1.12, 1.12, 1.12);
+            const bandsMat = new THREE.MeshStandardMaterial({ color: 0x78350f, wireframe: true });
+            mesh.add(new THREE.Mesh(bandsGeo, bandsMat));
+            
+            scene.add(mesh);
+            return mesh;
+        }
+
+        // 3. LOGISTICS GLOWING DELIVERY PAD
+        function buildDropZoneMesh() {
+            const zoneGroup = new THREE.Group();
+            
+            const floorRingGeo = new THREE.RingGeometry(2.0, 2.3, 32);
+            const floorRingMat = new THREE.MeshBasicMaterial({ color: 0x10b981, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(floorRingGeo, floorRingMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = 0.02;
+            zoneGroup.add(ring);
+
+            const beamGeo = new THREE.CylinderGeometry(2.0, 2.0, 4.0, 16, 1, true);
+            const beamMat = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.12, side: THREE.DoubleSide });
+            const beam = new THREE.Mesh(beamGeo, beamMat);
+            beam.position.y = 2.0;
+            zoneGroup.add(beam);
+
+            scene.add(zoneGroup);
+            return zoneGroup;
+        }
+
+        // 4. MAP OBSTACLE SYSTEM FACTORY
+        function buildPillarObstacle(x, z) {
+            const group = new THREE.Group();
+            
+            const baseGeo = new THREE.CylinderGeometry(1.2, 1.2, 1.0, 12);
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 });
+            const base = new THREE.Mesh(baseGeo, baseMat);
+            base.position.y = 0.5;
+            group.add(base);
+            
+            const pillarGeo = new THREE.CylinderGeometry(0.8, 0.8, 8.0, 12);
+            const pillarMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+            const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+            pillar.position.y = 4.0;
+            group.add(pillar);
+            
+            const stripeGeo = new THREE.CylinderGeometry(1.22, 1.22, 0.4, 12);
+            const stripeMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
+            const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+            stripe.position.y = 0.5;
+            group.add(stripe);
+
+            group.position.set(x, 0, z);
+            scene.add(group);
+            
+            obstacles.push({
+                position: new THREE.Vector3(x, 0, z),
+                radius: 1.2
+            });
+        }
+
+        // --- RUN INITIAL GENERATOR INTERNALS VIA MATRIX SYSTEM ---
+        function initializeMapFromGrid() {
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const itemType = LEVEL_GRID[r][c];
+                    if (itemType === 0) continue;
+
+                    const world = gridToWorldCoords(r, c);
+
+                    if (itemType === 1) {
+                        // Spawn Column Obstacle
+                        buildPillarObstacle(world.x, world.z);
+                    } else if (itemType === 2) {
+                        // Spawn Glowing Delivery Pad Target
+                        dropZone = buildDropZoneMesh();
+                        dropZone.position.set(world.x, 0, world.z);
+                    } else if (itemType === 3) {
+                        // Spawn Box Cargo Target Instance
+                        const crate = createCargoBoxMesh();
+                        crate.position.set(world.x, 0.55, world.z);
+                        cargoItems.push(crate);
+                    }
+                }
+            }
+
+            // Fallback generation failsafes if grid lacked mandatory configurations
+            if (!dropZone) {
+                dropZone = buildDropZoneMesh();
+                dropZone.position.set(-15, 0, -15);
+            }
+            if (cargoItems.length === 0) {
+                spawnDynamicCargoCrate();
+            }
+        }
+
+        function spawnDynamicCargoCrate() {
+            const crate = createCargoBoxMesh();
+            let rx, rz;
+            let isValid = false;
+
+            while(!isValid) {
+                rx = (Math.random() - 0.5) * 38;
+                rz = (Math.random() - 0.5) * 38;
+                isValid = true;
+
+                if(Math.abs(rx - dropZone.position.x) < 5 && Math.abs(rz - dropZone.position.z) < 5) {
+                    isValid = false;
+                    continue;
+                }
+
+                for(let obs of obstacles) {
+                    let distance = new THREE.Vector2(rx, rz).distanceTo(new THREE.Vector2(obs.position.x, obs.position.z));
+                    if(distance < (obs.radius + 2.0)) {
+                        isValid = false;
+                        break;
+                    }
+                }
+            }
+
+            crate.position.set(rx, 0.55, rz);
+            cargoItems.push(crate);
+        }
+
+        // Build Forklift Player Vehicle Instance
+        forklift = buildForkliftMesh();
+        forklift.position.set(0, 0, 4);
+
+        // Run Grid System Setup Loader
+        initializeMapFromGrid();
+
+        // --- APPARATUS PHYSICS MECHANICS VALUES ---
+        let speed = 0;
+        const maxSpeed = 0.16;
+        const acceleration = 0.006;
+        const friction = 0.003;
+        let rotationAngle = 0;
+        const turnSpeed = 0.035;
+
+        function triggerForkliftRefuelFlash(hexColor) {
+            if (forkliftChassisMesh) {
+                const originalColor = 0xd97706;
+                forkliftChassisMesh.material.color.setHex(hexColor);
+                setTimeout(() => {
+                    forkliftChassisMesh.material.color.setHex(originalColor);
+                }, 800);
+            }
+        }
+
+        // --- ENGINE TICK LOGICS MATRIX ANIMATION LOOP ---
+        const clock = new THREE.Clock();
+
+        function tick() {
+            requestAnimationFrame(tick);
+            const delta = Math.min(clock.getDelta(), 0.1);
+
+            // 1. VEHICLE CONTROLS & RESTRAINTS PHYSICS EXECUTION
+            const isDrivingForward = keys.w || keys.ArrowUp;
+            const isDrivingBackward = keys.s || keys.ArrowDown;
+            const isSteeringLeft = keys.a || keys.ArrowLeft;
+            const isSteeringRight = keys.d || keys.ArrowRight;
+
+            if(fuel <= 0) {
+                fuel = 0;
+            }
+
+            // --- INFINITE BOX PHYSICS WEIGHT SCALING SCANNERS ---
+            // Speed Penalty: Each box drops engine throttle by 15%, bottoming out at 20% max capacity performance
+            const speedPenaltyFactor = Math.max(0.20, 1.0 - (carriedBoxes.length * 0.15));
+            const activeMaxSpeed = maxSpeed * speedPenaltyFactor;
+
+            // Fuel Consumption Scaling: Base consumption rate + 30% added drain per box carried 
+            const fuelBurnFactor = 1.0 + (carriedBoxes.length * 0.30);
+
+            if(fuel > 0) {
+                if (isDrivingForward) speed = Math.min(speed + acceleration, activeMaxSpeed);
+                else if (isDrivingBackward) speed = Math.max(speed - acceleration, -activeMaxSpeed * 0.6);
+                else {
+                    if (speed > 0) speed = Math.max(speed - friction, 0);
+                    if (speed < 0) speed = Math.min(speed + friction, 0);
+                }
+
+                if (speed > activeMaxSpeed) speed = activeMaxSpeed;
+                if (speed < -activeMaxSpeed * 0.6) speed = -activeMaxSpeed * 0.6;
+
+                if (Math.abs(speed) > 0.01) {
+                    const directionMultiplier = speed > 0 ? 1 : -1;
+                    if (isSteeringLeft) rotationAngle += turnSpeed * directionMultiplier;
+                    if (isSteeringRight) rotationAngle -= turnSpeed * directionMultiplier;
+                    
+                    // Apply expanded dynamic fuel burn factor formula
+                    fuel -= delta * (1.2 + Math.abs(speed) * 35) * fuelBurnFactor;
+                    updateFuelGauge();
+                }
+            } else {
+                speed *= 0.85;
+            }
+
+            // Apply calculated movement vectors
+            forklift.position.x += Math.sin(rotationAngle) * speed;
+            forklift.position.z += Math.cos(rotationAngle) * speed;
+            forklift.rotation.y = rotationAngle;
+
+            // 2. COLUMN OBSTACLE PHYSICAL COLLISION ENGINE
+            obstacles.forEach(obs => {
+                const distanceToObstacle = forklift.position.distanceTo(obs.position);
+                const combinedRadiusThreshold = 1.4 + obs.radius;
+                
+                if (distanceToObstacle < combinedRadiusThreshold) {
+                    const pushNormal = new THREE.Vector3()
+                        .subVectors(forklift.position, obs.position)
+                        .setY(0)
+                        .normalize();
+                    
+                    const depthOverlap = combinedRadiusThreshold - distanceToObstacle;
+                    forklift.position.addScaledVector(pushNormal, depthOverlap);
+                    speed *= -0.25; // Impact deflection bounce kickback
+                }
+            });
+
+            // Outer Retaining Boundary Walls
+            const bound = 24;
+            forklift.position.x = Math.max(-bound, Math.min(bound, forklift.position.x));
+            forklift.position.z = Math.max(-bound, Math.min(bound, forklift.position.z));
+
+            // 3. REVOLVING DECORATIONS LIFTS RADIAL PULSE CHANNELS
+            if(dropZone) {
+                dropZone.children[0].rotation.z += 0.005;
+                dropZone.children[1].scale.y = 1 + Math.sin(Date.now() * 0.003) * 0.05;
+            }
+
+            // 4. TOWING CODES COLLISION INTERFACES (INFINITE BOX LIFTER REGISTRY)
+            for (let i = 0; i < cargoItems.length; i++) {
+                const box = cargoItems[i];
+                const distance = forklift.position.distanceTo(box.position);
+
+                // Check collision intersection context against the front fork prongs tips
+                if (distance < 2.3) {
+                    carriedBoxes.push(box);
+                    cargoItems.splice(i, 1);
+                    
+                    // Dynamically refresh HUD monitor element tracker counter text layout
+                    document.getElementById('stack-txt').innerText = carriedBoxes.length;
+                    
+                    // Spawn another crate replacement elsewhere on grid map layouts automatically
+                    spawnDynamicCargoCrate();
+                    break;
+                }
+            }
+
+            // Real-time iteration handler loop to update stacked structures vertically
+            carriedBoxes.forEach((box, index) => {
+                const calculatedBoxHeightY = 0.22 + 0.55 + (index * 1.1);
+                box.position.set(
+                    forklift.position.x + Math.sin(rotationAngle) * 2.2,
+                    calculatedBoxHeightY,
+                    forklift.position.z + Math.cos(rotationAngle) * 2.2
+                );
+                box.rotation.y = forklift.rotation.y;
+            });
+
+            // Unloading processes drop target triggers verification checks
+            if (carriedBoxes.length > 0 && dropZone) {
+                const stackFrontLocation = new THREE.Vector3(
+                    forklift.position.x + Math.sin(rotationAngle) * 2.2,
+                    0.55,
+                    forklift.position.z + Math.cos(rotationAngle) * 2.2
+                );
+
+                const distanceToDropZone = stackFrontLocation.distanceTo(dropZone.position);
+                if(distanceToDropZone < 2.4) {
+                    const stackTotalCount = carriedBoxes.length;
+                    
+                    carriedBoxes.forEach(box => {
+                        scene.remove(box);
+                    });
+                    carriedBoxes = [];
+                    
+                    // Reset HUD element counts trackers
+                    document.getElementById('stack-txt').innerText = 0;
+                    
+                    // Adjust metrics data pools values updates loops
+                    score += stackTotalCount;
+                    document.getElementById('score-txt').innerText = score;
+                    
+                    const card = document.getElementById('score-txt').parentElement;
+                    card.classList.add('scale-110', 'border-amber-500');
+                    setTimeout(() => card.classList.remove('scale-110', 'border-amber-500'), 150);
+                }
+            }
+
+            // 5. THIRD-PERSON SMOOTH FOLLOW CAMERA LERP VECTOR CALCULATIONS
+            const targetCamX = forklift.position.x - Math.sin(rotationAngle) * 7;
+            const targetCamZ = forklift.position.z - Math.cos(rotationAngle) * 7;
+            const targetCamY = forklift.position.y + 4.5;
+
+            camera.position.x += (targetCamX - camera.position.x) * 0.08;
+            camera.position.y += (targetCamY - camera.position.y) * 0.08;
+            camera.position.z += (targetCamZ - camera.position.z) * 0.08;
+            camera.lookAt(forklift.position.x, forklift.position.y + 0.8, forklift.position.z);
+
+            renderer.render(scene, camera);
+        }
+
+        // --- OBSERVER HANDLERS VISUAL MATRIX ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize Core System Loops Execution Pipelines
+        fetchVocabularyData();
+        tick();
+    </script>
+</body>
+</html>
