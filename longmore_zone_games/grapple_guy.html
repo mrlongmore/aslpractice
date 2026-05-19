@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Auto-Load Grapple Arena</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f1f5f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Crosshair for First-Person Aiming */
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(15, 23, 42, 0.8);
+            border-radius: 50%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism Overlays */
+        .overlay-card {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        /* Async Loading Screen */
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0f172a;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border-left-color: #38bdf8;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* In-game HUD Layout */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            color: white;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .counter-title {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+        .counter-value {
+            font-size: 26px;
+            font-weight: bold;
+            color: #38bdf8;
+            margin-bottom: 2px;
+        }
+        .level-highlight {
+            color: #22c55e !important;
+        }
+
+        .hint-section {
+            font-size: 11px;
+            color: #cbd5e1;
+            line-height: 1.4;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 8px;
+            margin-top: 10px;
+        }
+
+        /* Fullscreen Pop-up Quiz Modal */
+        #quiz-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 190;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #quiz-modal.active { opacity: 1; pointer-events: auto; }
+
+        .category-tag {
+            font-size: 12px;
+            color: #38bdf8;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .sign-gif {
+            width: 100%;
+            max-height: 220px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin: 15px 0;
+            background: #0f172a;
+            border: 1px solid #334155;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            background: #334155;
+            color: white;
+            border: 1px solid #475569;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover { background: #475569; border-color: #64748b; }
+
+        /* Level Notification Banner */
+        #alert-banner {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.9);
+            color: #22c55e;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 18px;
+            border: 1px solid #22c55e;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div id="loading-text">Generating world from configuration matrix...</div>
+    </div>
+
+    <div id="crosshair"></div>
+    <div id="canvas-container"></div>
+
+    <div id="alert-banner">LEVEL UP!</div>
+
+    <div id="hud">
+        <div class="counter-title">Current Objective</div>
+        <div id="level-counter" class="counter-value level-highlight">Level 1</div>
+
+        <div class="counter-title">Grapples Available</div>
+        <div id="grapple-counter" class="counter-value">3</div>
+        
+        <div class="hint-section">
+            <strong>Click screen to lock controls</strong><br>
+            <strong>Movement:</strong> W/A/S/D keys<br>
+            <strong>Toggle Rope:</strong> Left Click OR Spacebar<br>
+            <strong>Refuel Hooks Pool:</strong> Press <b style="color: #facc15;">"Q" Key</b><br>
+            <!--🧗 MAP DESIGN CODES:
+            0 = Dead space / Air drop.<br>
+            1 = Flat Base Platform.<br>
+            2 = Mid-Air Step Platform.<br>
+            3 = High Goal Platform!-->
+        </div>
+    </div>
+
+    <div id="quiz-modal">
+        <div class="overlay-card quiz-card" style="max-width: 450px; width: 90%;">
+            <div id="quiz-category" class="category-tag">CATEGORY</div>
+            <h2 id="quiz-question" style="margin-top: 0; font-size: 20px;">Loading Question...</h2>
+            <img id="quiz-image" class="sign-gif" src="" alt="Sign Animation Asset">
+            <div class="options-grid" id="quiz-options"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- EDITABLE LEVEL CONFIGURATION MATRIX ---
+        // 0 = Block space is empty open air
+        // 1 = Ground Level Platform (Height = 0)
+        // 2 = Mid-Air Climbing Step (Height = goalHeight / 2)
+        // 3 = Elevated Goal Platform (Height = goalHeight)
+        // Note: The player always spawns securely on the top-left item [0][0]
+        const LEVELS_CONFIG = {
+            1: {
+                goalHeight: 5, // Peak goal platform height in meters
+                grid: [
+                    [1, 0, 1, 0],
+                    [0, 2, 0, 1],
+                    [1, 0, 2, 0],
+                    [0, 1, 0, 3]  
+                ]
+            },
+            2: {
+                goalHeight: 11, // Progressively climbing higher with more open-air gaps
+                grid: [
+                    [1, 0, 0, 1, 0],
+                    [0, 2, 0, 0, 1],
+                    [1, 0, 2, 2, 0],
+                    [0, 0, 0, 0, 2],
+                    [3, 0, 1, 0, 1]  
+                ]
+            },
+            3: {
+                goalHeight: 18, // Highest custom challenge requires swinging up vertical segments
+                grid: [
+                    [1, 0, 1, 0, 0, 1],
+                    [0, 2, 0, 2, 0, 0],
+                    [0, 0, 0, 0, 2, 0],
+                    [1, 0, 2, 0, 0, 2],
+                    [0, 2, 0, 0, 0, 0],
+                    [0, 0, 3, 0, 1, 0]  
+                ]
+            }
+        };
+
+        const BASE_CEILING_HEIGHT = 22.0;
+
+        // --- AMBIENT DATA SYSTEM VARIABLES ---
+        let rawJsonData = null;
+        let questionsMasterList = [];
+        const JSON_URL = '../vocab.json';
+
+        // --- RUNTIME STATES ---
+        let matchActive = false;
+        let isQuizOpen = false;
+        let grapplesLeft = 3;
+        let currentLevel = 1;
+
+        // Grappling Tether Parameters
+        let isGrappled = false;
+        let grapplePoint = new THREE.Vector3();
+
+        // Kinematics and Movement Matrices
+        let playerPos = new THREE.Vector3(0, 2, 0); 
+        let playerVelocity = new THREE.Vector3(0, 0, 0);
+        let pitch = 0, yaw = 0; 
+
+        const playerHeight = 1.8;
+        const gravity = -0.007;
+        const speedMultiplier = 0.07;
+        const airDriftMultiplier = 0.015;
+
+        const keys = { w: false, a: false, s: false, d: false };
+        let ceilingHeight = BASE_CEILING_HEIGHT;
+
+        // Three.js Context Globals
+        let scene, camera, renderer;
+        let ropeMesh = null;
+        let platformsArray = [];
+        let winPortalMesh = null;
+        let ceilingMesh = null;
+        let ceilingGridHelper = null;
+        const spacing = 10; 
+
+        // --- STEP 1: LOAD JSON DATA MAPS & AUTO-START GAMEPLAY ---
+        async function fetchVocabularyStructureAndStart() {
+            try {
+                const response = await fetch(JSON_URL);
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                rawJsonData = await response.json();
+                
+                // Automatically parse all questions into your refuel battery list by default
+                questionsMasterList = [];
+                for (const key in rawJsonData) {
+                    if (rawJsonData.hasOwnProperty(key) && rawJsonData[key].questions) {
+                        rawJsonData[key].questions.forEach(q => {
+                            questionsMasterList.push({
+                                category: rawJsonData[key].title,
+                                question: q.question,
+                                image: q.image,
+                                options: q.options,
+                                correct: q.correct
+                            });
+                        });
+                    }
+                }
+
+                // If vocab JSON fails to supply indices, push a backup array item to prevent engine locks
+                if (questionsMasterList.length === 0) {
+                    questionsMasterList.push({
+                        category: "SYSTEM ENG",
+                        question: "Identify the emergency system refuel password code:",
+                        image: "",
+                        options: ["OKAY", "RELOAD", "TEST", "RUN"],
+                        correct: 1
+                    });
+                }
+
+                // Turn on the game and build Level 1 immediately by default
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('hud').style.display = 'block';
+                
+                matchActive = true;
+                generateCurrentLevelGrid();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading-text').innerHTML = `<span style="color:#ef4444;">Failed to read vocabulary indices automatically. Verify vocab.json setup.</span>`;
+            }
+        }
+
+        // --- STEP 2: GRAPHICS AND ENVIRONMENT ENGINE ---
+        function initEngine() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color('#f1f5f9');
+            scene.fog = new THREE.FogExp2('#f1f5f9', 0.01);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.copy(playerPos);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            dirLight.position.set(20, 60, 20);
+            scene.add(dirLight);
+
+            const pointLight = new THREE.PointLight(0x3b82f6, 1.5, 150);
+            pointLight.position.set(25, 20, 25);
+            scene.add(pointLight);
+
+            // Ceiling Cap setup
+            const ceilingGeo = new THREE.PlaneGeometry(300, 300);
+            const ceilingMat = new THREE.MeshStandardMaterial({ 
+                color: 0xffffff, roughness: 0.4, metalness: 0.05, side: THREE.DoubleSide 
+            });
+            ceilingMesh = new THREE.Mesh(ceilingGeo, ceilingMat);
+            ceilingMesh.rotation.x = Math.PI / 2;
+            ceilingMesh.position.y = ceilingHeight;
+            scene.add(ceilingMesh);
+
+            ceilingGridHelper = new THREE.GridHelper(300, 50, 0x94a3b8, 0xcbd5e1);
+            ceilingGridHelper.position.y = ceilingHeight - 0.02;
+            scene.add(ceilingGridHelper);
+
+            // AUTOMATIC WINDOW VISIBILITY POINTER LOCKERS
+            window.addEventListener('click', () => {
+                if (matchActive && !isQuizOpen) document.body.requestPointerLock();
+            });
+
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', handleMouseAim);
+            document.addEventListener('mousedown', handleWeaponClick);
+
+            fetchVocabularyStructureAndStart();
+            animateLoop();
+        }
+
+        // Clean procedural design textures - no visible numbers rendered to players
+        function createBlockTexture(type) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            if (type === 1) ctx.fillStyle = '#ffffff'; 
+            if (type === 2) ctx.fillStyle = '#e0f2fe'; 
+            if (type === 3) ctx.fillStyle = '#fef08a'; 
+
+            ctx.fillRect(0, 0, 256, 256);
+
+            // Distinct minimalist layout borders
+            if (type === 3) {
+                ctx.strokeStyle = '#eab308';
+            } else if (type === 2) {
+                ctx.strokeStyle = '#0ea5e9';
+            } else {
+                ctx.strokeStyle = '#2563eb';
+            }
+            
+            ctx.lineWidth = 24;
+            ctx.strokeRect(0, 0, 256, 256);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            return tex;
+        }
+
+        // --- STEP 3: LEVEL CONFIG INTERPRETATION MAP ---
+        function generateCurrentLevelGrid() {
+            // Clean up old assets
+            platformsArray.forEach(p => { if(p.mesh) scene.remove(p.mesh); });
+            platformsArray = [];
+            if (winPortalMesh) { scene.remove(winPortalMesh); winPortalMesh = null; }
+
+            // Dynamic setup checks config limits or flows into procedural calculations beyond Level 3
+            let currentLevelConfig;
+            if (LEVELS_CONFIG[currentLevel]) {
+                currentLevelConfig = LEVELS_CONFIG[currentLevel];
+            } else {
+                const inferredGoalHeight = 18 + ((currentLevel - 3) * 5);
+                currentLevelConfig = {
+                    goalHeight: inferredGoalHeight,
+                    grid: [
+                        [1, 0, 2, 0, 0, 1],
+                        [0, 2, 0, 2, 0, 0],
+                        [1, 0, 0, 0, 2, 0],
+                        [0, 0, 2, 0, 0, 2],
+                        [0, 2, 0, 1, 0, 0],
+                        [0, 0, 3, 0, 1, 0]
+                    ]
+                };
+            }
+
+            const activeGrid = currentLevelConfig.grid;
+            const targetGoalHeight = currentLevelConfig.goalHeight;
+
+            // Move the roof dynamically out of the way of higher target peaks
+            ceilingHeight = Math.max(BASE_CEILING_HEIGHT, targetGoalHeight + 12.0);
+            ceilingMesh.position.y = ceilingHeight;
+            ceilingGridHelper.position.y = ceilingHeight - 0.02;
+
+            const blockGeo = new THREE.BoxGeometry(5, 1, 5);
+            const rows = activeGrid.length;
+            const cols = activeGrid[0].length;
+
+            for (let z = 0; z < rows; z++) {
+                for (let x = 0; x < cols; x++) {
+                    const cellValue = activeGrid[z][x];
+
+                    // 0 values are skipped and represent empty air
+                    if (cellValue === 0) continue;
+
+                    // Compute altitude based on block type matrix configuration
+                    let platformY = 0;
+                    if (cellValue === 2) platformY = targetGoalHeight / 2; 
+                    if (cellValue === 3) platformY = targetGoalHeight;     
+
+                    const blockMat = new THREE.MeshStandardMaterial({
+                        map: createBlockTexture(cellValue),
+                        roughness: 0.3,
+                        metalness: 0.1
+                    });
+
+                    const blockMesh = new THREE.Mesh(blockGeo, blockMat);
+                    blockMesh.position.set(x * spacing, platformY, -z * spacing);
+                    scene.add(blockMesh);
+
+                    platformsArray.push({
+                        mesh: blockMesh,
+                        isPlatform: true, 
+                        bounds: {
+                            minX: (x * spacing) - 2.5, maxX: (x * spacing) + 2.5,
+                            minZ: (-z * spacing) - 2.5, maxZ: (-z * spacing) + 2.5
+                        }
+                    });
+
+                    // Set player safely on the initial spawn pad
+                    if (x === 0 && z === 0) {
+                        playerPos.set(0, platformY + 1.5, 0);
+                        playerVelocity.set(0, 0, 0);
+                    }
+
+                    // Floating golden end-goal target sphere
+                    if (cellValue === 3) {
+                        const portalGeo = new THREE.SphereGeometry(2, 16, 16);
+                        const portalMat = new THREE.MeshBasicMaterial({ color: 0xd97706, wireframe: true });
+                        winPortalMesh = new THREE.Mesh(portalGeo, portalMat);
+                        winPortalMesh.position.set(blockMesh.position.x, blockMesh.position.y + 2.5, blockMesh.position.z);
+                        scene.add(winPortalMesh);
+                    }
+                }
+            }
+
+            document.getElementById('level-counter').innerText = `Level ${currentLevel}`;
+        }
+
+        // --- STEP 4: RESPONDERS ---
+        function triggerNextLevelSequence() {
+            currentLevel++;
+            displayBannerNotification(`ADVANCED TO LEVEL ${currentLevel}!`);
+            generateCurrentLevelGrid();
+        }
+
+        function triggerVoidFallRespawn() {
+            displayBannerNotification(`⚠️ RE-ANCHORING TO SPAWN PAD`);
+            generateCurrentLevelGrid();
+        }
+
+        function displayBannerNotification(msg) {
+            const banner = document.getElementById('alert-banner');
+            banner.innerText = msg;
+            banner.style.opacity = '1';
+            clearTimeout(banner.timer);
+            banner.timer = setTimeout(() => { banner.style.opacity = '0'; }, 2000);
+        }
+
+        // --- STEP 5: INPUT HANDLING ---
+        function handleMouseAim(e) {
+            if (document.pointerLockElement !== document.body || isQuizOpen) return;
+            yaw -= e.movementX * 0.0022;
+            pitch -= e.movementY * 0.0022;
+            pitch = Math.max(-Math.PI/2 + 0.05, Math.min(Math.PI/2 - 0.05, pitch));
+            camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+        }
+
+        function toggleGrappleSystem() {
+            if (isGrappled) {
+                resetGrappleLine();
+                return;
+            }
+
+            if (grapplesLeft <= 0) {
+                alert("Out of Grapples! Press 'Q' to solve an inventory puzzle and reload.");
+                return;
+            }
+
+            const cameraDirection = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+            if (cameraDirection.y <= 0) return;
+
+            const scaleFactor = (ceilingHeight - camera.position.y) / cameraDirection.y;
+            grapplePoint.copy(camera.position).addScaledVector(cameraDirection, scaleFactor);
+
+            grapplesLeft--;
+            document.getElementById('grapple-counter').innerText = grapplesLeft;
+            isGrappled = true;
+
+            const ropeGeo = new THREE.BufferGeometry().setFromPoints([camera.position, grapplePoint]);
+            const ropeMat = new THREE.LineBasicMaterial({ color: 0x2563eb, linewidth: 4 });
+            ropeMesh = new THREE.Line(ropeGeo, ropeMat);
+            scene.add(ropeMesh);
+        }
+
+        function handleWeaponClick(e) {
+            if (document.pointerLockElement !== document.body || isQuizOpen || e.button !== 0) return;
+            toggleGrappleSystem();
+        }
+
+        function handleKeyDown(e) {
+            if (isQuizOpen) return;
+            if (e.key.toLowerCase() === 'w') keys.w = true;
+            if (e.key.toLowerCase() === 'a') keys.a = true;
+            if (e.key.toLowerCase() === 's') keys.s = true;
+            if (e.key.toLowerCase() === 'd') keys.d = true;
+
+            if (e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                if (document.pointerLockElement === document.body) {
+                    toggleGrappleSystem();
+                }
+            }
+
+            if (e.key.toLowerCase() === 'q') {
+                document.exitPointerLock();
+                openQuizInterface();
+            }
+        }
+
+        function handleKeyUp(e) {
+            if (e.key.toLowerCase() === 'w') keys.w = false;
+            if (e.key.toLowerCase() === 'a') keys.a = false;
+            if (e.key.toLowerCase() === 's') keys.s = false;
+            if (e.key.toLowerCase() === 'd') keys.d = false;
+        }
+
+        function resetGrappleLine() {
+            isGrappled = false;
+            if (ropeMesh) {
+                scene.remove(ropeMesh);
+                ropeMesh = null;
+            }
+        }
+
+        // --- STEP 6: QUIZ PROCESSING SYSTEM ---
+        function openQuizInterface() {
+            isQuizOpen = true;
+            keys.w = keys.a = keys.s = keys.d = false; 
+            
+            const randIndex = Math.floor(Math.random() * questionsMasterList.length);
+            const qData = questionsMasterList[randIndex];
+
+            document.getElementById('quiz-category').innerText = qData.category;
+            document.getElementById('quiz-question').innerText = qData.question;
+            document.getElementById('quiz-image').src = qData.image;
+
+            const grid = document.getElementById('quiz-options');
+            grid.innerHTML = '';
+
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => processQuizSelection(idx, qData.correct);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('quiz-modal').classList.add('active');
+        }
+
+        function processQuizSelection(chosen, correct) {
+            if (chosen === correct) {
+                grapplesLeft += 3;
+                document.getElementById('grapple-counter').innerText = grapplesLeft;
+                displayBannerNotification("CORRECT! +3 GRAPPLE REFILLS");
+            } else {
+                displayBannerNotification("❌ INCORRECT REFUEL CODE");
+            }
+            
+            document.getElementById('quiz-modal').classList.remove('active');
+            isQuizOpen = false;
+            
+            setTimeout(() => {
+                if (matchActive) document.body.requestPointerLock();
+            }, 50);
+        }
+
+        // --- STEP 7: PHYSICS AND FRAME LOOP ---
+        function animateLoop() {
+            requestAnimationFrame(animateLoop);
+
+            if (matchActive && !isQuizOpen) {
+                applyMovementPhysics();
+                evaluateWorldCollisions();
+            }
+
+            if (winPortalMesh) winPortalMesh.rotation.y += 0.02;
+            renderer.render(scene, camera);
+        }
+
+        function applyMovementPhysics() {
+            playerVelocity.y += gravity;
+
+            let moveIntent = new THREE.Vector3();
+            if (keys.w) moveIntent.z -= 1;
+            if (keys.s) moveIntent.z += 1;
+            if (keys.a) moveIntent.x -= 1;
+            if (keys.d) moveIntent.x += 1;
+
+            moveIntent.applyEuler(new THREE.Euler(0, yaw, 0)).normalize();
+
+            const isGrounded = (playerVelocity.y === 0);
+            if (isGrounded) {
+                playerVelocity.x = moveIntent.x * speedMultiplier;
+                playerVelocity.z = moveIntent.z * speedMultiplier;
+            } else {
+                playerVelocity.x += moveIntent.x * airDriftMultiplier;
+                playerVelocity.z += moveIntent.z * airDriftMultiplier;
+                playerVelocity.x *= 0.98;
+                playerVelocity.z *= 0.98;
+            }
+
+            if (isGrappled) {
+                let hookVector = new THREE.Vector3().subVectors(grapplePoint, playerPos);
+                hookVector.normalize();
+                playerVelocity.addScaledVector(hookVector, 0.016);
+                playerVelocity.multiplyScalar(0.985);
+
+                if (ropeMesh) {
+                    const positions = ropeMesh.geometry.attributes.position.array;
+                    positions[0] = camera.position.x;
+                    positions[1] = camera.position.y - 0.15; 
+                    positions[2] = camera.position.z;
+                    ropeMesh.geometry.attributes.position.needsUpdate = true;
+                }
+            }
+
+            playerPos.add(playerVelocity);
+
+            // ANTI-CLIPPING CEILING CONTROLLER
+            const maxPlayerFeetY = ceilingHeight - playerHeight - 0.3; 
+            if (playerPos.y > maxPlayerFeetY) {
+                playerPos.y = maxPlayerFeetY;
+                if (playerVelocity.y > 0) playerVelocity.y = 0; 
+            }
+
+            camera.position.copy(playerPos);
+            camera.position.y += playerHeight / 2; 
+        }
+
+        function evaluateWorldCollisions() {
+            if (playerPos.y < -12) {
+                resetGrappleLine();
+                triggerVoidFallRespawn();
+                return;
+            }
+
+            if (winPortalMesh && playerPos.distanceTo(winPortalMesh.position) < 2.2) {
+                resetGrappleLine();
+                triggerNextLevelSequence();
+                return;
+            }
+
+            for (let i = 0; i < platformsArray.length; i++) {
+                const plat = platformsArray[i];
+                
+                if (playerPos.x >= plat.bounds.minX && playerPos.x <= plat.bounds.maxX &&
+                    playerPos.z >= plat.bounds.minZ && playerPos.z <= plat.bounds.maxZ) {
+                    
+                    const topSurfaceY = (plat.mesh ? plat.mesh.position.y : 0) + 0.5; 
+
+                    if (playerVelocity.y <= 0 && playerPos.y >= topSurfaceY - 0.4 && playerPos.y <= topSurfaceY + 0.2) {
+                        playerPos.y = topSurfaceY;
+                        playerVelocity.y = 0;
+                        break;
+                    }
+                }
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.onload = initEngine;
+    </script>
+</body>
+</html>
