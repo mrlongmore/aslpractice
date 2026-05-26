@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoCapture: Fluid Cute Companion Matrix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #bae6fd; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+        .interactive { pointer-events: auto; }
+        .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="win-modal" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-white text-center hidden transition-all duration-300">
+        <div class="glass p-8 rounded-2xl border border-emerald-500/50 shadow-2xl max-w-sm w-full interactive">
+            <span class="text-5xl mb-4 block animate-bounce">✨</span>
+            <h2 class="text-3xl font-black text-emerald-400 mb-2 uppercase tracking-widest">You Win!</h2>
+            <div id="win-exp-log" class="text-sm text-gray-300 mb-6 bg-slate-900/50 p-4 rounded-xl border border-white/10 text-left font-mono space-y-1 max-h-[40vh] overflow-y-auto custom-scroll">
+                </div>
+            <button onclick="closeWinModal()" class="w-full px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition">Continue</button>
+        </div>
+    </div>
+
+    <div id="learn-move-modal" style="z-index: 60;" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white text-center hidden transition-all duration-300">
+        <div class="glass p-6 rounded-2xl border border-sky-500/50 shadow-2xl max-w-md w-full interactive">
+            <h2 class="text-2xl font-black text-sky-400 mb-2 uppercase tracking-widest" id="learn-move-title">Learn New Move!</h2>
+            <p class="text-sm text-gray-300 mb-4" id="learn-move-desc">Companion wants to learn a move, but already knows 4. Choose a move to overwrite.</p>
+            
+            <div id="forget-move-list" class="grid grid-cols-1 gap-2 mb-4">
+                </div>
+            
+            <button id="skip-learn-btn" class="w-full px-4 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 font-bold text-xs uppercase tracking-wider rounded-xl transition border border-white/10">
+                Give up on learning
+            </button>
+        </div>
+    </div>
+
+    <div id="lose-modal" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-white text-center hidden transition-all duration-300">
+        <div class="glass p-8 rounded-2xl border border-red-500/50 shadow-2xl max-w-sm w-full interactive">
+            <span class="text-5xl mb-4 block">💀</span>
+            <h2 class="text-2xl font-black text-red-400 mb-2 uppercase tracking-widest">System Failure</h2>
+            <p class="text-sm text-gray-300 mb-6">You lost, restoring creatures to full health.</p>
+            <button onclick="closeLoseModal()" class="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-black font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition">Reboot Matrix</button>
+        </div>
+    </div>
+
+    <div id="potion-modal" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 text-white hidden transition-all duration-300">
+        <div class="glass p-6 rounded-2xl border border-sky-500/50 shadow-2xl max-w-md w-full interactive">
+            <h2 class="text-2xl font-black text-emerald-400 mb-2 uppercase tracking-widest">Health Potion</h2>
+            <p id="potion-modal-info" class="text-sm text-gray-300 mb-4">Choose a companion to heal 20 HP.</p>
+            <div id="potion-creature-list" class="grid gap-2 max-h-80 overflow-y-auto custom-scroll"></div>
+            <button onclick="closeHealthPotionModal()" class="mt-4 w-full px-4 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 font-bold text-xs uppercase tracking-wider rounded-xl transition border border-white/10">Cancel</button>
+        </div>
+    </div>
+
+    <div id="victory-modal" class="absolute inset-0 z-50 bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-white text-center hidden transition-all duration-500">
+        <span class="text-6xl mb-4 animate-bounce">🏆</span>
+        <h2 class="text-3xl font-black text-amber-400 mb-2 uppercase tracking-widest">Grand Championship Attained</h2>
+        <p class="text-sm text-gray-300 max-w-md mb-6">You have bested Ranger Maya in structural grid combat and stabilized the local matrix pipeline!</p>
+        <button onclick="window.location.reload()" class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-xs uppercase tracking-wider rounded-xl shadow-lg hover:scale-105 transition interactive">Reinitialize Simulation</button>
+    </div>
+
+    <div id="dialogue-modal" class="absolute inset-0 z-40 bg-black/40 backdrop-blur-sm flex items-end justify-center p-6 text-white hidden transition-all duration-300">
+        <div class="glass w-full max-w-2xl rounded-2xl p-6 border border-white/10 shadow-2xl flex flex-col gap-4 interactive mb-12">
+            <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                <h3 id="dialogue-speaker-name" class="text-sm font-black text-sky-400 uppercase tracking-wider">NPC Speaker</h3>
+                <span class="text-[9px] font-mono font-bold bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded uppercase tracking-widest">Encounter Interaction</span>
+            </div>
+            <p id="dialogue-body-text" class="text-sm text-gray-200 leading-relaxed font-medium">Dialogue transmission body strings go here...</p>
+            <div class="flex justify-end mt-2">
+                <button id="dialogue-action-btn" class="px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-sky-500/20">
+                    Accept Battle Matrix
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="starter-modal" class="absolute inset-0 z-50 glass flex flex-col items-center justify-center p-6 text-white text-center interactive transition-all duration-500">
+        <h2 class="text-2xl font-black text-emerald-400 mb-2 uppercase tracking-wider">Select Your Starting Companion</h2>
+        <p class="text-xs text-gray-300 max-w-md mb-8">This cute companion creature will channel elemental matrix frequencies and battle on your behalf.</p>
+        <div id="starter-options" class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full px-4">
+            </div>
+    </div>
+
+    <div id="roster-modal" class="absolute inset-0 z-40 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 text-white hidden opacity-0 transition-all duration-300">
+        <div class="glass w-full max-w-lg rounded-2xl border border-white/15 overflow-hidden flex flex-col max-h-[85vh] shadow-2xl interactive">
+            <div class="p-4 bg-gradient-to-r from-emerald-950/50 to-sky-950/50 border-b border-white/10 flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">Captured Squad Matrix</h3>
+                    <p class="text-[10px] text-gray-400 font-mono">Select a dynamic companion to assign as active representative</p>
+                </div>
+                <button onclick="toggleRosterModal(false)" class="text-gray-400 hover:text-white text-xs bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-md transition font-bold font-mono">ESC [X]</button>
+            </div>
+            
+            <div id="roster-list-container" class="p-4 overflow-y-auto custom-scroll flex-1 space-y-3 bg-slate-950/30">
+                </div>
+            
+            <div class="p-3 bg-slate-900/60 border-t border-white/10 text-[10px] text-gray-400 text-center font-mono">
+                Squad capacity unbounded. Swap active representatives anytime outside combat phases.
+            </div>
+        </div>
+    </div>
+
+    <div class="ui-layer flex flex-col justify-between p-6 h-full">
+        
+        <div class="w-full flex justify-between items-start gap-4">
+            <button onclick="toggleRosterModal(true)" class="glass interactive px-5 py-3 rounded-2xl flex items-center gap-4 text-white text-left hover:border-sky-500/50 transition shadow-lg group">
+                <span class="text-3xl animate-pulse group-hover:scale-110 transition-transform">🎒</span>
+                <div>
+                    <h1 class="text-sm font-black text-emerald-400 tracking-wide uppercase flex items-center gap-1.5">
+                        Roster Ledger 
+                        <span class="text-[10px] text-sky-300 font-mono font-normal bg-sky-500/10 px-1.5 py-0.5 rounded">OPEN</span>
+                    </h1>
+                    <p id="roster-txt" class="text-xs text-gray-300 font-medium">Creatures Synced: 1</p>
+                </div>
+            </button>
+
+            <div class="flex gap-3">
+                <div class="glass px-5 py-2.5 rounded-2xl text-center min-w-[120px] text-white">
+                    <p class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Capture Tokens</p>
+                    <p id="tokens-txt" class="text-xl font-black text-amber-400">3</p>
+                </div>
+                <div class="glass px-5 py-2.5 rounded-2xl text-center min-w-[120px] text-white interactive">
+                    <p class="text-[10px] font-bold text-fuchsia-400 uppercase tracking-wider">Health Potions</p>
+                    <button id="potions-txt" type="button" class="interactive text-xl font-black text-fuchsia-400 z-50 cursor-pointer">0</button>
+                    <button onclick="openHealthPotionModal()" class="interactive mt-2 px-3 py-1 rounded-full text-[10px] bg-white/10 hover:bg-white/20 transition uppercase tracking-wider">Use Potion</button>
+                </div>
+                <div class="glass px-5 py-2.5 rounded-2xl text-center min-w-[110px] text-white">
+                    <p class="text-[10px] font-bold text-sky-400 uppercase tracking-wider">Engine State</p>
+                    <p id="state-txt" class="text-xs font-black text-white uppercase tracking-widest mt-1">Exploring</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="battle-hp-hud" class="self-center w-full max-w-2xl flex flex-col gap-2 hidden transition-all duration-300">
+            <div class="flex justify-between gap-8">
+                <div class="glass p-3 rounded-xl text-white flex-1 border border-sky-500/30">
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="text-sky-400"><span id="player-lvl-txt" class="text-[10px] bg-white/10 px-1 rounded mr-1">LV 1</span><span id="player-name-txt">Your Companion</span></span>
+                        <span id="player-hp-txt">HP: 100/100</span>
+                    </div>
+                    <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden mb-1">
+                        <div id="player-hp-bar" class="bg-gradient-to-r from-sky-400 to-blue-500 h-full transition-all duration-200" style="width: 100%"></div>
+                    </div>
+                    <div class="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
+                        <div id="player-exp-bar" class="bg-cyan-200 h-full transition-all duration-200" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="glass p-3 rounded-xl text-white flex-1 border border-rose-500/30">
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="text-rose-400"><span id="enemy-lvl-txt" class="text-[10px] bg-white/10 px-1 rounded mr-1">LV 1</span><span id="enemy-name-txt">Wild Creature</span></span>
+                        <span id="enemy-hp-txt">HP: 100/100</span>
+                    </div>
+                    <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden">
+                        <div id="enemy-hp-bar" class="bg-gradient-to-r from-rose-500 to-red-600 h-full transition-all duration-200" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass px-4 py-1.5 rounded-xl text-center text-[11px] text-amber-300 font-medium font-mono">
+                🎯 Calculated Synchronization Lock Probability: <span id="live-catch-rate-txt">0%</span>
+            </div>
+        </div>
+
+        <div id="battle-announcer" class="self-center glass px-8 py-4 rounded-2xl border border-orange-500/40 text-center max-w-md hidden transition-all text-white">
+            <p id="announcer-title" class="text-xs font-black text-orange-400 tracking-widest uppercase mb-1">🌿 Encounter Activated 🌿</p>
+            <p id="announcer-msg" class="text-sm font-bold text-gray-100">Synchronizing battlefield parameters...</p>
+        </div>
+
+        <div class="w-full flex flex-col md:flex-row justify-between items-end gap-6">
+            <div class="glass p-4 rounded-2xl text-[11px] text-gray-300 space-y-1.5 max-w-xs hidden md:block">
+                <p class="font-bold text-emerald-400 uppercase tracking-wider text-[12px] mb-1">VARIABLE PARAMETERS LINK</p>
+                <p><span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">W A S D</span> or <span class="bg-white/10 text-white px-1.5 py-0.5 rounded font-mono font-bold mr-1">Arrows</span> Hold to walk cleanly</p>
+                <p><span class="bg-indigo-600 text-white px-1.5 py-0.5 rounded font-medium mr-1">NPCs</span> Higher speed values strike first in turns</p>
+            </div>
+
+            <div class="w-full md:w-96 glass interactive rounded-2xl overflow-hidden flex flex-col border border-white/10 shadow-2xl text-white">
+                <div class="bg-gradient-to-r from-emerald-950/40 to-sky-950/40 px-4 py-3 border-b border-white/10 flex justify-between items-center">
+                    <span id="hub-title" class="text-xs font-black tracking-wider text-emerald-400 uppercase">Expedition Command Link</span>
+                </div>
+                <div id="hub-content" class="p-4 flex flex-col gap-4 max-h-[340px] overflow-y-auto custom-scroll">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- MASTER VARIABLE CONFIGURATION GRAPH ---
+const CONFIG_DATA = {
+"grid": {
+                "rows": 15, "cols": 15, "cellSize": 4,
+                "layout": [
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 0, 0, 0, 1],
+                    [1, 0, 1, 1, 0, 0, 1, 3, 3, 3, 3, 0, 1, 0, 1],
+                    [1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+                    [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1],
+                    [1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+                    [1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 1],
+                    [1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 1],
+                    [1, 2, 2, 1, 0, 0, 1, 1, 1, 0, 0, 1, 4, 4, 1],
+                    [1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1],
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
+                    [1, 0, 1, 1, 0, 0, 1, 2, 2, 2, 0, 1, 1, 0, 1],
+                    [1, 0, 0, 0, 0, 0, 1, 2, 2, 2, 0, 0, 0, 0, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                ]
+            },
+            "zones": {
+                "2": { "color": 0x14532d, "minLevel": 3, "maxLevel": 5, "encounters": ["dandelio", "pebbletoad", "pugplug"] },
+                "3": { "color": 0x064e3b, "minLevel": 6, "maxLevel": 9, "encounters": ["igniguana", "zephyrobin", "vampurr"] },
+                "4": { "color": 0x854d0e, "minLevel": 10, "maxLevel": 14, "encounters": ["aquack", "thumpkin", "roarbor"] }
+            },
+            "creatures": {
+                "dandelio": {
+                    "id": "dandelio", "displayName": "Dandelio", "elementalType": ["grass"],
+                    "evolvesTo": { "target": "roarbor", "level": 14 },
+                    "maxHp": 90, "attack": 55, "defense": 50, "speed": 60, "baseCatchRate": 0.40,
+                    "baseExpYield": 55, "growth": { "hp": 4, "attack": 3, "defense": 2, "speed": 3 },
+                    "moves": ["bramble_lash", "flora_mend"],
+                    "learnset": [ { "level": 6, "move": "sun_cannon" }, { "level": 10, "move": "dirt_fling" } ],
+                    "color": 0x4ade80, "aesthetic": "lion"
+                },
+                                "igniguana": {
+                    "id": "igniguana", "displayName": "Igniguana", "elementalType": ["fire"],
+                    "evolvesTo": { "target": "combustodo", "level": 14 },
+                    "maxHp": 75, "attack": 65, "defense": 45, "speed": 70, "baseCatchRate": 0.40,
+                    "baseExpYield": 55, "growth": { "hp": 3, "attack": 4, "defense": 2, "speed": 4 },
+                    "moves": ["cinder_chomp", "kindle_spirit"],
+                    "learnset": [ { "level": 6, "move": "gloom_glide" }, { "level": 10, "move": "inferno_blast" } ],
+                    "color": 0xf87171, "aesthetic": "lizard"
+                },
+                                "aquack": {
+                    "id": "aquack", "displayName": "Aquack", "elementalType": ["water"],
+                    "evolvesTo": { "target": "quackkraken", "level": 14 },
+                    "maxHp": 85, "attack": 50, "defense": 65, "speed": 55, "baseCatchRate": 0.40,
+                    "baseExpYield": 55, "growth": { "hp": 4, "attack": 2, "defense": 4, "speed": 3 },
+                    "moves": ["geyser_dash", "cleansing_tide"],
+                    "learnset": [ { "level": 6, "move": "zephyr_slice" }, { "level": 10, "move": "tsunami_surge" } ],
+                    "color": 0x60a5fa, "aesthetic": "duck"
+                },
+                "roarbor": {
+                    "id": "roarbor", "displayName": "Roarbor", "elementalType": ["grass", "earth"],
+                    "maxHp": 150, "attack": 95, "defense": 85, "speed": 80, "baseCatchRate": 0.15,
+                    "baseExpYield": 150, "growth": { "hp": 6, "attack": 5, "defense": 4, "speed": 4 },
+                    "moves": ["sun_cannon", "flora_mend", "fault_line", "stone_skin"],
+                    "learnset": [],
+                    "color": 0x22c55e, "aesthetic": "lion_evo"
+                },
+                "combustodo": {
+                    "id": "combustodo", "displayName": "Combustodo", "elementalType": ["fire", "dark"],
+                    "maxHp": 130, "attack": 105, "defense": 70, "speed": 100, "baseCatchRate": 0.15,
+                    "baseExpYield": 150, "growth": { "hp": 5, "attack": 6, "defense": 3, "speed": 5 },
+                    "moves": ["inferno_blast", "kindle_spirit", "abyssal_void", "dread_gaze"],
+                    "learnset": [],
+                    "color": 0xdc2626, "aesthetic": "lizard_evo"
+                },
+                "quackkraken": {
+                    "id": "quackkraken", "displayName": "Quackkraken", "elementalType": ["water", "wind"],
+                    "maxHp": 145, "attack": 85, "defense": 105, "speed": 75, "baseCatchRate": 0.15,
+                    "baseExpYield": 150, "growth": { "hp": 6, "attack": 4, "defense": 6, "speed": 4 },
+                    "moves": ["tsunami_surge", "cleansing_tide", "cyclone_spin", "updraft"],
+                    "learnset": [],
+                    "color": 0x2563eb, "aesthetic": "duck_evo"
+                },
+                // --- ELECTRIC LINE ---
+                "pugplug": {
+                    "id": "pugplug", "displayName": "Pugplug", "elementalType": ["electric"],
+                    "evolvesTo": { "target": "sparkbark", "level": 12 },
+                    "maxHp": 80, "attack": 55, "defense": 50, "speed": 85, "baseCatchRate": 0.45,
+                    "baseExpYield": 45, "growth": { "hp": 3, "attack": 3, "defense": 2, "speed": 5 },
+                    "moves": ["spark_slam", "overcharge"],
+                    "learnset": [ { "level": 5, "move": "radiant_gleam" }, { "level": 9, "move": "thunder_strike" } ],
+                    "color": 0xfbbf24, "aesthetic": "dog"
+                },
+                "sparkbark": {
+                    "id": "sparkbark", "displayName": "Sparkbark", "elementalType": ["electric", "light"],
+                    "maxHp": 120, "attack": 85, "defense": 75, "speed": 125, "baseCatchRate": 0.20,
+                    "baseExpYield": 130, "growth": { "hp": 5, "attack": 5, "defense": 4, "speed": 6 },
+                    "moves": ["thunder_strike", "overcharge", "holy_nova", "blinding_ray"],
+                    "learnset": [],
+                    "color": 0xf59e0b, "aesthetic": "dog_evo"
+                },
+                // --- DARK LINE ---
+                "vampurr": {
+                    "id": "vampurr", "displayName": "Vampurr", "elementalType": ["dark"],
+                    "evolvesTo": { "target": "necrofelis", "level": 15 },
+                    "maxHp": 70, "attack": 75, "defense": 40, "speed": 80, "baseCatchRate": 0.35,
+                    "baseExpYield": 60, "growth": { "hp": 3, "attack": 5, "defense": 2, "speed": 4 },
+                    "moves": ["gloom_glide", "dread_gaze"],
+                    "learnset": [ { "level": 7, "move": "zephyr_slice" }, { "level": 11, "move": "abyssal_void" } ],
+                    "color": 0xa78bfa, "aesthetic": "cat"
+                },
+                "necrofelis": {
+                    "id": "necrofelis", "displayName": "Necrofelis", "elementalType": ["dark", "wind"],
+                    "maxHp": 125, "attack": 120, "defense": 65, "speed": 115, "baseCatchRate": 0.10,
+                    "baseExpYield": 165, "growth": { "hp": 4, "attack": 7, "defense": 3, "speed": 6 },
+                    "moves": ["abyssal_void", "dread_gaze", "cyclone_spin", "updraft"],
+                    "learnset": [],
+                    "color": 0x7c3aed, "aesthetic": "cat_evo"
+                },
+                // --- LIGHT/WIND LINE ---
+                "zephyrobin": {
+                    "id": "zephyrobin", "displayName": "Zephyrobin", "elementalType": ["wind", "light"],
+                    "evolvesTo": { "target": "aeroeagle", "level": 13 },
+                    "maxHp": 75, "attack": 60, "defense": 50, "speed": 95, "baseCatchRate": 0.45,
+                    "baseExpYield": 50, "growth": { "hp": 3, "attack": 4, "defense": 3, "speed": 5 },
+                    "moves": ["zephyr_slice", "updraft"],
+                    "learnset": [ { "level": 6, "move": "radiant_gleam" }, { "level": 10, "move": "holy_nova" } ],
+                    "color": 0x38bdf8, "aesthetic": "bird"
+                },
+                "aeroeagle": {
+                    "id": "aeroeagle", "displayName": "Aeroeagle", "elementalType": ["wind", "light"],
+                    "maxHp": 135, "attack": 90, "defense": 75, "speed": 130, "baseCatchRate": 0.15,
+                    "baseExpYield": 145, "growth": { "hp": 5, "attack": 5, "defense": 4, "speed": 6 },
+                    "moves": ["cyclone_spin", "updraft", "holy_nova", "blinding_ray"],
+                    "learnset": [],
+                    "color": 0x0ea5e9, "aesthetic": "bird_evo"
+                },
+                // --- EARTH LINE ---
+                "pebbletoad": {
+                    "id": "pebbletoad", "displayName": "Pebbletoad", "elementalType": ["earth"],
+                    "evolvesTo": { "target": "bouldertort", "level": 16 },
+                    "maxHp": 100, "attack": 50, "defense": 80, "speed": 35, "baseCatchRate": 0.40,
+                    "baseExpYield": 60, "growth": { "hp": 5, "attack": 3, "defense": 5, "speed": 1 },
+                    "moves": ["dirt_fling", "stone_skin"],
+                    "learnset": [ { "level": 7, "move": "geyser_dash" }, { "level": 12, "move": "fault_line" } ],
+                    "color": 0xd97706, "aesthetic": "turtle"
+                },
+                "bouldertort": {
+                    "id": "bouldertort", "displayName": "Bouldertort", "elementalType": ["earth", "water"],
+                    "maxHp": 170, "attack": 80, "defense": 130, "speed": 50, "baseCatchRate": 0.10,
+                    "baseExpYield": 170, "growth": { "hp": 7, "attack": 4, "defense": 7, "speed": 2 },
+                    "moves": ["fault_line", "stone_skin", "tsunami_surge", "cleansing_tide"],
+                    "learnset": [],
+                    "color": 0xb45309, "aesthetic": "turtle_evo"
+                },
+                // --- HYBRID GRASS/EARTH LINE ---
+                "thumpkin": {
+                    "id": "thumpkin", "displayName": "Thumpkin", "elementalType": ["earth", "grass"],
+                    "evolvesTo": { "target": "jackoshmash", "level": 15 },
+                    "maxHp": 95, "attack": 65, "defense": 65, "speed": 45, "baseCatchRate": 0.35,
+                    "baseExpYield": 60, "growth": { "hp": 4, "attack": 4, "defense": 4, "speed": 2 },
+                    "moves": ["dirt_fling", "flora_mend"],
+                    "learnset": [ { "level": 6, "move": "bramble_lash" }, { "level": 11, "move": "fault_line" } ],
+                    "color": 0xa3e635, "aesthetic": "bunny"
+                },
+                "jackoshmash": {
+                    "id": "jackoshmash", "displayName": "Jackoshmash", "elementalType": ["earth", "dark"],
+                    "maxHp": 155, "attack": 110, "defense": 100, "speed": 60, "baseCatchRate": 0.10,
+                    "baseExpYield": 160, "growth": { "hp": 6, "attack": 6, "defense": 5, "speed": 3 },
+                    "moves": ["fault_line", "stone_skin", "abyssal_void", "dread_gaze"],
+                    "learnset": [],
+                    "color": 0x65a30d, "aesthetic": "bunny_evo"
+                }
+            },
+            "expMechanics": {
+                "curveMultiplier": 100
+            },
+            "captureMechanics": {
+                "formula": "Chance = BaseCatchRate + (1 - (CurrentHP / MaxHP)) * MaxHpBonusModifier",
+                "parameters": { "maxHpBonusModifier": 0.45 }
+            },
+            "moves": {
+                "cinder_chomp": { "name": "Cinder Chomp", "type": "fire", "category": "damage", "power": 45 },
+                "inferno_blast": { "name": "Inferno Blast", "type": "fire", "category": "damage", "power": 85 },
+                "kindle_spirit": { "name": "Kindle Spirit", "type": "fire", "category": "status", "target": "self", "stat": "attack", "operator": "multiply", "value": 1.5 },
+                
+                "geyser_dash": { "name": "Geyser Dash", "type": "water", "category": "damage", "power": 40 },
+                "tsunami_surge": { "name": "Tsunami Surge", "type": "water", "category": "damage", "power": 90 },
+                "cleansing_tide": { "name": "Cleansing Tide", "type": "water", "category": "status", "target": "self", "stat": "defense", "operator": "multiply", "value": 1.5 },
+                
+                "bramble_lash": { "name": "Bramble Lash", "type": "grass", "category": "damage", "power": 45 },
+                "sun_cannon": { "name": "Sun Cannon", "type": "grass", "category": "damage", "power": 100 },
+                "flora_mend": { "name": "Flora Mend", "type": "grass", "category": "status", "target": "self", "stat": "defense", "operator": "multiply", "value": 1.5 },
+
+                "spark_slam": { "name": "Spark Slam", "type": "electric", "category": "damage", "power": 50 },
+                "thunder_strike": { "name": "Thunder Strike", "type": "electric", "category": "damage", "power": 85 },
+                "overcharge": { "name": "Overcharge", "type": "electric", "category": "status", "target": "self", "stat": "speed", "operator": "multiply", "value": 1.5 },
+
+                "dirt_fling": { "name": "Dirt Fling", "type": "earth", "category": "damage", "power": 40 },
+                "fault_line": { "name": "Fault Line", "type": "earth", "category": "damage", "power": 95 },
+                "stone_skin": { "name": "Stone Skin", "type": "earth", "category": "status", "target": "self", "stat": "defense", "operator": "multiply", "value": 1.5 },
+
+                "zephyr_slice": { "name": "Zephyr Slice", "type": "wind", "category": "damage", "power": 45 },
+                "cyclone_spin": { "name": "Cyclone Spin", "type": "wind", "category": "damage", "power": 80 },
+                "updraft": { "name": "Updraft", "type": "wind", "category": "status", "target": "self", "stat": "speed", "operator": "multiply", "value": 1.5 },
+
+                "gloom_glide": { "name": "Gloom Glide", "type": "dark", "category": "damage", "power": 55 },
+                "abyssal_void": { "name": "Abyssal Void", "type": "dark", "category": "damage", "power": 90 },
+                "dread_gaze": { "name": "Dread Gaze", "type": "dark", "category": "status", "target": "enemy", "stat": "attack", "operator": "divide", "value": 1.5 },
+
+                "radiant_gleam": { "name": "Radiant Gleam", "type": "light", "category": "damage", "power": 50 },
+                "holy_nova": { "name": "Holy Nova", "type": "light", "category": "damage", "power": 95 },
+                "blinding_ray": { "name": "Blinding Ray", "type": "light", "category": "status", "target": "enemy", "stat": "defense", "operator": "divide", "value": 1.5 }
+            },
+            "effectiveness": {
+                "fire":     { "grass": 2.0, "wind": 2.0, "water": 0.5, "earth": 0.5 },
+                "water":    { "fire": 2.0, "earth": 2.0, "grass": 0.5, "electric": 0.5 },
+                "grass":    { "water": 2.0, "earth": 2.0, "fire": 0.5, "wind": 0.5 },
+                "electric": { "water": 2.0, "wind": 2.0, "earth": 0.5, "grass": 0.5 },
+                "earth":    { "fire": 2.0, "electric": 2.0, "water": 0.5, "grass": 0.5, "wind": 0.5 },
+                "wind":     { "grass": 2.0, "earth": 2.0, "electric": 0.5, "light": 0.5 },
+                "dark":     { "light": 2.0, "wind": 2.0, "earth": 0.5 },
+                "light":    { "dark": 2.0, "fire": 2.0, "grass": 0.5 }
+            },
+"npcs": [
+                { 
+                    "id": "npc_01", "name": "Hiker Silas", "r": 4, "c": 3, "isBoss": false, "shirtColor": 0xd97706,
+                    "dialogue": {
+                        "greeting": "Hey explorer! My companion Pebbletoad wants to test its armor against your team. Ready?",
+                        "victory": "Incredible tactics! You've raised your companion perfectly."
+                    },
+                    "roster": [{ "type": "pebbletoad", "level": 6 }] 
+                },
+                { 
+                    "id": "npc_03", "name": "Swimmer Coral", "r": 11, "c": 3, "isBoss": false, "shirtColor": 0x0284c7,
+                    "dialogue": {
+                        "greeting": "Water is the source of all life! Let my Aquack wash you away!",
+                        "victory": "I'm all dried up... Good battle!"
+                    },
+                    "roster": [{ "type": "aquack", "level": 8 }] 
+                },
+                { 
+                    "id": "npc_vet", "name": "Vet Joy", "r": 3, "c": 11, "isBoss": false, "isVet": true, "shirtColor": 0xf472b6,
+                    "dialogue": {
+                        "greeting": "Welcome to the field clinic! Your companions look a bit tired. Let me restore their vital matrices!",
+                        "victory": "" // Not needed for Vet
+                    },
+                    "roster": [] 
+                },
+                { 
+                    "id": "npc_02", "name": "Ranger Maya", "r": 10, "c": 11, "isBoss": true, "shirtColor": 0xb91c1c,
+                    "dialogue": {
+                        "greeting": "Halt, traveler! I am the Grand Wilderness Guide. To master this region, you must bypass my Bouldertort! Show me your bond!",
+                        "victory": "Astonishing! The wild paths are safe in your hands. You are the ultimate Champion!"
+                    },
+                    "roster": [{ "type": "bouldertort", "level": 16 }] 
+                }
+            ]
+        };
+
+        // --- SIMULATION STATES ---
+        let vocabDatabase = null;
+        let currentTopicKey = "";
+        let currentQuestionIdx = 0;
+
+        let captureTokens = 3;
+        let healthPotionCount = 0;
+        let gameState = "STARTER"; 
+
+        let squadInventory = [];
+        let activeSquadIndex = 0;
+
+        let activeCombatContext = {
+            isTrainerBattle: false,
+            npcRef: null,
+            enemyEntity: null,
+            playerCreature: null,
+            playerModifiers: { attack: 1.0, defense: 1.0, speed: 1.0 },
+            enemyModifiers: { attack: 1.0, defense: 1.0, speed: 1.0 }
+        };
+
+        let pendingMovesToLearn = [];
+        let currentLearningMoveKey = null;
+
+        let playerGridX = 1, playerGridZ = 1;
+        let playerTargetPos = new THREE.Vector3();
+        let isPlayerMoving = false;
+        const movementSpeed = 10.5;
+
+        const CELL_SIZE = CONFIG_DATA.grid.cellSize;
+        const MAP_WIDTH = CONFIG_DATA.grid.cols * CELL_SIZE;
+        const MAP_DEPTH = CONFIG_DATA.grid.rows * CELL_SIZE;
+
+        const obstacles = [];
+        const grassTiles = [];
+        const npcOverworldRegistry = [];
+
+        const worldOverworldGroup = new THREE.Group();
+        const worldBattleGroup = new THREE.Group();
+        let playerGroup, battlePlayerMesh, wildCreatureMesh;
+        let battleCameraAngle = 0;
+
+        const activeInputState = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+
+        // --- INITIALIZE THREE.JS RUNTIME ENVIRONMENT ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xbae6fd);
+        scene.fog = new THREE.FogExp2(0xbae6fd, 0.012);
+
+        scene.add(worldOverworldGroup);
+        scene.add(worldBattleGroup);
+        worldBattleGroup.visible = false;
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+        const sunLight = new THREE.DirectionalLight(0xfef08a, 0.75);
+        sunLight.position.set(40, 60, 20);
+        scene.add(sunLight);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        function gridToWorld(r, c) {
+            return {
+                x: -MAP_WIDTH / 2 + (c * CELL_SIZE) + CELL_SIZE / 2,
+                z: -MAP_DEPTH / 2 + (r * CELL_SIZE) + CELL_SIZE / 2
+            };
+        }
+
+        // --- ENVIRONMENT CONSTRUCTORS ---
+function assembleSimulationWorld() {
+            const floorGeo = new THREE.PlaneGeometry(MAP_WIDTH + 40, MAP_DEPTH + 40);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.9 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            worldOverworldGroup.add(floor);
+
+            const gridLines = new THREE.GridHelper(Math.max(MAP_WIDTH, MAP_DEPTH), 30, 0x16a34a, 0x15803d);
+            gridLines.position.y = 0.01;
+            worldOverworldGroup.add(gridLines);
+
+            const layout = CONFIG_DATA.grid.layout;
+            for(let r=0; r<layout.length; r++) {
+                for(let c=0; c<layout[r].length; c++) {
+                    const cell = layout[r][c];
+                    const pos = gridToWorld(r, c);
+
+                    if(cell === 1) {
+                        const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE*0.85, 3.5, CELL_SIZE*0.85), new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.8 }));
+                        mesh.position.set(pos.x, 1.75, pos.z);
+                        worldOverworldGroup.add(mesh);
+                        obstacles.push({ r, c });
+                    } else if(cell >= 2) {
+                        // Dynamically pull colors and data for zones 2, 3, 4, etc.
+                        const zoneInfo = CONFIG_DATA.zones[cell.toString()];
+                        if (zoneInfo) {
+                            const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE*0.95, 0.4, CELL_SIZE*0.95), new THREE.MeshStandardMaterial({ color: zoneInfo.color, roughness: 0.95 }));
+                            mesh.position.set(pos.x, 0.2, pos.z);
+                            worldOverworldGroup.add(mesh);
+                            grassTiles.push({ r, c, zoneId: cell.toString() }); // Store zoneId for encounters
+                        }
+                    }
+                }
+            }
+
+            CONFIG_DATA.npcs.forEach(npc => {
+                const pos = gridToWorld(npc.r, npc.c);
+                const npcColor = npc.shirtColor || 0x4338ca; // Use defined color or fallback to blue
+                const npcGroup = assembleLittleGuyModel(npcColor);
+                npcGroup.position.set(pos.x, 0, pos.z);
+                worldOverworldGroup.add(npcGroup);
+                npcOverworldRegistry.push({ data: npc, r: npc.r, c: npc.c, mesh: npcGroup });
+            });
+
+            const battleFloor = new THREE.Mesh(new THREE.PlaneGeometry(160, 160), new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.9 }));
+            battleFloor.rotation.x = -Math.PI / 2;
+            battleFloor.position.set(200, 0, 200);
+            worldBattleGroup.add(battleFloor);
+
+            const battleRing = new THREE.Mesh(new THREE.RingGeometry(8, 8.2, 32), new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
+            battleRing.rotation.x = Math.PI / 2;
+            battleRing.position.set(200, 0.02, 200);
+            worldBattleGroup.add(battleRing);
+        }
+
+        function assembleLittleGuyModel(shirtHex = 0x0284c7) {
+            const group = new THREE.Group();
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.8, 0.5), new THREE.MeshStandardMaterial({ color: shirtHex, roughness: 0.6 }));
+            torso.position.y = 0.7;
+            group.add(torso);
+
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), new THREE.MeshStandardMaterial({ color: 0xffedd5 }));
+            head.position.y = 1.35;
+            group.add(head);
+
+            const legGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.4, 8);
+            const legMat = new THREE.MeshStandardMaterial({ color: 0x44403c });
+            const leftLeg = new THREE.Mesh(legGeo, legMat); leftLeg.position.set(-0.2, 0.2, 0); leftLeg.name = "leftLeg";
+            const rightLeg = leftLeg.clone(); rightLeg.position.x = 0.2; rightLeg.name = "rightLeg";
+            group.add(leftLeg, rightLeg);
+            return group;
+        }
+
+        // --- CUTE 3D CREATURE ENGINE DESIGN MODEL ---
+        function createCuteCreatureGroup(schemaKey) {
+            const spec = CONFIG_DATA.creatures[schemaKey];
+            const rootGroup = new THREE.Group();
+            rootGroup.name = "cuteRoot";
+
+            const bodyMesh = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 24), new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.4 }));
+            bodyMesh.scale.set(1.0, 0.9, 1.0);
+            bodyMesh.position.y = 0.9;
+            bodyMesh.name = "bodyCore";
+            rootGroup.add(bodyMesh);
+
+            const whiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const blackMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+
+            const leftEyeBase = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), whiteMat);
+            leftEyeBase.position.set(0.35, 1.1, 0.85);
+            leftEyeBase.scale.set(1, 1.2, 0.5);
+            rootGroup.add(leftEyeBase);
+
+            const leftPupil = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), blackMat);
+            leftPupil.position.set(0.35, 1.1, 0.95);
+            leftPupil.scale.set(1, 1.1, 0.3);
+            rootGroup.add(leftPupil);
+
+            const rightEyeBase = leftEyeBase.clone();
+            rightEyeBase.position.x = -0.35;
+            rootGroup.add(rightEyeBase);
+
+            const rightPupil = leftPupil.clone();
+            rightPupil.position.x = -0.35;
+            rootGroup.add(rightPupil);
+
+            const blushMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, transparent: true, opacity: 0.7 });
+            const leftBlush = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 8), blushMat);
+            leftBlush.position.set(0.55, 0.85, 0.8);
+            leftBlush.scale.set(1.2, 0.7, 0.5);
+            rootGroup.add(leftBlush);
+
+            const rightBlush = leftBlush.clone();
+            rightBlush.position.x = -0.55;
+            rootGroup.add(rightBlush);
+
+            if (spec.aesthetic === "bunny") {
+                const earGeo = new THREE.CylinderGeometry(0.12, 0.15, 1.1, 16);
+                const leftEar = new THREE.Mesh(earGeo, bodyMesh.material);
+                leftEar.position.set(0.4, 2.1, 0);
+                leftEar.rotation.z = -0.15;
+                const rightEar = leftEar.clone();
+                rightEar.position.x = -0.4;
+                rightEar.rotation.z = 0.15;
+                rootGroup.add(leftEar, rightEar);
+            } else if (spec.aesthetic === "cat") {
+                const earGeo = new THREE.ConeGeometry(0.25, 0.5, 4);
+                const leftEar = new THREE.Mesh(earGeo, bodyMesh.material);
+                leftEar.position.set(0.45, 1.8, 0.2);
+                leftEar.rotation.z = -0.2;
+                const rightEar = leftEar.clone();
+                rightEar.position.x = -0.45;
+                rightEar.rotation.z = 0.2;
+                rootGroup.add(leftEar, rightEar);
+            } else if (spec.aesthetic === "bear") {
+                const earGeo = new THREE.SphereGeometry(0.25, 16, 16);
+                const leftEar = new THREE.Mesh(earGeo, bodyMesh.material);
+                leftEar.position.set(0.55, 1.7, 0.1);
+                const rightEar = leftEar.clone();
+                rightEar.position.x = -0.55;
+                rootGroup.add(leftEar, rightEar);
+            } else if (spec.aesthetic === "fox") {
+                // Large, pointy ears and a fluffy tail
+                const earGeo = new THREE.ConeGeometry(0.2, 0.6, 4);
+                const leftEar = new THREE.Mesh(earGeo, bodyMesh.material);
+                leftEar.position.set(0.4, 1.8, 0);
+                leftEar.rotation.z = -0.25;
+                const rightEar = leftEar.clone();
+                rightEar.position.x = -0.4;
+                rightEar.rotation.z = 0.25;
+                
+                const tailGeo = new THREE.ConeGeometry(0.3, 1.2, 8);
+                const tail = new THREE.Mesh(tailGeo, bodyMesh.material);
+                tail.position.set(0, 0.5, -0.9);
+                tail.rotation.x = -1.0;
+                
+                rootGroup.add(leftEar, rightEar, tail);
+            } else if (spec.aesthetic === "dragon") {
+                // Small horns and tiny wings
+                const hornGeo = new THREE.CylinderGeometry(0.05, 0.15, 0.5, 8);
+                const leftHorn = new THREE.Mesh(hornGeo, new THREE.MeshStandardMaterial({ color: 0xe5e7eb }));
+                leftHorn.position.set(0.3, 1.9, -0.2);
+                leftHorn.rotation.x = -0.2;
+                leftHorn.rotation.z = -0.2;
+                const rightHorn = leftHorn.clone();
+                rightHorn.position.x = -0.3;
+                rightHorn.rotation.z = 0.2;
+                
+                const wingGeo = new THREE.BoxGeometry(1.2, 0.6, 0.1);
+                const wing = new THREE.Mesh(wingGeo, bodyMesh.material);
+                wing.position.set(0, 1.2, -0.8);
+                
+                rootGroup.add(leftHorn, rightHorn, wing);
+            } else if (spec.aesthetic === "dog") {
+                // Floppy ears and a waggy stub tail
+                const earGeo = new THREE.BoxGeometry(0.2, 0.7, 0.3);
+                const leftEar = new THREE.Mesh(earGeo, bodyMesh.material);
+                leftEar.position.set(0.6, 1.4, 0.2);
+                leftEar.rotation.z = 0.3;
+                const rightEar = leftEar.clone();
+                rightEar.position.x = -0.6;
+                rightEar.rotation.z = -0.3;
+                
+                const tailGeo = new THREE.CylinderGeometry(0.08, 0.1, 0.4, 8);
+                const tail = new THREE.Mesh(tailGeo, bodyMesh.material);
+                tail.position.set(0, 0.6, -0.9);
+                tail.rotation.x = -1.2;
+                
+                rootGroup.add(leftEar, rightEar, tail);
+            }
+
+            const footGeo = new THREE.SphereGeometry(0.22, 16, 16);
+            const footMat = new THREE.MeshStandardMaterial({ color: spec.color, roughness: 0.6 });
+            
+            const fl = new THREE.Mesh(footGeo, footMat); fl.position.set(0.45, 0.15, 0.4); fl.name="fl";
+            const fr = fl.clone(); fr.position.x = -0.45; fr.name="fr";
+            const bl = fl.clone(); bl.position.z = -0.4; bl.name="bl";
+            const br = fr.clone(); br.position.z = -0.4; br.name="br";
+            
+            rootGroup.add(fl, fr, bl, br);
+            return rootGroup;
+        }
+
+        function instantiateBattleMesh(schemaKey, isPlayer) {
+            if (isPlayer) {
+                if (battlePlayerMesh) worldBattleGroup.remove(battlePlayerMesh);
+                battlePlayerMesh = createCuteCreatureGroup(schemaKey);
+                battlePlayerMesh.position.set(194.5, 0, 200);
+                battlePlayerMesh.lookAt(205.5, 0, 200);
+                worldBattleGroup.add(battlePlayerMesh);
+            } else {
+                if (wildCreatureMesh) worldBattleGroup.remove(wildCreatureMesh);
+                wildCreatureMesh = createCuteCreatureGroup(schemaKey);
+                wildCreatureMesh.position.set(205.5, 0, 200);
+                wildCreatureMesh.lookAt(194.5, 0, 200);
+                worldBattleGroup.add(wildCreatureMesh);
+            }
+        }
+
+        function bootstrapCharacters() {
+            playerGroup = assembleLittleGuyModel(0x0284c7);
+            const bootWorld = gridToWorld(playerGridZ, playerGridX);
+            playerGroup.position.set(bootWorld.x, 0, bootWorld.z);
+            playerTargetPos.copy(playerGroup.position);
+            worldOverworldGroup.add(playerGroup);
+        }
+
+        // --- COMPANION STARTER INITIALIZATION ---
+function renderStarterSelectionPanel() {
+            const target = document.getElementById('starter-options');
+            target.innerHTML = "";
+            
+            const starterKeys = Object.keys(CONFIG_DATA.creatures).slice(0, 3);
+            starterKeys.forEach(key => {
+                const c = CONFIG_DATA.creatures[key];
+                const columnCard = document.createElement('div');
+                columnCard.className = "glass p-5 rounded-2xl border border-white/10 hover:border-emerald-500/50 transition-all text-left flex flex-col justify-between interactive";
+                
+                // Uses the new badge generator to display dual typings cleanly!
+                const typeBadges = generateTypeBadgesHTML(c.elementalType);
+
+                columnCard.innerHTML = `
+                    <div>
+                        <div class="mb-2 flex gap-1">${typeBadges}</div>
+                        <h3 class="text-lg font-bold mb-1">${c.displayName}</h3>
+                        <p class="text-[11px] text-gray-400 mb-4 font-mono">HP: ${c.maxHp} | ATK: ${c.attack} | SPD: ${c.speed}</p>
+                        <div class="space-y-1 mb-6">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Starting Pool:</p>
+                            ${c.moves.map(m => {
+                                const moveDef = CONFIG_DATA.moves[m];
+                                const icon = moveDef.category === "damage" ? "⚔️" : "✨";
+                                return `<p class="text-xs text-gray-300">${icon} ${moveDef.name}</p>`
+                            }).join('')}
+                        </div>
+                    </div>
+                    <button onclick="commitStarterCompanionSelection('${key}')" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black rounded-xl text-xs uppercase tracking-wider transition-all">Synchronize Matrix</button>
+                `;
+                target.appendChild(columnCard);
+            });
+        }
+
+        function generateEntityInstance(key, level) {
+            const template = CONFIG_DATA.creatures[key];
+            let hp = template.maxHp;
+            let atk = template.attack;
+            let def = template.defense;
+            let spd = template.speed;
+            
+            if (level > 1) {
+                const g = template.growth;
+                const lmod = level - 1;
+                hp += g.hp * lmod;
+                atk += g.attack * lmod;
+                def += g.defense * lmod;
+                spd += g.speed * lmod;
+            }
+
+            // Dynamically calculate learned moves based on generated level
+            let assignedMoves = [...template.moves];
+            if (template.learnset) {
+                template.learnset.forEach(learnedObj => {
+                    if (level >= learnedObj.level && !assignedMoves.includes(learnedObj.move)) {
+                        if (assignedMoves.length < 4) {
+                            assignedMoves.push(learnedObj.move);
+                        } else {
+                            // NPCs and wild creatures automatically forget their oldest move
+                            assignedMoves.shift();
+                            assignedMoves.push(learnedObj.move);
+                        }
+                    }
+                });
+            }
+
+            return {
+                id: key, displayName: template.displayName, type: template.elementalType, baseExpYield: template.baseExpYield,
+                level: level, exp: 0,
+                hp: hp, maxHp: hp, attack: atk, defense: def, speed: spd, moves: assignedMoves
+            };
+        }
+
+        function commitStarterCompanionSelection(key) {
+            squadInventory.push(generateEntityInstance(key, 5));
+            activeSquadIndex = 0;
+
+            syncContextWithActiveSquad();
+
+            document.getElementById('starter-modal').classList.add('opacity-0');
+            setTimeout(() => {
+                document.getElementById('starter-modal').classList.add('hidden');
+                gameState = "EXPLORE";
+                updateRosterHudCount();
+                runDataLookupPipeline();
+            }, 500);
+        }
+
+        function syncContextWithActiveSquad() {
+            activeCombatContext.playerCreature = squadInventory[activeSquadIndex];
+            activeCombatContext.playerModifiers = { attack: 1.0, defense: 1.0, speed: 1.0 };
+            activeCombatContext.enemyModifiers = { attack: 1.0, defense: 1.0, speed: 1.0 };
+        }
+
+        function updateRosterHudCount() {
+            document.getElementById('roster-txt').innerText = `Creatures Synced: ${squadInventory.length}`;
+        }
+
+        // --- SQUAD ROSTER LEDGER UI OPERATORS ---
+        function toggleRosterModal(open) {
+            if (gameState !== "EXPLORE") return;
+            const modal = document.getElementById('roster-modal');
+            if(open) {
+                populateRosterInterfaceGrid();
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            } else {
+                modal.classList.add('opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+        }
+
+        function populateRosterInterfaceGrid() {
+            const viewContainer = document.getElementById('roster-list-container');
+            viewContainer.innerHTML = "";
+
+            squadInventory.forEach((monster, idx) => {
+                const card = document.createElement('div');
+                const isActive = (idx === activeSquadIndex);
+                
+                card.className = `p-4 rounded-xl border transition flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+                    isActive ? 'bg-sky-950/40 border-sky-500' : 'bg-white/5 border-white/10 hover:border-white/20'
+                }`;
+
+                let elementBadge = "text-sky-400 bg-sky-500/10";
+                if(monster.type === "matrix") elementBadge = "text-purple-400 bg-purple-500/10";
+                if(monster.type === "plains") elementBadge = "text-amber-400 bg-amber-500/10";
+
+                const expNeeded = monster.level * CONFIG_DATA.expMechanics.curveMultiplier;
+
+                card.innerHTML = `
+                    <div class="space-y-1 w-full sm:w-auto flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black bg-white/10 px-1.5 py-0.2 rounded text-white">LVL ${monster.level}</span>
+                            <h4 class="text-sm font-bold text-white">${monster.displayName}</h4>
+                            <span class="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded uppercase ${elementBadge}">${monster.type}</span>
+                            ${isActive ? `<span class="text-[9px] font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded tracking-widest uppercase">Active</span>` : ''}
+                        </div>
+                        <p class="text-[11px] font-mono text-gray-400">VIT: ${monster.hp}/${monster.maxHp} | ATK: ${monster.attack} | SPD: ${monster.speed}</p>
+                        <div class="w-full max-w-[200px] h-1 bg-black/50 rounded-full overflow-hidden mt-1">
+                            <div class="bg-cyan-300 h-full" style="width: ${(monster.exp / expNeeded) * 100}%"></div>
+                        </div>
+                    </div>
+                    <button 
+                        onclick="setActiveSquadCompanion(${idx})" 
+                        ${isActive ? 'disabled' : ''} 
+                        class="w-full sm:w-auto px-4 py-2 text-xs font-black rounded-lg uppercase tracking-wider transition ${
+                            isActive ? 'bg-slate-800 text-gray-500 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600 text-black'
+                        }">
+                        Deploy Companion
+                    </button>
+                `;
+                viewContainer.appendChild(card);
+            });
+        }
+
+        function setActiveSquadCompanion(index) {
+            activeSquadIndex = index;
+            syncContextWithActiveSquad();
+            populateRosterInterfaceGrid();
+            
+            setTimeout(() => {
+                if(gameState === "EXPLORE") {
+                    if (vocabDatabase) renderTerminalQuestion();
+                    else renderFileLoaderPrompt();
+                }
+            }, 500);
+
+            toggleRosterModal(false);
+        }
+
+        // --- VOCAB ENGINE STACK ---
+        async function runDataLookupPipeline() {
+            try {
+                const res = await fetch('../vocab.json');
+                if(!res.ok) throw new Error();
+                ingestVocabDataset(await res.json());
+            } catch (e) {
+                renderFileLoaderPrompt();
+            }
+        }
+
+        function renderFileLoaderPrompt() {
+            document.getElementById('hub-content').innerHTML = `
+                <div class="flex flex-col items-center justify-center p-2 text-center gap-3 text-white">
+                    <div class="text-xl animate-bounce">🌱</div>
+                    <div>
+                        <p class="text-xs font-bold">Connect External Study Core</p>
+                        <p class="text-[10px] text-gray-400 mt-0.5">Feed your standard vocab.json directly into the explorer module to generate extra combat capture tokens dynamically.</p>
+                    </div>
+                    <label class="w-full py-2 rounded-xl border border-dashed border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10 cursor-pointer text-xs font-bold text-emerald-400 text-center uppercase block interactive">
+                        Select vocab.json
+                        <input type="file" accept=".json" class="hidden" onchange="parseSandboxFile(event)">
+                    </label>
+                </div>
+            `;
+        }
+
+        function parseSandboxFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try { ingestVocabDataset(JSON.parse(evt.target.result)); } catch(err) { alert("Matrix exception."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function ingestVocabDataset(data) {
+            vocabDatabase = data;
+            currentTopicKey = Object.keys(data)[0];
+            currentQuestionIdx = 0;
+            if(gameState === "EXPLORE") renderTerminalQuestion();
+        }
+
+        function renderTerminalQuestion() {
+    document.getElementById('hub-title').innerText = "Mainframe Deck Link";
+    const panel = document.getElementById('hub-content');
+    if(!vocabDatabase) { renderFileLoaderPrompt(); return; }
+
+    const pool = vocabDatabase[currentTopicKey]?.questions;
+    if(!pool || pool.length === 0) return;
+    
+    if(currentQuestionIdx >= pool.length) currentQuestionIdx = 0;
+    const item = pool[currentQuestionIdx];
+
+    let s = `<select onchange="currentTopicKey=this.value; currentQuestionIdx=0; renderTerminalQuestion();" class="w-full bg-slate-900 border border-white/10 rounded-lg p-1 text-xs font-bold text-emerald-400 outline-none interactive mb-1">`;
+    for (const key in vocabDatabase) s += `<option value="${key}" ${key===currentTopicKey?'selected':''}>${vocabDatabase[key].title || key}</option>`;
+    s += `</select>`;
+
+    // The fix: Re-added the conditional image injection block below!
+    panel.innerHTML = s + `
+        <div class="flex flex-col gap-2 pt-2 border-t border-white/5 text-white">
+            <div class="flex justify-between items-center text-[9px] text-sky-400 font-mono uppercase">
+                <span>Node Core ID: #${currentQuestionIdx+1}</span>
+                <span class="text-amber-400">Answer to earn +1 Capture Coin +1 Potion</span>
+            </div>
+            ${item.image ? `<div class="bg-slate-900/60 h-32 w-full flex items-center justify-center rounded-lg overflow-hidden border border-white/10"><img src="${item.image}" alt="Sign GIF" class="max-h-full max-w-full object-contain rounded"></div>` : ''}
+            <p class="text-xs font-bold">${item.question}</p>
+            <div id="options-box" class="grid grid-cols-2 gap-2"></div>
+        </div>
+    `;
+
+    item.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "p-2 rounded-lg bg-white/5 border border-white/5 text-left text-xs transition interactive";
+        btn.innerText = opt;
+        btn.onclick = () => {
+            const buttons = document.getElementById('options-box').getElementsByTagName('button');
+            Array.from(buttons).forEach(b => b.style.pointerEvents = 'none');
+            
+            if(idx === item.correct) {
+                btn.className = "p-2 rounded-lg bg-emerald-500/20 border border-emerald-500 text-xs font-bold text-emerald-400";
+                captureTokens++;
+                healthPotionCount++;
+                renderItemHud();
+            } else {
+                btn.className = "p-2 rounded-lg bg-red-500/20 border border-red-500 text-xs font-bold text-red-400";
+                buttons[item.correct].className = "p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-xs text-emerald-400";
+            }
+            setTimeout(() => { currentQuestionIdx++; if (gameState === "EXPLORE") renderTerminalQuestion(); }, 1200);
+        };
+        document.getElementById('options-box').appendChild(btn);
+    });
+}
+
+        function renderItemHud() {
+            document.getElementById('tokens-txt').innerText = captureTokens;
+            const potionText = document.getElementById('potions-txt');
+            if (potionText) {
+                potionText.innerText = healthPotionCount;
+                if (!potionText.dataset.listenerAttached) {
+                    potionText.addEventListener('click', openHealthPotionModal);
+                    potionText.dataset.listenerAttached = 'true';
+                }
+            }
+        }
+
+        function openHealthPotionModal() {
+            if (healthPotionCount <= 0) {
+                alert('No health potions are available. Answer more questions to earn potions.');
+                return;
+            }
+            populateHealthPotionModal();
+            const feedback = document.getElementById('reward-feedback');
+            if (feedback) feedback.innerText = "Select a companion to heal 20 HP.";
+            document.getElementById('potion-modal').classList.remove('hidden');
+        }
+
+        function disableRewardButtons() {
+            const cubeBtn = document.getElementById('btn-claim-cube');
+            const potionBtn = document.getElementById('btn-claim-potion');
+            if (cubeBtn) {
+                cubeBtn.disabled = true;
+                cubeBtn.classList.add('opacity-40', 'pointer-events-none');
+            }
+            if (potionBtn) {
+                potionBtn.disabled = true;
+                potionBtn.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+
+        function populateHealthPotionModal() {
+            const list = document.getElementById('potion-creature-list');
+            const info = document.getElementById('potion-modal-info');
+            list.innerHTML = "";
+
+            if (squadInventory.length === 0) {
+                info.innerText = "No companions are synced yet. Select a starter first.";
+                return;
+            }
+
+            const aliveParty = squadInventory.filter(creature => creature.hp > 0);
+            if (aliveParty.length === 0) {
+                info.innerText = "No living companions remain to heal.";
+                return;
+            }
+
+            info.innerText = "Select a companion to heal 20 HP.";
+            squadInventory.forEach((creature, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-3 rounded-2xl border border-white/10 bg-slate-900/70 text-left text-xs text-white interactive hover:bg-slate-800";
+                btn.disabled = creature.hp <= 0;
+                btn.innerHTML = `
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="font-bold text-sky-300">${creature.displayName}</span>
+                        <span class="text-[9px] text-gray-400">HP ${creature.hp}/${creature.maxHp}</span>
+                    </div>
+                    <p class="text-[9px] text-slate-400 mt-1">Level ${creature.level} · ${Array.isArray(creature.type) ? creature.type.join(', ') : creature.type}</p>
+                `;
+                btn.onclick = () => applyHealthPotionTo(idx);
+                list.appendChild(btn);
+            });
+        }
+
+        function applyHealthPotionTo(index) {
+            if (healthPotionCount <= 0) return;
+            const creature = squadInventory[index];
+            if (!creature || creature.hp <= 0) return;
+            healthPotionCount = Math.max(0, healthPotionCount - 1);
+            creature.hp = Math.min(creature.maxHp, creature.hp + 20);
+            renderItemHud();
+            const feedback = document.getElementById('reward-feedback');
+            if (feedback) feedback.innerText = `${creature.displayName} healed for 20 HP.`;
+            closeHealthPotionModal();
+            if (gameState === "BATTLE") updateCombatDashboardMetrics();
+        }
+
+        function closeHealthPotionModal() {
+            document.getElementById('potion-modal').classList.add('hidden');
+        }
+
+function openNpcDialogueOverlay(npcObject) {
+            gameState = "DIALOGUE";
+            document.getElementById('state-txt').innerText = "Dialogue";
+            
+            Object.keys(activeInputState).forEach(k => activeInputState[k] = false);
+
+            const modal = document.getElementById('dialogue-modal');
+            document.getElementById('dialogue-speaker-name').innerText = npcObject.name;
+            document.getElementById('dialogue-body-text').innerText = npcObject.dialogue.greeting;
+            
+            const triggerBtn = document.getElementById('dialogue-action-btn');
+
+            if (npcObject.isVet) {
+                // --- VET HEALING LOGIC ---
+                triggerBtn.innerText = "Heal Party";
+                triggerBtn.onclick = () => {
+                    // Heal entire roster
+                    squadInventory.forEach(creature => {
+                        creature.hp = creature.maxHp;
+                    });
+                    syncContextWithActiveSquad();
+                    
+                    document.getElementById('dialogue-body-text').innerText = "Your companions are fully healed! Be safe out there in the wild zones!";
+                    triggerBtn.innerText = "Farewell";
+                    triggerBtn.onclick = () => {
+                        modal.classList.add('hidden');
+                        gameState = "EXPLORE";
+                        document.getElementById('state-txt').innerText = "Exploring";
+                    };
+                };
+            } else {
+                // --- NORMAL BATTLE LOGIC ---
+                triggerBtn.innerText = "Initialize Battle Matrix";
+                triggerBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    const enemyDef = npcObject.roster[0];
+                    initializeCombatEngagement(enemyDef.type, enemyDef.level, true, npcObject);
+                };
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        // --- MATCH CAPTURE MATRIX COMPUTATIONS ---
+        function calculateActiveCatchProbability() {
+            const ctx = activeCombatContext;
+            if (!ctx.enemyEntity) return 0;
+            const baseRate = CONFIG_DATA.creatures[ctx.enemyEntity.id].baseCatchRate;
+            const hpBonusScalar = CONFIG_DATA.captureMechanics.parameters.maxHpBonusModifier;
+            return Math.min(1.0, Math.max(0.0, baseRate + (1 - (ctx.enemyEntity.hp / ctx.enemyEntity.maxHp)) * hpBonusScalar));
+        }
+
+        // --- STAT MODIFIER CAPPER ---
+// --- STAT MODIFIER CAPPER ---
+function applyStatModifier(targetMods, stat, operator, value) {
+    const MAX_MOD = 4.0;
+    const MIN_MOD = 0.25;
+    
+    // Store the value before we change it
+    const previousValue = targetMods[stat];
+
+    if (operator === "multiply") {
+        targetMods[stat] *= value;
+    } else if (operator === "divide") {
+        targetMods[stat] /= value;
+    }
+
+    // Clamp the value to prevent infinite stacking
+    targetMods[stat] = Math.max(MIN_MOD, Math.min(MAX_MOD, targetMods[stat]));
+    
+    // Check if the stat was already at the absolute limit
+    if (previousValue === targetMods[stat]) {
+        return targetMods[stat] === MAX_MOD ? "maxed" : "minned";
+    }
+    
+    return "changed";
+}
+        function initializeCombatEngagement(schemaKey, targetLevel, isTrainer = false, npcData = null) {
+            gameState = "CINEMATIC";
+            document.getElementById('state-txt').innerText = "In Battle";
+            
+            syncContextWithActiveSquad();
+            
+            activeCombatContext.enemyEntity = generateEntityInstance(schemaKey, targetLevel);
+            activeCombatContext.isTrainerBattle = isTrainer;
+            activeCombatContext.npcRef = npcData;
+
+            instantiateBattleMesh(activeCombatContext.playerCreature.id, true);
+            instantiateBattleMesh(schemaKey, false);
+
+            worldOverworldGroup.visible = false;
+            worldBattleGroup.visible = true;
+            battleCameraAngle = 0;
+
+            const announcer = document.getElementById('battle-announcer');
+            document.getElementById('announcer-title').innerText = isTrainer ? `⚔️ Trainer Challenge ⚔️` : `🌿 Wild Encounter 🌿`;
+            document.getElementById('announcer-msg').innerText = isTrainer ? `${npcData.name} sends out ${activeCombatContext.enemyEntity.displayName}!` : `A wild ${activeCombatContext.enemyEntity.displayName} appears!`;
+            
+            announcer.classList.remove('hidden');
+            document.getElementById('battle-hp-hud').classList.remove('hidden');
+            updateCombatDashboardMetrics();
+
+            setTimeout(() => {
+                announcer.classList.add('hidden');
+                gameState = "BATTLE";
+                renderCombatActionPanel();
+            }, 2500);
+        }
+
+function updateCombatDashboardMetrics() {
+    const ctx = activeCombatContext;
+    
+    ctx.playerCreature.hp = Math.max(0, ctx.playerCreature.hp);
+    ctx.enemyEntity.hp = Math.max(0, ctx.enemyEntity.hp);
+
+    document.getElementById('player-hp-txt').innerText = `HP: ${ctx.playerCreature.hp}/${ctx.playerCreature.maxHp}`;
+    document.getElementById('player-hp-bar').style.width = `${(ctx.playerCreature.hp/ctx.playerCreature.maxHp)*100}%`;
+    
+    // Inject Name AND Dual Type Badges
+    document.getElementById('player-name-txt').innerHTML = `${ctx.playerCreature.displayName} ${generateTypeBadgesHTML(ctx.playerCreature.type)}`;
+    document.getElementById('player-lvl-txt').innerText = `LV ${ctx.playerCreature.level}`;
+    
+    const expReq = ctx.playerCreature.level * CONFIG_DATA.expMechanics.curveMultiplier;
+    document.getElementById('player-exp-bar').style.width = `${(ctx.playerCreature.exp/expReq)*100}%`;
+
+    // Inject Name AND Dual Type Badges
+    document.getElementById('enemy-name-txt').innerHTML = `${ctx.enemyEntity.displayName} ${generateTypeBadgesHTML(ctx.enemyEntity.type)}`;
+    document.getElementById('enemy-lvl-txt').innerText = `LV ${ctx.enemyEntity.level}`;
+    document.getElementById('enemy-hp-txt').innerText = `HP: ${ctx.enemyEntity.hp}/${ctx.enemyEntity.maxHp}`;
+    document.getElementById('enemy-hp-bar').style.width = `${(ctx.enemyEntity.hp/ctx.enemyEntity.maxHp)*100}%`;
+
+    document.getElementById('live-catch-rate-txt').innerText = `${Math.floor(calculateActiveCatchProbability() * 100)}%`;
+}
+
+        function renderCombatActionPanel() {
+            document.getElementById('hub-title').innerText = `COMBAT MATRIX ACTIVE`;
+            const display = document.getElementById('hub-content');
+            
+            const pSpeed = Math.floor(activeCombatContext.playerCreature.speed * activeCombatContext.playerModifiers.speed);
+            const eSpeed = Math.floor(activeCombatContext.enemyEntity.speed * activeCombatContext.enemyModifiers.speed);
+
+            display.innerHTML = `
+                <div class="flex flex-col gap-2 w-full text-white">
+                    <p class="text-[10px] font-bold text-sky-400 uppercase tracking-wider">Execute Companion Move (Speed: ${pSpeed} vs Enemy Speed: ${eSpeed})</p>
+                    <div id="moves-action-grid" class="grid grid-cols-2 gap-2"></div>
+                    
+                    <div class="pt-2 border-t border-white/10 mt-1 space-y-2">
+                        <button id="btn-capture-action" onclick="executeCaptureSystemAction()" class="w-full p-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-xs uppercase tracking-wider flex justify-between items-center interactive">
+                            <span>Deploy Containment Pin</span>
+                            <span class="bg-black/20 text-[9px] px-1.5 py-0.5 rounded text-white">Cost: 1 Token</span>
+                        </button>
+                        ${hasAliveSwitchableCreature() ? `<button id="btn-switch-action" onclick="renderBattleSwitchPanel(false)" class="w-full p-2 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-500 text-black font-black text-xs uppercase tracking-wider interactive">Switch Companion</button>` : ''}
+                        <button id="btn-escape-action" onclick="processCombatEscape()" class="w-full p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-gray-300 font-medium interactive">
+                            Retreat From Field
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            const companionMoves = activeCombatContext.playerCreature.moves;
+            const grid = document.getElementById('moves-action-grid');
+            companionMoves.forEach(mKey => {
+                const moveSpec = CONFIG_DATA.moves[mKey];
+                const btn = document.createElement('button');
+                btn.className = "move-strike-btn p-2 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 text-left text-xs interactive flex flex-col";
+                
+                if (moveSpec.category === "damage") {
+                    btn.innerHTML = `<span class="font-bold text-sky-300">${moveSpec.name}</span><span class="text-[9px] text-gray-400 uppercase font-mono">Pwr: ${moveSpec.power}</span>`;
+                } else {
+                    btn.innerHTML = `<span class="font-bold text-purple-300">${moveSpec.name}</span><span class="text-[9px] text-gray-400 uppercase font-mono">Status Mod</span>`;
+                }
+                
+                btn.onclick = () => processTurnSequenceOrder(mKey);
+                grid.appendChild(btn);
+            });
+        }
+
+        function getAliveSquadIndices() {
+            return squadInventory
+                .map((creature, idx) => creature.hp > 0 ? idx : -1)
+                .filter(idx => idx >= 0);
+        }
+
+        function hasAliveSwitchableCreature() {
+            return getAliveSquadIndices().some(idx => idx !== activeSquadIndex);
+        }
+
+        function renderBattleSwitchPanel(isForced = false) {
+            const aliveIndices = getAliveSquadIndices();
+            const display = document.getElementById('hub-content');
+
+            if (aliveIndices.length === 0) {
+                processPlayerFaint();
+                return;
+            }
+
+            const title = isForced
+                ? 'Your companion fainted! Choose a replacement.'
+                : 'Choose a companion to switch in.';
+
+            display.innerHTML = `
+                <div class="flex flex-col gap-3 text-white">
+                    <p class="text-[10px] font-bold text-sky-400 uppercase tracking-wider">${title}</p>
+                    <div id="switch-options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+                    <button onclick="renderCombatActionPanel()" class="w-full p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-gray-300 font-medium interactive">Back to Actions</button>
+                </div>
+            `;
+
+            const grid = document.getElementById('switch-options-grid');
+            aliveIndices.forEach(idx => {
+                const creature = squadInventory[idx];
+                const btn = document.createElement('button');
+                btn.className = "p-3 rounded-2xl border border-white/10 bg-white/5 text-left text-xs interactive hover:bg-white/10";
+                btn.disabled = idx === activeSquadIndex;
+                btn.innerHTML = `
+                    <div class="flex justify-between items-center gap-2">
+                        <span class="font-bold text-sky-300">${creature.displayName}</span>
+                        <span class="text-[9px] text-gray-400 uppercase">HP ${creature.hp}/${creature.maxHp}</span>
+                    </div>
+                    <p class="mt-1 text-[10px] text-gray-300">Level ${creature.level} · ${Array.isArray(creature.type) ? creature.type.join(', ') : creature.type}</p>
+                `;
+                btn.onclick = () => {
+                    if (idx === activeSquadIndex) return;
+                    performBattleSwitch(idx, isForced);
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function performBattleSwitch(index, isForced = false) {
+            const announcer = document.getElementById('battle-announcer');
+            announcer.classList.remove('hidden');
+            announcer.classList.remove('opacity-0');
+
+            activeSquadIndex = index;
+            syncContextWithActiveSquad();
+            instantiateBattleMesh(activeCombatContext.playerCreature.id, true);
+            updateCombatDashboardMetrics();
+
+            document.getElementById('announcer-msg').innerText = `${activeCombatContext.playerCreature.displayName} enters the battlefield!`;
+
+            if (isForced) {
+                setTimeout(() => {
+                    gameState = "BATTLE";
+                    announcer.classList.add('hidden');
+                    renderCombatActionPanel();
+                }, 1600);
+                return;
+            }
+
+            setTimeout(() => {
+                const ctx = activeCombatContext;
+                if (ctx.enemyEntity.hp <= 0) {
+                    processCombatVictory();
+                    return;
+                }
+
+                executeEnemyActionPhase(() => {
+                    if (ctx.playerCreature.hp <= 0) {
+                        processPlayerFaint();
+                    } else {
+                        gameState = "BATTLE";
+                        lockCombatInputDecks(false);
+                        announcer.classList.add('hidden');
+                        renderCombatActionPanel();
+                    }
+                });
+            }, 1600);
+        }
+
+        function lockCombatInputDecks(shouldLock) {
+            const moveButtons = document.querySelectorAll('.move-strike-btn');
+            moveButtons.forEach(btn => {
+                btn.disabled = shouldLock;
+                if(shouldLock) btn.classList.add('opacity-40', 'pointer-events-none');
+                else btn.classList.remove('opacity-40', 'pointer-events-none');
+            });
+            const capBtn = document.getElementById('btn-capture-action');
+            const escBtn = document.getElementById('btn-escape-action');
+            if(capBtn) { capBtn.disabled = shouldLock; capBtn.className = capBtn.className.replace('opacity-40 pointer-events-none', ''); if(shouldLock) capBtn.classList.add('opacity-40', 'pointer-events-none'); }
+            if(escBtn) { escBtn.disabled = shouldLock; escBtn.className = escBtn.className.replace('opacity-40 pointer-events-none', ''); if(shouldLock) escBtn.classList.add('opacity-40', 'pointer-events-none'); }
+        }
+// --- DUAL-TYPE MATH & UI HELPERS ---
+function getMultiTypeEffectiveness(moveType, defenderTypes) {
+    let totalMult = 1.0;
+    // Ensure it's an array so it doesn't break if a creature only has 1 type
+    const typeArr = Array.isArray(defenderTypes) ? defenderTypes : [defenderTypes];
+    
+    typeArr.forEach(t => {
+        if(CONFIG_DATA.effectiveness[moveType] && CONFIG_DATA.effectiveness[moveType][t] !== undefined) {
+            totalMult *= CONFIG_DATA.effectiveness[moveType][t];
+        }
+    });
+    return totalMult;
+}
+
+function generateTypeBadgesHTML(types) {
+    const typeArr = Array.isArray(types) ? types : [types];
+    return typeArr.map(t => {
+        let badgeClass = "text-gray-400 bg-gray-500/10 border-gray-500/30";
+        if(t === "fire") badgeClass = "text-red-400 bg-red-500/10 border-red-500/30";
+        if(t === "water") badgeClass = "text-blue-400 bg-blue-500/10 border-blue-500/30";
+        if(t === "grass") badgeClass = "text-green-400 bg-green-500/10 border-green-500/30";
+        if(t === "electric") badgeClass = "text-yellow-400 bg-yellow-500/10 border-yellow-500/30";
+        if(t === "earth") badgeClass = "text-orange-400 bg-orange-500/10 border-orange-500/30";
+        if(t === "wind") badgeClass = "text-teal-400 bg-teal-500/10 border-teal-500/30";
+        if(t === "dark") badgeClass = "text-purple-400 bg-purple-500/10 border-purple-500/30";
+        if(t === "light") badgeClass = "text-yellow-200 bg-yellow-100/10 border-yellow-200/30";
+        
+        return `<span class="ml-1 text-[8px] border font-mono font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${badgeClass}">${t}</span>`;
+    }).join('');
+}
+        // --- SEQUENTIAL TURN EVALUATION ENGINE ---
+        function processTurnSequenceOrder(playerMoveKey) {
+            gameState = "CINEMATIC";
+            lockCombatInputDecks(true);
+
+            const ctx = activeCombatContext;
+            const announcer = document.getElementById('battle-announcer');
+            announcer.classList.remove('hidden');
+
+            const pSpeed = ctx.playerCreature.speed * ctx.playerModifiers.speed;
+            const eSpeed = ctx.enemyEntity.speed * ctx.enemyModifiers.speed;
+            const playerFirst = pSpeed >= eSpeed;
+
+            if (playerFirst) {
+                executePlayerActionPhase(playerMoveKey, () => {
+                    if (ctx.enemyEntity.hp <= 0) {
+                        processCombatVictory();
+                    } else {
+                        executeEnemyActionPhase(() => {
+                            if (ctx.playerCreature.hp <= 0) {
+                                processPlayerFaint();
+                            } else {
+                                gameState = "BATTLE";
+                                lockCombatInputDecks(false);
+                                announcer.classList.add('hidden');
+                                renderCombatActionPanel();
+                            }
+                        });
+                    }
+                });
+            } else {
+                executeEnemyActionPhase(() => {
+                    if (ctx.playerCreature.hp <= 0) {
+                        processPlayerFaint();
+                    } else {
+                        executePlayerActionPhase(playerMoveKey, () => {
+                            if (ctx.enemyEntity.hp <= 0) {
+                                processCombatVictory();
+                            } else {
+                                gameState = "BATTLE";
+                                lockCombatInputDecks(false);
+                                announcer.classList.add('hidden');
+                                renderCombatActionPanel(); 
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+function executePlayerActionPhase(moveKey, nextCallback) {
+    const mSpec = CONFIG_DATA.moves[moveKey];
+    const ctx = activeCombatContext;
+
+    if (mSpec.category === "damage") {
+        // USE NEW MULTI-TYPE FUNCTION HERE
+        const mult = getMultiTypeEffectiveness(mSpec.type, ctx.enemyEntity.type);
+        
+        const effAtk = ctx.playerCreature.attack * ctx.playerModifiers.attack;
+        const effDef = ctx.enemyEntity.defense * ctx.enemyModifiers.defense;
+        
+        const rawBase = Math.floor((((2 * ctx.playerCreature.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 50) + 2);
+        const totalDmg = Math.floor(rawBase * mult * (0.85 + Math.random() * 0.15));
+
+        ctx.enemyEntity.hp = Math.max(0, ctx.enemyEntity.hp - totalDmg);
+        
+        let message = `${ctx.playerCreature.displayName} hits opposing ${ctx.enemyEntity.displayName} with ${mSpec.name}! Dealt ${totalDmg} damage.`;
+        if (mult >= 2.0) message += " ✨ SUPER EFFECTIVE!";
+        if (mult > 0 && mult <= 0.5) message += " 🛡️ Not very effective...";
+        if (mult === 0) message += " It had no effect...";
+        
+        document.getElementById('announcer-msg').innerText = message;
+    } else if (mSpec.category === "status") {
+        const targetMods = mSpec.target === "self" ? ctx.playerModifiers : ctx.enemyModifiers;
+        const result = applyStatModifier(targetMods, mSpec.stat, mSpec.operator, mSpec.value);
+        const targetName = mSpec.target === "self" ? ctx.playerCreature.displayName : `opposing ${ctx.enemyEntity.displayName}`;
+        
+        let message = `${ctx.playerCreature.displayName} cast ${mSpec.name}! `;
+        if (result === "maxed") message += `${targetName}'s ${mSpec.stat} won't go any higher!`;
+        else if (result === "minned") message += `${targetName}'s ${mSpec.stat} won't go any lower!`;
+        else message += `${targetName}'s ${mSpec.stat} ${mSpec.operator === "multiply" ? "rose" : "fell"}!`;
+        
+        document.getElementById('announcer-msg').innerText = message;
+    }
+
+    updateCombatDashboardMetrics();
+    setTimeout(() => { nextCallback(); }, 2200);
+}
+
+function executeEnemyActionPhase(nextCallback) {
+    const ctx = activeCombatContext;
+    const available = ctx.enemyEntity.moves;
+    const chosenKey = available[Math.floor(Math.random() * available.length)];
+    const mSpec = CONFIG_DATA.moves[chosenKey];
+
+    if (mSpec.category === "damage") {
+        // USE NEW MULTI-TYPE FUNCTION HERE
+        const mult = getMultiTypeEffectiveness(mSpec.type, ctx.playerCreature.type);
+        
+        const effAtk = ctx.enemyEntity.attack * ctx.enemyModifiers.attack;
+        const effDef = ctx.playerCreature.defense * ctx.playerModifiers.defense;
+
+        const rawBase = Math.floor((((2 * ctx.enemyEntity.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 50) + 2);
+        const totalDmg = Math.floor(rawBase * mult * (0.85 + Math.random() * 0.15));
+
+        ctx.playerCreature.hp = Math.max(0, ctx.playerCreature.hp - totalDmg);
+        
+        let message = `Opposing ${ctx.enemyEntity.displayName} retaliates using ${mSpec.name}! Reduced health by ${totalDmg}.`;
+        if (mult >= 2.0) message += " 💥 CRITICAL SYSTEMS DAMAGE!";
+        if (mult > 0 && mult <= 0.5) message += " 🛡️ You resisted it!";
+        
+        document.getElementById('announcer-msg').innerText = message;
+    } else if (mSpec.category === "status") {
+        const targetMods = mSpec.target === "self" ? ctx.enemyModifiers : ctx.playerModifiers;
+        const result = applyStatModifier(targetMods, mSpec.stat, mSpec.operator, mSpec.value);
+        const targetName = mSpec.target === "self" ? `Opposing ${ctx.enemyEntity.displayName}` : ctx.playerCreature.displayName;
+        
+        let message = `Opposing ${ctx.enemyEntity.displayName} cast ${mSpec.name}! `;
+        if (result === "maxed") message += `${targetName}'s ${mSpec.stat} won't go any higher!`;
+        else if (result === "minned") message += `${targetName}'s ${mSpec.stat} won't go any lower!`;
+        else message += `${targetName}'s ${mSpec.stat} ${mSpec.operator === "multiply" ? "rose" : "fell"}!`;
+
+        document.getElementById('announcer-msg').innerText = message;
+    }
+
+    updateCombatDashboardMetrics();
+    setTimeout(() => { nextCallback(); }, 2200);
+}
+
+        function executeCaptureSystemAction() {
+            gameState = "CINEMATIC";
+            lockCombatInputDecks(true);
+            const announcer = document.getElementById('battle-announcer');
+            announcer.classList.remove('hidden');
+            
+            if (activeCombatContext.isTrainerBattle) {
+                document.getElementById('announcer-msg').innerText = "Security Override Denied: Cannot capture another trainer's creature!";
+                setTimeout(() => { 
+                    executeEnemyActionPhase(() => {
+                        if (activeCombatContext.playerCreature.hp <= 0) processPlayerFaint();
+                        else { gameState = "BATTLE"; lockCombatInputDecks(false); announcer.classList.add('hidden'); }
+                    });
+                }, 2000);
+                return;
+            }
+
+            if(captureTokens < 1) {
+                document.getElementById('announcer-msg').innerText = "No capture tokens remaining!";
+                setTimeout(() => { gameState = "BATTLE"; lockCombatInputDecks(false); announcer.classList.add('hidden'); }, 1500);
+                return;
+            }
+
+            captureTokens--;
+            document.getElementById('tokens-txt').innerText = captureTokens;
+
+            const successProbability = calculateActiveCatchProbability();
+            if (Math.random() < successProbability) {
+                squadInventory.push(activeCombatContext.enemyEntity); 
+                updateRosterHudCount();
+
+                document.getElementById('announcer-msg').innerText = `SUCCESS! Synced ${activeCombatContext.enemyEntity.displayName}!`;
+                setTimeout(() => { closeCombatArena(); }, 2000);
+            } else {
+                document.getElementById('announcer-msg').innerText = `CONTAINMENT BROKEN! Matrix deflection occurred.`;
+                setTimeout(() => { 
+                    executeEnemyActionPhase(() => {
+                        if (activeCombatContext.playerCreature.hp <= 0) processPlayerFaint();
+                        else { gameState = "BATTLE"; lockCombatInputDecks(false); announcer.classList.add('hidden'); }
+                    });
+                }, 2000);
+            }
+        }
+
+        // --- WIN / EXP / LEVEL UP PROCESSOR ---
+        function processCombatVictory() {
+            document.getElementById('battle-announcer').classList.add('hidden');
+            pendingMovesToLearn = []; // Clear queue
+            
+            const ctx = activeCombatContext;
+            const p = ctx.playerCreature;
+            const expYield = ctx.enemyEntity.baseExpYield * ctx.enemyEntity.level;
+            
+            p.exp += expYield;
+            
+            const logContainer = document.getElementById('win-exp-log');
+            logContainer.innerHTML = `<p class="text-emerald-300">↳ Extracted ${expYield} EXP from matrix node.</p>`;
+
+            let expReq = p.level * CONFIG_DATA.expMechanics.curveMultiplier;
+
+            while(p.exp >= expReq) {
+                p.exp -= expReq;
+                p.level++;
+                
+                const growth = CONFIG_DATA.creatures[p.id].growth;
+                p.maxHp += growth.hp;
+                p.hp += growth.hp; 
+                p.attack += growth.attack;
+                p.defense += growth.defense;
+                p.speed += growth.speed;
+
+                expReq = p.level * CONFIG_DATA.expMechanics.curveMultiplier;
+
+                logContainer.innerHTML += `
+                    <div class="mt-2 pt-2 border-t border-white/10">
+                        <p class="text-sky-300 font-bold mb-1">⭐ LEVEL UP! System reached LVL ${p.level}!</p>
+                        <p class="text-[11px] text-gray-400">MAX HP +${growth.hp} | ATK +${growth.attack} | DEF +${growth.defense} | SPD +${growth.speed}</p>
+                    </div>
+                `;
+
+                // Check for new moves
+                const learnset = CONFIG_DATA.creatures[p.id].learnset;
+                if (learnset) {
+                    learnset.forEach(learnedObj => {
+                        if (learnedObj.level === p.level && !p.moves.includes(learnedObj.move)) {
+                            pendingMovesToLearn.push(learnedObj.move);
+                        }
+                    });
+                }
+            }
+
+            processNextLearnedMove();
+        }
+
+        // --- MOVE LEARNING QUEUE HANDLER ---
+        function processNextLearnedMove() {
+            if (pendingMovesToLearn.length === 0) {
+                document.getElementById('win-modal').classList.remove('hidden');
+                return;
+            }
+
+            const moveKey = pendingMovesToLearn.shift();
+            const p = activeCombatContext.playerCreature;
+            const mSpec = CONFIG_DATA.moves[moveKey];
+            const logContainer = document.getElementById('win-exp-log');
+
+            if (p.moves.length < 4) {
+                p.moves.push(moveKey);
+                logContainer.innerHTML += `
+                    <div class="mt-2 pt-2 border-t border-white/10">
+                        <p class="text-amber-400 font-bold">✨ ${p.displayName} learned ${mSpec.name}!</p>
+                    </div>
+                `;
+                processNextLearnedMove();
+            } else {
+                currentLearningMoveKey = moveKey;
+                launchLearnMoveModal(moveKey, p);
+            }
+        }
+
+        function launchLearnMoveModal(newMoveKey, p) {
+            const mSpec = CONFIG_DATA.moves[newMoveKey];
+            document.getElementById('learn-move-title').innerText = `Learn ${mSpec.name}?`;
+            
+            const list = document.getElementById('forget-move-list');
+            list.innerHTML = "";
+            
+            p.moves.forEach((existingMoveKey, idx) => {
+                const eSpec = CONFIG_DATA.moves[existingMoveKey];
+                const btn = document.createElement('button');
+                btn.className = "p-3 bg-red-900/30 border border-red-500/50 rounded-xl hover:bg-red-800/60 text-left transition flex justify-between items-center group";
+                btn.innerHTML = `
+                    <span class="font-bold text-red-300 group-hover:text-white transition">Forget ${eSpec.name}</span>
+                    <span class="text-[10px] text-gray-400 font-mono">Pwr: ${eSpec.power || 'Status'}</span>
+                `;
+                btn.onclick = () => {
+                    p.moves[idx] = currentLearningMoveKey;
+                    const logContainer = document.getElementById('win-exp-log');
+                    logContainer.innerHTML += `
+                        <div class="mt-2 pt-2 border-t border-white/10">
+                            <p class="text-amber-400 font-bold">✨ ${p.displayName} forgot ${eSpec.name} and learned ${mSpec.name}!</p>
+                        </div>
+                    `;
+                    document.getElementById('learn-move-modal').classList.add('hidden');
+                    processNextLearnedMove();
+                };
+                list.appendChild(btn);
+            });
+
+            const skipBtn = document.getElementById('skip-learn-btn');
+            skipBtn.innerText = `Give up on learning ${mSpec.name}`;
+            skipBtn.onclick = () => {
+                document.getElementById('learn-move-modal').classList.add('hidden');
+                processNextLearnedMove();
+            };
+
+            document.getElementById('learn-move-modal').classList.remove('hidden');
+        }
+
+        function closeWinModal() {
+            document.getElementById('win-modal').classList.add('hidden');
+            
+            const ctx = activeCombatContext;
+            if(ctx.isTrainerBattle && ctx.npcRef) {
+                gameState = "DIALOGUE";
+                const modal = document.getElementById('dialogue-modal');
+                document.getElementById('dialogue-speaker-name').innerText = ctx.npcRef.name;
+                document.getElementById('dialogue-body-text').innerText = ctx.npcRef.dialogue.victory;
+                
+                const triggerBtn = document.getElementById('dialogue-action-btn');
+                triggerBtn.innerText = ctx.npcRef.isBoss ? "Claim Ultimate Championship Medal" : "De-allocate Encounter Matrix";
+                
+                triggerBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    if (ctx.npcRef.isBoss) {
+                        document.getElementById('victory-modal').classList.remove('hidden');
+                    } else {
+                        const index = npcOverworldRegistry.findIndex(n => n.data.id === ctx.npcRef.id);
+                        if(index !== -1) {
+                            worldOverworldGroup.remove(npcOverworldRegistry[index].mesh);
+                            npcOverworldRegistry.splice(index, 1);
+                        }
+                        closeCombatArena();
+                    }
+                };
+                modal.classList.remove('hidden');
+            } else {
+                closeCombatArena();
+            }
+        }
+
+        function processCombatEscape() {
+            if (activeCombatContext.isTrainerBattle) {
+                const announcer = document.getElementById('battle-announcer');
+                announcer.classList.remove('hidden');
+                document.getElementById('announcer-msg').innerText = "Escape restricted in regulated trainer battles!";
+                setTimeout(() => { announcer.classList.add('hidden'); }, 2000);
+                return;
+            }
+            closeCombatArena();
+        }
+
+        function processPlayerFaint() {
+            if (hasAliveSwitchableCreature()) {
+                document.getElementById('battle-announcer').classList.remove('hidden');
+                document.getElementById('announcer-msg').innerText = `${activeCombatContext.playerCreature.displayName} fainted! Select a new companion.`;
+                renderBattleSwitchPanel(true);
+                return;
+            }
+
+            document.getElementById('battle-announcer').classList.add('hidden');
+            document.getElementById('lose-modal').classList.remove('hidden');
+        }
+
+        function closeLoseModal() {
+            document.getElementById('lose-modal').classList.add('hidden');
+            
+            squadInventory.forEach(creature => {
+                creature.hp = creature.maxHp;
+            });
+            syncContextWithActiveSquad();
+            
+            closeCombatArena();
+        }
+
+        function closeCombatArena() {
+            if (wildCreatureMesh) { worldBattleGroup.remove(wildCreatureMesh); wildCreatureMesh = null; }
+            if (battlePlayerMesh) { worldBattleGroup.remove(battlePlayerMesh); battlePlayerMesh = null; }
+            worldBattleGroup.visible = false;
+            worldOverworldGroup.visible = true;
+
+            document.getElementById('battle-hp-hud').classList.add('hidden');
+            document.getElementById('battle-announcer').classList.add('hidden');
+            
+            gameState = "EXPLORE";
+            document.getElementById('state-txt').innerText = "Exploring";
+            if (vocabDatabase) renderTerminalQuestion();
+            else renderFileLoaderPrompt();
+        }
+
+        // --- GRID EXPLORATION MECHANICS ---
+        function checkCollision(r, c) {
+            if(r < 0 || r >= CONFIG_DATA.grid.rows || c < 0 || c >= CONFIG_DATA.grid.cols) return true;
+            return obstacles.some(o => o.r === r && o.c === c);
+        }
+
+        window.addEventListener('keydown', e => {
+            if (e.key === "Escape") { toggleRosterModal(false); return; }
+            if (e.key in activeInputState) {
+                activeInputState[e.key] = true;
+            }
+        });
+
+        window.addEventListener('keyup', e => {
+            if (e.key in activeInputState) {
+                activeInputState[e.key] = false;
+            }
+        });
+
+        function digestOverworldInputBuffer() {
+            if (gameState !== "EXPLORE" || isPlayerMoving) return;
+
+            let deltaR = 0;
+            let deltaC = 0;
+
+            if (activeInputState.w || activeInputState.ArrowUp) deltaR = -1;
+            else if (activeInputState.s || activeInputState.ArrowDown) deltaR = 1;
+            else if (activeInputState.a || activeInputState.ArrowLeft) deltaC = -1;
+            else if (activeInputState.d || activeInputState.ArrowRight) deltaC = 1;
+
+            if (deltaR === 0 && deltaC === 0) return;
+
+            const targetR = playerGridZ + deltaR;
+            const targetC = playerGridX + deltaC;
+
+            const hitNpc = npcOverworldRegistry.find(n => n.r === targetR && n.c === targetC);
+            if(hitNpc) {
+                openNpcDialogueOverlay(hitNpc.data);
+                return;
+            }
+
+            if (!checkCollision(targetR, targetC)) {
+                playerGridX = targetC;
+                playerGridZ = targetR;
+                
+                const wPos = gridToWorld(playerGridZ, playerGridX);
+                playerTargetPos.set(wPos.x, 0, wPos.z);
+                isPlayerMoving = true;
+
+                playerGroup.rotation.y = Math.atan2(wPos.x - playerGroup.position.x, wPos.z - playerGroup.position.z);
+            }
+        }
+
+        assembleSimulationWorld();
+        bootstrapCharacters();
+        renderStarterSelectionPanel();
+
+        const engineClock = new THREE.Clock();
+
+        // --- TICK LOOP RENDER PIPELINE ---
+        function tick() {
+            requestAnimationFrame(tick);
+            const delta = Math.min(engineClock.getDelta(), 0.1);
+
+            if (gameState === "EXPLORE") {
+                digestOverworldInputBuffer();
+
+                if (isPlayerMoving) {
+                    const distance = playerGroup.position.distanceTo(playerTargetPos);
+                    const step = movementSpeed * delta;
+
+                    if (distance <= step) {
+                        playerGroup.position.copy(playerTargetPos);
+                        isPlayerMoving = false;
+
+                        playerGroup.getObjectByName("leftLeg").rotation.x = 0;
+                        playerGroup.getObjectByName("rightLeg").rotation.x = 0;
+
+// Check if we landed on a grass tile
+                        const steppedGrass = grassTiles.find(t => t.r === playerGridZ && t.c === playerGridX);
+                        
+                        if(steppedGrass && Math.random() < 0.25) {
+                            Object.keys(activeInputState).forEach(k => activeInputState[k] = false);
+                            
+                            // Load the specific zone parameters
+                            const zoneInfo = CONFIG_DATA.zones[steppedGrass.zoneId];
+                            
+                            // Pick random creature from THIS zone's pool
+                            const randomSpecies = zoneInfo.encounters[Math.floor(Math.random() * zoneInfo.encounters.length)];
+                            
+                            // Generate a wild level between minLevel and maxLevel for THIS zone
+                            const wildLevel = Math.floor(Math.random() * (zoneInfo.maxLevel - zoneInfo.minLevel + 1)) + zoneInfo.minLevel;
+                            
+                            initializeCombatEngagement(randomSpecies, wildLevel, false);
+                        }
+                    } else {
+                        playerGroup.position.addScaledVector(new THREE.Vector3().subVectors(playerTargetPos, playerGroup.position).normalize(), step);
+
+                        const swing = Date.now() * 0.015;
+                        playerGroup.getObjectByName("leftLeg").rotation.x = Math.sin(swing) * 0.6;
+                        playerGroup.getObjectByName("rightLeg").rotation.x = -Math.sin(swing) * 0.6;
+                    }
+                } else {
+                    if(playerGroup) playerGroup.position.y = Math.sin(Date.now() * 0.003) * 0.02;
+                }
+
+                camera.position.x += (playerGroup.position.x - camera.position.x) * 0.08;
+                camera.position.y += (20 - camera.position.y) * 0.08;
+                camera.position.z += ((playerGroup.position.z + 16) - camera.position.z) * 0.08;
+                camera.lookAt(playerGroup.position.x, 0.6, playerGroup.position.z);
+            }
+            else if (gameState === "BATTLE" || gameState === "CINEMATIC") {
+                const wiggleTime = Date.now() * 0.005;
+                const dynamicSquash = 0.9 + Math.sin(wiggleTime * 2) * 0.04;
+
+                if (wildCreatureMesh) {
+                    const wildRoot = wildCreatureMesh.getObjectByName("cuteRoot");
+                    wildRoot.getObjectByName("bodyCore").scale.set(1.0, dynamicSquash, 1.0);
+                    wildRoot.getObjectByName("fl").position.y = 0.15 + Math.max(0, Math.sin(wiggleTime)) * 0.15;
+                    wildRoot.getObjectByName("br").position.y = 0.15 + Math.max(0, Math.sin(wiggleTime + Math.PI)) * 0.15;
+                }
+                if (battlePlayerMesh) {
+                    const pRoot = battlePlayerMesh.getObjectByName("cuteRoot");
+                    pRoot.getObjectByName("bodyCore").scale.set(1.0, 0.9 + Math.cos(wiggleTime * 2) * 0.04, 1.0);
+                    pRoot.getObjectByName("fr").position.y = 0.15 + Math.max(0, Math.cos(wiggleTime)) * 0.15;
+                    pRoot.getObjectByName("bl").position.y = 0.15 + Math.max(0, Math.cos(wiggleTime + Math.PI)) * 0.15;
+                }
+
+                battleCameraAngle += 0.12 * delta;
+                const focusX = 197.5, focusY = 1.3, focusZ = 200;
+
+                camera.position.x += ((focusX + Math.cos(battleCameraAngle) * 12) - camera.position.x) * 0.05;
+                camera.position.y += (3.8 - camera.position.y) * 0.05;
+                camera.position.z += ((focusZ + Math.sin(battleCameraAngle) * 12) - camera.position.z) * 0.05;
+                camera.lookAt(focusX, focusY, focusZ);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        tick();
+    </script>
+</body>
+</html>
