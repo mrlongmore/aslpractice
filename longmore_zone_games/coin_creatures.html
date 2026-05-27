@@ -48,7 +48,7 @@
 
     <div id="lose-modal" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-white text-center hidden transition-all duration-300">
         <div class="glass p-8 rounded-2xl border border-red-500/50 shadow-2xl max-w-sm w-full interactive">
-            <span class="text-5xl mb-4 block">💀</span>
+            <span class="text-5xl mb-4 block">❌</span>
             <h2 class="text-2xl font-black text-red-400 mb-2 uppercase tracking-widest">System Failure</h2>
             <p class="text-sm text-gray-300 mb-6">You lost, restoring creatures to full health.</p>
             <button onclick="closeLoseModal()" class="w-full px-6 py-3 bg-red-500 hover:bg-red-600 text-black font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition">Reboot Matrix</button>
@@ -107,7 +107,47 @@
                 </div>
             
             <div class="p-3 bg-slate-900/60 border-t border-white/10 text-[10px] text-gray-400 text-center font-mono">
-                Squad capacity unbounded. Swap active representatives anytime outside combat phases.
+                Active party limited to 4 companions. Excess creatures are routed to PC storage automatically when caught.
+            </div>
+        </div>
+    </div>
+
+    <div id="pc-modal" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 text-white hidden transition-all duration-300">
+        <div class="glass w-full max-w-3xl rounded-2xl border border-white/15 overflow-hidden flex flex-col max-h-[85vh] shadow-2xl interactive">
+            <div class="p-4 bg-gradient-to-r from-slate-950/60 to-slate-900/80 border-b border-white/10 flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm font-black text-cyan-300 uppercase tracking-wider">Matrix PC Hub</h3>
+                    <p class="text-[10px] text-gray-400 font-mono">Store or retrieve companions from your backup storage.</p>
+                </div>
+                <button onclick="closePcModal()" class="text-gray-400 hover:text-white text-xs bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-md transition font-bold font-mono">ESC [X]</button>
+            </div>
+            <div class="p-4 overflow-y-auto custom-scroll space-y-4 bg-slate-950/40">
+                <div class="grid gap-3 md:grid-cols-2">
+                    <div class="glass p-4 rounded-2xl border border-sky-500/15">
+                        <h4 class="text-xs font-black text-sky-300 uppercase tracking-wider">Active Party <span id="pc-party-count" class="text-emerald-400">0/4</span></h4>
+                        <div id="pc-party-list" class="grid gap-3 mt-3"></div>
+                    </div>
+                    <div class="glass p-4 rounded-2xl border border-amber-500/15">
+                        <h4 class="text-xs font-black text-amber-300 uppercase tracking-wider">PC Storage <span id="pc-storage-count" class="text-emerald-400">0</span></h4>
+                        <div id="pc-storage-list" class="grid gap-3 mt-3"></div>
+                    </div>
+                </div>
+                <p id="pc-hint-text" class="text-[11px] text-gray-400 font-mono">Use the terminal to send party creatures to PC storage or withdraw them back into your active roster.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="capture-overflow-modal" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 text-white hidden transition-all duration-300">
+        <div class="glass w-full max-w-3xl rounded-2xl border border-white/15 overflow-hidden flex flex-col max-h-[85vh] shadow-2xl interactive">
+            <div class="p-4 bg-gradient-to-r from-slate-950/60 to-slate-900/80 border-b border-white/10 flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm font-black text-amber-300 uppercase tracking-wider">Party Full</h3>
+                    <p class="text-[10px] text-gray-400 font-mono">Choose which companion should move to PC storage.</p>
+                </div>
+                <button onclick="closeCaptureOverflowModal()" class="text-gray-400 hover:text-white text-xs bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-md transition font-bold font-mono">ESC [X]</button>
+            </div>
+            <div class="p-4 overflow-y-auto custom-scroll space-y-4 bg-slate-950/40">
+                <div id="capture-overflow-cards" class="grid gap-3"></div>
             </div>
         </div>
     </div>
@@ -198,23 +238,33 @@
         // --- MASTER VARIABLE CONFIGURATION GRAPH ---
 const CONFIG_DATA = {
 "grid": {
-                "rows": 15, "cols": 15, "cellSize": 4,
+                "rows": 25, "cols": 25, "cellSize": 4,
                 "layout": [
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 0, 0, 0, 0, 0, 1, 3, 3, 3, 3, 0, 0, 0, 1],
-                    [1, 0, 1, 1, 0, 0, 1, 3, 3, 3, 3, 0, 1, 0, 1],
-                    [1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-                    [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1],
-                    [1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-                    [1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 1],
-                    [1, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 1],
-                    [1, 2, 2, 1, 0, 0, 1, 1, 1, 0, 0, 1, 4, 4, 1],
-                    [1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1],
-                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                    [1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
-                    [1, 0, 1, 1, 0, 0, 1, 2, 2, 2, 0, 1, 1, 0, 1],
-                    [1, 0, 0, 0, 0, 0, 1, 2, 2, 2, 0, 0, 0, 0, 1],
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                    [5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [5, 6, 6, 8, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+                    [5, 6, 6, 6, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+                    [5, 6, 6, 7, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+                    [5, 0, 0, 0, 5, 0, 2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 0, 2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 0, 0, 1, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+                    [1, 0, 2, 7, 1, 0, 0, 1, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+                    [1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+                    [1, 0, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 3, 3, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
+                    [1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
+                    [1, 2, 2, 2, 1, 0, 0, 1, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
+                    [1, 2, 2, 2, 1, 0, 0, 1, 0, 0, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1],
+                    [1, 7, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 4, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 4, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+                    [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
                 ]
             },
             "zones": {
@@ -222,6 +272,10 @@ const CONFIG_DATA = {
                 "3": { "color": 0x064e3b, "minLevel": 6, "maxLevel": 9, "encounters": ["igniguana", "zephyrobin", "vampurr"] },
                 "4": { "color": 0x854d0e, "minLevel": 10, "maxLevel": 14, "encounters": ["aquack", "thumpkin", "roarbor"] }
             },
+            "interactables": [
+                { "id": "sign_notice", "type": "sign", "r": 4, "c": 4, "title": "Storage Notice", "text": "Active party size is limited to 4. When you catch more, choose which companion goes to your PC. You can also heal your creatures with the Vet in pink!" },
+                { "id": "computer_main", "type": "computer", "r": 2, "c": 4, "name": "Terminal PC", "dialogue": { "greeting": "PC System online. Store or retrieve a companion from the backup matrix." } }
+            ],
             "creatures": {
                 "dandelio": {
                     "id": "dandelio", "displayName": "Dandelio", "elementalType": ["grass"],
@@ -417,12 +471,12 @@ const CONFIG_DATA = {
             },
 "npcs": [
                 { 
-                    "id": "npc_01", "name": "Hiker Silas", "r": 4, "c": 3, "isBoss": false, "shirtColor": 0xd97706,
+                    "id": "npc_01", "name": "Hiker Silas", "r": 2, "c": 10, "isBoss": false, "shirtColor": 0xd97706,
                     "dialogue": {
                         "greeting": "Hey explorer! My companion Pebbletoad wants to test its armor against your team. Ready?",
                         "victory": "Incredible tactics! You've raised your companion perfectly."
                     },
-                    "roster": [{ "type": "pebbletoad", "level": 6 }] 
+                    "roster": [{ "type": "pebbletoad", "level": 6 }, { "type": "bouldertort", "level": 10 }] 
                 },
                 { 
                     "id": "npc_03", "name": "Swimmer Coral", "r": 11, "c": 3, "isBoss": false, "shirtColor": 0x0284c7,
@@ -430,10 +484,10 @@ const CONFIG_DATA = {
                         "greeting": "Water is the source of all life! Let my Aquack wash you away!",
                         "victory": "I'm all dried up... Good battle!"
                     },
-                    "roster": [{ "type": "aquack", "level": 8 }] 
+                    "roster": [{ "type": "aquack", "level": 8 }, { "type": "quackkraken", "level": 12 }] 
                 },
                 { 
-                    "id": "npc_vet", "name": "Vet Joy", "r": 3, "c": 11, "isBoss": false, "isVet": true, "shirtColor": 0xf472b6,
+                    "id": "npc_vet", "name": "Vet Joy", "r": 2, "c": 2, "isBoss": false, "isVet": true, "shirtColor": 0xf472b6,
                     "dialogue": {
                         "greeting": "Welcome to the field clinic! Your companions look a bit tired. Let me restore their vital matrices!",
                         "victory": "" // Not needed for Vet
@@ -441,12 +495,44 @@ const CONFIG_DATA = {
                     "roster": [] 
                 },
                 { 
-                    "id": "npc_02", "name": "Ranger Maya", "r": 10, "c": 11, "isBoss": true, "shirtColor": 0xb91c1c,
+                    "id": "npc_02", "name": "Ranger Maya", "r": 2, "c": 24, "isBoss": true, "shirtColor": 0xb91c1c,
                     "dialogue": {
                         "greeting": "Halt, traveler! I am the Grand Wilderness Guide. To master this region, you must bypass my Bouldertort! Show me your bond!",
                         "victory": "Astonishing! The wild paths are safe in your hands. You are the ultimate Champion!"
                     },
-                    "roster": [{ "type": "bouldertort", "level": 16 }] 
+                    "roster": [{ "type": "bouldertort", "level": 16 }, { "type": "necrofelis", "level": 15 }] 
+                },
+                { 
+                    "id": "npc_04", "name": "Bug Catcher Pip", "r": 8, "c": 12, "isBoss": false, "shirtColor": 0x65a30d,
+                    "dialogue": {
+                        "greeting": "I spent all day catching grass critters in the thick zones! Let's see what you've got!",
+                        "victory": "Aww, my bugs got squashed..."
+                    },
+                    "roster": [{ "type": "dandelio", "level": 5 }, { "type": "thumpkin", "level": 5 }] 
+                },
+                { 
+                    "id": "npc_05", "name": "Collector Sterling", "r": 14, "c": 20, "isBoss": false, "shirtColor": 0x7c3aed,
+                    "dialogue": {
+                        "greeting": "I travel the world looking for rare elemental attributes. Behold my dark and light synergy!",
+                        "victory": "An immaculate display of tactical power! Fine work."
+                    },
+                    "roster": [{ "type": "vampurr", "level": 11 }, { "type": "zephyrobin", "level": 12 }] 
+                },
+                { 
+                    "id": "npc_06", "name": "Tamer Vance", "r": 19, "c": 8, "isBoss": false, "shirtColor": 0xe11d48,
+                    "dialogue": {
+                        "greeting": "You look like you've won a few matches, but can you handle a multi-element assault?",
+                        "victory": "Incredible! Your team has no blind spots."
+                    },
+                    "roster": [{ "type": "igniguana", "level": 13 }, { "type": "pugplug", "level": 13 }, { "type": "aquack", "level": 14 }] 
+                },
+                { 
+                    "id": "npc_07", "name": "Ace Trainer Skye", "r": 22, "c": 15, "isBoss": false, "shirtColor": 0x2563eb,
+                    "dialogue": {
+                        "greeting": "Right before you challenge the Ranger Boss, you have to get through me! Prepare yourself!",
+                        "victory": "Magnificent. You are more than ready for Ranger Maya."
+                    },
+                    "roster": [{ "type": "sparkbark", "level": 15 }, { "type": "aeroeagle", "level": 15 }] 
                 }
             ]
         };
@@ -469,16 +555,22 @@ const CONFIG_DATA = {
             enemyEntity: null,
             playerCreature: null,
             playerModifiers: { attack: 1.0, defense: 1.0, speed: 1.0 },
-            enemyModifiers: { attack: 1.0, defense: 1.0, speed: 1.0 }
+            enemyModifiers: { attack: 1.0, defense: 1.0, speed: 1.0 },
+            trainerCurrentCreatureIndex: 0
         };
 
         let pendingMovesToLearn = [];
         let currentLearningMoveKey = null;
 
-        let playerGridX = 1, playerGridZ = 1;
+        let playerGridX = 2, playerGridZ = 4;
         let playerTargetPos = new THREE.Vector3();
         let isPlayerMoving = false;
         const movementSpeed = 10.5;
+
+        const MAX_PARTY_SIZE = 4;
+        const pcStorage = [];
+        let pendingCapturedCreature = null;
+        const interactableRegistry = [];
 
         const CELL_SIZE = CONFIG_DATA.grid.cellSize;
         const MAP_WIDTH = CONFIG_DATA.grid.cols * CELL_SIZE;
@@ -516,10 +608,20 @@ const CONFIG_DATA = {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
+        function toGridIndex(value) {
+            return value - 1;
+        }
+
+        function isValidGridCoord(r, c) {
+            return r >= 1 && r <= CONFIG_DATA.grid.rows && c >= 1 && c <= CONFIG_DATA.grid.cols;
+        }
+
         function gridToWorld(r, c) {
+            const rowIndex = toGridIndex(r);
+            const colIndex = toGridIndex(c);
             return {
-                x: -MAP_WIDTH / 2 + (c * CELL_SIZE) + CELL_SIZE / 2,
-                z: -MAP_DEPTH / 2 + (r * CELL_SIZE) + CELL_SIZE / 2
+                x: -MAP_WIDTH / 2 + (colIndex * CELL_SIZE) + CELL_SIZE / 2,
+                z: -MAP_DEPTH / 2 + (rowIndex * CELL_SIZE) + CELL_SIZE / 2
             };
         }
 
@@ -536,24 +638,61 @@ function assembleSimulationWorld() {
             worldOverworldGroup.add(gridLines);
 
             const layout = CONFIG_DATA.grid.layout;
-            for(let r=0; r<layout.length; r++) {
-                for(let c=0; c<layout[r].length; c++) {
-                    const cell = layout[r][c];
-                    const pos = gridToWorld(r, c);
+            for(let row=0; row<layout.length; row++) {
+                for(let col=0; col<layout[row].length; col++) {
+                    const cell = layout[row][col];
+                    const worldRow = row + 1;
+                    const worldCol = col + 1;
+                    const pos = gridToWorld(worldRow, worldCol);
 
-                    if(cell === 1) {
-                        const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE*0.85, 3.5, CELL_SIZE*0.85), new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.8 }));
+                    if (cell === 1 || cell === 5) {
+                        const wallColor = cell === 1 ? 0x78716c : 0x8b5e3c;
+                        const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE*0.85, 3.5, CELL_SIZE*0.85), new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.8 }));
                         mesh.position.set(pos.x, 1.75, pos.z);
                         worldOverworldGroup.add(mesh);
-                        obstacles.push({ r, c });
-                    } else if(cell >= 2) {
+                        obstacles.push({ r: worldRow, c: worldCol });
+                    } else if (cell === 6) {
+                        const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE*0.95, 0.3, CELL_SIZE*0.95), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.95 }));
+                        mesh.position.set(pos.x, 0.15, pos.z);
+                        worldOverworldGroup.add(mesh);
+                    } else if (cell === 7) {
+                        const base = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE*0.95, 0.16, CELL_SIZE*0.95), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.95 }));
+                        base.position.set(pos.x, 0.08, pos.z);
+                        worldOverworldGroup.add(base);
+
+                        const signData = lookupInteractable(worldRow, worldCol) || { title: 'Sign', text: 'No information available.' };
+                        const signPost = new THREE.Group();
+                        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.2, 10), new THREE.MeshStandardMaterial({ color: 0x553a10, roughness: 0.9 }));
+                        post.position.set(0, 0.6, 0);
+                        const board = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.5, 0.1), new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.4 }));
+                        board.position.set(0, 1.05, 0);
+                        signPost.add(post, board);
+                        signPost.position.set(pos.x, 0, pos.z);
+                        worldOverworldGroup.add(signPost);
+
+                        interactableRegistry.push({ r: worldRow, c: worldCol, type: 'sign', ...signData });
+                    } else if (cell === 8) {
+                        const base = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE*0.95, 0.2, CELL_SIZE*0.95), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 }));
+                        base.position.set(pos.x, 0.1, pos.z);
+                        worldOverworldGroup.add(base);
+                        const stand = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.35, 0.8), new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 }));
+                        stand.position.set(pos.x, 0.2, pos.z);
+                        const screen = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.75, 0.12), new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x38bdf8, emissiveIntensity: 0.45 }));
+                        screen.position.set(pos.x, 0.75, pos.z - 0.05);
+                        const support = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.5, 10), new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.9 }));
+                        support.position.set(pos.x, 0.4, pos.z - 0.05);
+                        worldOverworldGroup.add(stand, support, screen);
+
+                        const computerData = lookupInteractable(worldRow, worldCol) || { name: 'PC Terminal', dialogue: { greeting: 'Accessing backup storage.' } };
+                        interactableRegistry.push({ r: worldRow, c: worldCol, type: 'computer', ...computerData });
+                    } else if (cell == 2 || cell == 3 || cell == 4) {
                         // Dynamically pull colors and data for zones 2, 3, 4, etc.
                         const zoneInfo = CONFIG_DATA.zones[cell.toString()];
                         if (zoneInfo) {
                             const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE*0.95, 0.4, CELL_SIZE*0.95), new THREE.MeshStandardMaterial({ color: zoneInfo.color, roughness: 0.95 }));
                             mesh.position.set(pos.x, 0.2, pos.z);
                             worldOverworldGroup.add(mesh);
-                            grassTiles.push({ r, c, zoneId: cell.toString() }); // Store zoneId for encounters
+                            grassTiles.push({ r: worldRow, c: worldCol, zoneId: cell.toString() }); // Store zoneId for encounters
                         }
                     }
                 }
@@ -577,6 +716,201 @@ function assembleSimulationWorld() {
             battleRing.rotation.x = Math.PI / 2;
             battleRing.position.set(200, 0.02, 200);
             worldBattleGroup.add(battleRing);
+        }
+
+        function lookupInteractable(r, c) {
+            return CONFIG_DATA.interactables.find(item => item.r === r && item.c === c) || null;
+        }
+
+        function getInteractableAt(r, c) {
+            return interactableRegistry.find(item => item.r === r && item.c === c) || null;
+        }
+
+        function openSignOverlay(signData) {
+            gameState = "DIALOGUE";
+            document.getElementById('state-txt').innerText = "Reading Sign";
+            const modal = document.getElementById('dialogue-modal');
+            document.getElementById('dialogue-speaker-name').innerText = signData.title;
+            document.getElementById('dialogue-body-text').innerText = signData.text;
+            const triggerBtn = document.getElementById('dialogue-action-btn');
+            triggerBtn.innerText = "Close";
+            triggerBtn.onclick = () => {
+                modal.classList.add('hidden');
+                gameState = "EXPLORE";
+                document.getElementById('state-txt').innerText = "Exploring";
+            };
+            modal.classList.remove('hidden');
+        }
+
+        function openPcModal() {
+            gameState = "DIALOGUE";
+            document.getElementById('state-txt').innerText = "PC Terminal";
+            const modal = document.getElementById('pc-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            populatePcStorageInterface();
+        }
+
+        function closePcModal() {
+            const modal = document.getElementById('pc-modal');
+            modal.classList.add('hidden');
+            gameState = "EXPLORE";
+            document.getElementById('state-txt').innerText = "Exploring";
+        }
+
+        function updatePcHudCounts() {
+            document.getElementById('pc-party-count').innerText = `${squadInventory.length}/${MAX_PARTY_SIZE}`;
+            document.getElementById('pc-storage-count').innerText = `${pcStorage.length}`;
+        }
+
+        function populatePcStorageInterface() {
+            updatePcHudCounts();
+            const partyContainer = document.getElementById('pc-party-list');
+            const storageContainer = document.getElementById('pc-storage-list');
+            partyContainer.innerHTML = "";
+            storageContainer.innerHTML = "";
+
+            squadInventory.forEach((monster, idx) => {
+                const card = document.createElement('div');
+                card.className = 'p-3 rounded-2xl border border-white/10 bg-slate-950/70';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-bold text-white">${monster.displayName}</p>
+                            <p class="text-[10px] text-gray-400">Level ${monster.level} · HP ${monster.hp}/${monster.maxHp}</p>
+                        </div>
+                        <button onclick="depositPartyCreatureToPC(${idx})" class="px-3 py-2 text-[10px] font-black uppercase tracking-wider rounded-full bg-amber-500 hover:bg-amber-400 text-black">Send to PC</button>
+                    </div>
+                `;
+                partyContainer.appendChild(card);
+            });
+
+            pcStorage.forEach((monster, idx) => {
+                const card = document.createElement('div');
+                card.className = 'p-3 rounded-2xl border border-white/10 bg-slate-950/70';
+                const canWithdraw = squadInventory.length < MAX_PARTY_SIZE;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-bold text-white">${monster.displayName}</p>
+                            <p class="text-[10px] text-gray-400">Level ${monster.level} · HP ${monster.hp}/${monster.maxHp}</p>
+                        </div>
+                        <button onclick="withdrawCreatureFromPC(${idx})" ${!canWithdraw ? 'disabled' : ''} class="px-3 py-2 text-[10px] font-black uppercase tracking-wider rounded-full ${canWithdraw ? 'bg-sky-500 hover:bg-sky-400 text-black' : 'bg-white/10 text-gray-400 cursor-not-allowed'}">Withdraw</button>
+                    </div>
+                `;
+                storageContainer.appendChild(card);
+            });
+        }
+
+        function depositPartyCreatureToPC(index) {
+            const creature = squadInventory[index];
+            if (!creature) return;
+            pcStorage.push(creature);
+            squadInventory.splice(index, 1);
+            if (activeSquadIndex >= squadInventory.length) activeSquadIndex = Math.max(0, squadInventory.length - 1);
+            syncContextWithActiveSquad();
+            populatePcStorageInterface();
+            updateRosterHudCount();
+        }
+
+        function withdrawCreatureFromPC(index) {
+            if (squadInventory.length >= MAX_PARTY_SIZE) return;
+            const creature = pcStorage[index];
+            if (!creature) return;
+            squadInventory.push(creature);
+            pcStorage.splice(index, 1);
+            syncContextWithActiveSquad();
+            populatePcStorageInterface();
+            updateRosterHudCount();
+        }
+
+        function closeCaptureOverflowModal() {
+            const modal = document.getElementById('capture-overflow-modal');
+            modal.classList.add('hidden');
+            pendingCapturedCreature = null;
+            gameState = "EXPLORE";
+            document.getElementById('state-txt').innerText = "Exploring";
+        }
+
+        function openCaptureOverflowModal(capturedCreature) {
+            pendingCapturedCreature = capturedCreature;
+            gameState = "DIALOGUE";
+            document.getElementById('state-txt').innerText = "Party Full";
+            const container = document.getElementById('capture-overflow-cards');
+            container.innerHTML = '';
+
+            const keepNewCard = document.createElement('div');
+            keepNewCard.className = 'p-4 rounded-2xl border border-white/10 bg-slate-950/80';
+            keepNewCard.innerHTML = `
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-bold text-white">Store New Capture</p>
+                        <p class="text-[10px] text-gray-400">Send ${capturedCreature.displayName} directly to PC.</p>
+                    </div>
+                    <button onclick="selectOverflowSendNewToPC()" class="px-3 py-2 text-[10px] font-black uppercase tracking-wider rounded-full bg-sky-500 hover:bg-sky-400 text-black">Send</button>
+                </div>
+            `;
+            container.appendChild(keepNewCard);
+
+            squadInventory.forEach((monster, idx) => {
+                const card = document.createElement('div');
+                card.className = 'p-4 rounded-2xl border border-white/10 bg-slate-950/80';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-bold text-white">Send ${monster.displayName} to PC</p>
+                            <p class="text-[10px] text-gray-400">Keep ${capturedCreature.displayName} in your active roster.</p>
+                        </div>
+                        <button onclick="selectOverflowSendExisting(${idx})" class="px-3 py-2 text-[10px] font-black uppercase tracking-wider rounded-full bg-amber-500 hover:bg-amber-400 text-black">Swap</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            const modal = document.getElementById('capture-overflow-modal');
+            modal.classList.remove('hidden');
+        }
+
+        function selectOverflowSendExisting(index) {
+            if (!pendingCapturedCreature) return;
+            pcStorage.push(squadInventory[index]);
+            squadInventory.splice(index, 1);
+            squadInventory.push(pendingCapturedCreature);
+            pendingCapturedCreature = null;
+            updateRosterHudCount();
+            closeCaptureOverflowModal();
+        }
+
+        function selectOverflowSendNewToPC() {
+            if (!pendingCapturedCreature) return;
+            pcStorage.push(pendingCapturedCreature);
+            pendingCapturedCreature = null;
+            closeCaptureOverflowModal();
+        }
+
+        function handleSuccessfulCapture(creature) {
+            if (squadInventory.length < MAX_PARTY_SIZE) {
+                squadInventory.push(creature);
+                updateRosterHudCount();
+                document.getElementById('announcer-msg').innerText = `SUCCESS! Synced ${creature.displayName}!`;
+                setTimeout(() => { closeCombatArena(); }, 2000);
+                return;
+            }
+
+            document.getElementById('announcer-msg').innerText = `Party is full! Choose a companion for PC storage.`;
+            setTimeout(() => {
+                closeCombatArena();
+                openCaptureOverflowModal(creature);
+            }, 1200);
+        }
+
+        function handleTileInteraction(interactable) {
+            if (!interactable) return;
+            if (interactable.type === 'sign') {
+                openSignOverlay(interactable);
+            } else if (interactable.type === 'computer') {
+                openPcModal();
+            }
         }
 
         function assembleLittleGuyModel(shirtHex = 0x0284c7) {
@@ -1189,6 +1523,7 @@ function applyStatModifier(targetMods, stat, operator, value) {
             activeCombatContext.enemyEntity = generateEntityInstance(schemaKey, targetLevel);
             activeCombatContext.isTrainerBattle = isTrainer;
             activeCombatContext.npcRef = npcData;
+            activeCombatContext.trainerCurrentCreatureIndex = 0;
 
             instantiateBattleMesh(activeCombatContext.playerCreature.id, true);
             instantiateBattleMesh(schemaKey, false);
@@ -1431,7 +1766,7 @@ function generateTypeBadgesHTML(types) {
             if (playerFirst) {
                 executePlayerActionPhase(playerMoveKey, () => {
                     if (ctx.enemyEntity.hp <= 0) {
-                        processCombatVictory();
+                        processEnemyFaint();
                     } else {
                         executeEnemyActionPhase(() => {
                             if (ctx.playerCreature.hp <= 0) {
@@ -1452,7 +1787,7 @@ function generateTypeBadgesHTML(types) {
                     } else {
                         executePlayerActionPhase(playerMoveKey, () => {
                             if (ctx.enemyEntity.hp <= 0) {
-                                processCombatVictory();
+                                processEnemyFaint();
                             } else {
                                 gameState = "BATTLE";
                                 lockCombatInputDecks(false);
@@ -1523,7 +1858,7 @@ function executeEnemyActionPhase(nextCallback) {
         ctx.playerCreature.hp = Math.max(0, ctx.playerCreature.hp - totalDmg);
         
         let message = `Opposing ${ctx.enemyEntity.displayName} retaliates using ${mSpec.name}! Reduced health by ${totalDmg}.`;
-        if (mult >= 2.0) message += " 💥 CRITICAL SYSTEMS DAMAGE!";
+        if (mult >= 2.0) message += " ✨ SUPER EFFECTIVE!";
         if (mult > 0 && mult <= 0.5) message += " 🛡️ You resisted it!";
         
         document.getElementById('announcer-msg').innerText = message;
@@ -1555,6 +1890,7 @@ function executeEnemyActionPhase(nextCallback) {
                 setTimeout(() => { 
                     executeEnemyActionPhase(() => {
                         if (activeCombatContext.playerCreature.hp <= 0) processPlayerFaint();
+                        else if (activeCombatContext.enemyEntity.hp <= 0) processEnemyFaint();
                         else { gameState = "BATTLE"; lockCombatInputDecks(false); announcer.classList.add('hidden'); }
                     });
                 }, 2000);
@@ -1582,10 +1918,49 @@ function executeEnemyActionPhase(nextCallback) {
                 setTimeout(() => { 
                     executeEnemyActionPhase(() => {
                         if (activeCombatContext.playerCreature.hp <= 0) processPlayerFaint();
+                        else if (activeCombatContext.enemyEntity.hp <= 0) processEnemyFaint();
                         else { gameState = "BATTLE"; lockCombatInputDecks(false); announcer.classList.add('hidden'); }
                     });
                 }, 2000);
             }
+        }
+
+        // --- ENEMY FAINT HANDLER (trainer creature switching) ---
+        function processEnemyFaint() {
+            const ctx = activeCombatContext;
+            
+            if (ctx.isTrainerBattle && ctx.npcRef && ctx.npcRef.roster) {
+                ctx.trainerCurrentCreatureIndex++;
+                
+                if (ctx.trainerCurrentCreatureIndex < ctx.npcRef.roster.length) {
+                    // Switch to next creature
+                    const nextCreatureDef = ctx.npcRef.roster[ctx.trainerCurrentCreatureIndex];
+                    const announcer = document.getElementById('battle-announcer');
+                    announcer.classList.remove('hidden');
+                    
+                    // Reset modifiers for the new battle
+                    activeCombatContext.playerModifiers = { attack: 1.0, defense: 1.0, speed: 1.0 };
+                    activeCombatContext.enemyModifiers = { attack: 1.0, defense: 1.0, speed: 1.0 };
+                    
+                    // Generate the next creature instance
+                    activeCombatContext.enemyEntity = generateEntityInstance(nextCreatureDef.type, nextCreatureDef.level);
+                    instantiateBattleMesh(nextCreatureDef.type, false);
+                    
+                    document.getElementById('announcer-msg').innerText = `${ctx.npcRef.name} sends out ${activeCombatContext.enemyEntity.displayName}!`;
+                    updateCombatDashboardMetrics();
+                    
+                    setTimeout(() => {
+                        announcer.classList.add('hidden');
+                        gameState = "BATTLE";
+                        lockCombatInputDecks(false);
+                        renderCombatActionPanel();
+                    }, 2000);
+                    return;
+                }
+            }
+            
+            // No more creatures (wild or trainer is out of creatures)
+            processCombatVictory();
         }
 
         // --- WIN / EXP / LEVEL UP PROCESSOR ---
@@ -1786,12 +2161,17 @@ function executeEnemyActionPhase(nextCallback) {
 
         // --- GRID EXPLORATION MECHANICS ---
         function checkCollision(r, c) {
-            if(r < 0 || r >= CONFIG_DATA.grid.rows || c < 0 || c >= CONFIG_DATA.grid.cols) return true;
+            if(!isValidGridCoord(r, c)) return true;
             return obstacles.some(o => o.r === r && o.c === c);
         }
 
         window.addEventListener('keydown', e => {
-            if (e.key === "Escape") { toggleRosterModal(false); return; }
+            if (e.key === "Escape") {
+                toggleRosterModal(false);
+                closePcModal();
+                closeCaptureOverflowModal();
+                return;
+            }
             if (e.key in activeInputState) {
                 activeInputState[e.key] = true;
             }
@@ -1862,7 +2242,11 @@ function executeEnemyActionPhase(nextCallback) {
                         playerGroup.getObjectByName("leftLeg").rotation.x = 0;
                         playerGroup.getObjectByName("rightLeg").rotation.x = 0;
 
-// Check if we landed on a grass tile
+                        const steppedInteractable = getInteractableAt(playerGridZ, playerGridX);
+                        if (steppedInteractable) {
+                            handleTileInteraction(steppedInteractable);
+                        }
+
                         const steppedGrass = grassTiles.find(t => t.r === playerGridZ && t.c === playerGridX);
                         
                         if(steppedGrass && Math.random() < 0.25) {
