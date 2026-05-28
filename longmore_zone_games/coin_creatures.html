@@ -1969,7 +1969,6 @@ function applyStatModifier(targetMods, stat, operator, value) {
 }
         function initializeCombatEngagement(schemaKey, targetLevel, isTrainer = false, npcData = null) {
             gameState = "CINEMATIC";
-            document.getElementById('state-txt').innerText = "In Battle";
             
             syncContextWithActiveSquad();
             
@@ -2027,7 +2026,6 @@ function updateCombatDashboardMetrics() {
 }
 
         function renderCombatActionPanel() {
-            document.getElementById('hub-title').innerText = `COMBAT MATRIX ACTIVE`;
             const display = document.getElementById('hub-content');
             
             const pSpeed = Math.floor(activeCombatContext.playerCreature.speed * activeCombatContext.playerModifiers.speed);
