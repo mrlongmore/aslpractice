@@ -2705,7 +2705,7 @@ function executePlayerActionPhase(moveKey, nextCallback) {
             const effDef = ctx.enemyEntity.defense * ctx.enemyModifiers.defense;
             
             // 1. Calculate raw base damage as a float
-            const rawBase = (((2 * ctx.playerCreature.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 50) + 2;
+            const rawBase = (((2 * ctx.playerCreature.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 10) + 2;
             
             // 2. Calculate discrete random modifier (85% to 100%)
             const randomModifier = (Math.floor(Math.random() * 16) + 85) / 100;
@@ -2756,7 +2756,7 @@ function executeEnemyActionPhase(nextCallback) {
             const effDef = ctx.playerCreature.defense * ctx.playerModifiers.defense;
             
             // 1. Calculate raw base damage as a float
-            const rawBase = (((2 * ctx.enemyEntity.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 50) + 2;
+            const rawBase = (((2 * ctx.enemyEntity.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 10) + 2;
             
             // 2. Calculate discrete random modifier (85% to 100%)
             const randomModifier = (Math.floor(Math.random() * 16) + 85) / 100;
