@@ -263,15 +263,15 @@ const CONFIG_DATA = {
 "grid": {
                 "rows": 25, "cols": 25, "cellSize": 4,
                 "layout": [
-                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5],
-                    [1, 6, 6, 8, 1, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 5, 6, 6, 6, 5],
-                    [1, 6, 6, 6, 1, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 0, 5, 6, 6, 6, 5],
-                    [1, 6, 6, 7, 1, 0, 0, 1, 0, 0, 0, 0, 1, 3, 0, 1, 4, 0, 1, 1, 5, 1, 6, 6, 5],
-                    [1, 1, 6, 1, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 4, 0, 0, 0, 5, 6, 6, 6, 5],
-                    [1, 0, 0, 7, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 4, 4, 0, 0, 5, 6, 6, 1, 5],
-                    [1, 0, 0, 0, 1, 0, 0, 1, 2, 2, 0, 0, 1, 0, 3, 1, 1, 1, 4, 0, 5, 6, 6, 6, 5],
-                    [1, 0, 0, 0, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 1, 1, 0, 4, 5, 1, 6, 6, 5],
-                    [1, 0, 0, 0, 1, 0, 0, 1, 2, 3, 0, 0, 1, 3, 0, 1, 0, 0, 0, 4, 5, 6, 6, 6, 5],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                    [1, 6, 6, 8, 1, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 1, 6, 6, 6, 1],
+                    [1, 6, 6, 6, 1, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 0, 1, 6, 6, 6, 1],
+                    [1, 6, 6, 7, 1, 0, 0, 1, 0, 0, 0, 0, 1, 3, 0, 1, 4, 0, 1, 1, 1, 1, 6, 6, 1],
+                    [1, 1, 6, 1, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 4, 0, 0, 0, 1, 6, 6, 6, 1],
+                    [5, 0, 0, 7, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 4, 4, 0, 0, 1, 6, 6, 1, 1],
+                    [1, 0, 0, 0, 1, 0, 0, 1, 2, 2, 0, 0, 1, 0, 3, 1, 1, 1, 4, 0, 1, 6, 6, 6, 1],
+                    [1, 0, 0, 0, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 1, 1, 0, 4, 1, 1, 6, 6, 1],
+                    [1, 0, 0, 0, 1, 0, 0, 1, 2, 3, 0, 0, 1, 3, 0, 1, 0, 0, 0, 4, 1, 6, 6, 6, 1],
                     [1, 0, 2, 7, 1, 0, 7, 1, 3, 2, 0, 0, 1, 0, 3, 1, 0, 0, 4, 4, 1, 6, 6, 1, 1],
                     [1, 2, 2, 2, 1, 0, 0, 1, 3, 3, 0, 0, 1, 0, 3, 1, 0, 4, 1, 1, 1, 6, 6, 6, 1],
                     [1, 0, 2, 0, 1, 0, 0, 1, 3, 3, 0, 0, 1, 3, 0, 1, 4, 0, 1, 1, 1, 1, 6, 1, 1],
@@ -296,7 +296,7 @@ const CONFIG_DATA = {
                 "4": { "color": 0x274B15, "minLevel": 10, "maxLevel": 14, "encounters": ["aquack", "thumpkin", "roarbor"] }
             },
             "interactables": [
-                { "id": "sign_notice", "type": "sign", "r": 4, "c": 4, "title": "Storage Notice", "text": "Active party size is limited to 4. When you catch more, choose which companion goes to your PC. You can also heal your creatures with the Vet in pink!" },
+                { "id": "sign_notice", "type": "sign", "r": 6, "c": 1, "title": "Storage Notice", "text": "Active party size is limited to 4. When you catch more, choose which companion goes to your PC. You can also heal your creatures with the Vet in pink!" },
                 { "id": "computer_main", "type": "computer", "r": 2, "c": 4, "name": "Terminal PC", "dialogue": { "greeting": "PC System online. Store or retrieve a companion from the backup matrix." } }
             ],
             "creatures": {
@@ -519,6 +519,22 @@ const CONFIG_DATA = {
                     "roster": [] 
                 },
                 { 
+                    "id": "npc_prof", "name": "Prof Longmore", "r": 2, "c": 3, "isBoss": false, "isProf": true, "shirtColor": 0xFFFFFF,
+                    "dialogue": {
+                        "greeting": "Hello, I am Professor Longmore! I can check to see if your Creature Dex is complete!",
+                        "victory": "" // Not needed for Prof
+                    },
+                    "roster": [] 
+                },
+                                { 
+                    "id": "npc_secret1", "name": "Ancient Carving", "r": 6, "c": 1, "isBoss": false, "isSecret": true, "shirtColor": 0xFFFFFF,
+                    "dialogue": {
+                        "greeting": "IV",
+                        "victory": "" // Not needed for Secret
+                    },
+                    "roster": [] 
+                },
+                { 
                     "id": "npc_02", "name": "Ranger Maya", "r": 2, "c": 23, "isBoss": true, "shirtColor": 0xb91c1c,
                     "dialogue": {
                         "greeting": "Halt, traveler! I am the Grand Wilderness Guide. To master this region, you must bypass my Bouldertort! Show me your bond!",
@@ -638,11 +654,13 @@ const CONFIG_DATA = {
         // Cap pixel ratio to 1 for more stable performance on low-end devices
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
         container.appendChild(renderer.domElement);
-
         const cameraTarget = new THREE.Vector3();
         const desiredCameraPos = new THREE.Vector3();
         // Reusable temporary vector to avoid allocations each frame
         const moveTemp = new THREE.Vector3();
+        let totalCount = C_MAP.length;
+        let capturedCount = capturedCreatureIds.length;
+        let percent = totalCount > 0 ? Math.round((capturedCount / totalCount) * 100) : 0;
         let initialCameraQuat = null;
             function registerDexEntry(creatureId) {
             if (CONFIG_DATA.creatures[creatureId] && !capturedCreatureIds.includes(creatureId)) {
@@ -652,9 +670,6 @@ const CONFIG_DATA = {
                 try { renderDexGrid(); } catch (e) { /* UI may not be mounted yet */ }
                 const ratioEl = document.getElementById('dex-completion-ratio');
                 if (ratioEl) {
-                    const totalCount = C_MAP.length;
-                    const capturedCount = capturedCreatureIds.length;
-                    const percent = totalCount > 0 ? Math.round((capturedCount / totalCount) * 100) : 0;
                     ratioEl.innerText = `${capturedCount} / ${totalCount} Species Logged (${percent}%)`;
                 }
             }
@@ -864,28 +879,42 @@ function assembleSimulationWorld() {
             });
 
             // Second pass: populate instanced meshes and create non-repeated objects
-            let wallIdx = 0;
-            for (let row = 0; row < layout.length; row++) {
-                for (let col = 0; col < layout[row].length; col++) {
-                    const cell = layout[row][col];
-                    const worldRow = row + 1;
-                    const worldCol = col + 1;
-                    const pos = gridToWorld(worldRow, worldCol);
+let wallIdx = 0;
+for (let row = 0; row < layout.length; row++) {
+    for (let col = 0; col < layout[row].length; col++) {
+        const cell = layout[row][col];
+        const worldRow = row + 1;
+        const worldCol = col + 1;
+        const pos = gridToWorld(worldRow, worldCol);
 
-                    if (cell === 1 || cell === 5) {
-                        const wallColor = cell === 1 ? 0x78716c : 0x8b5e3c;
-                        // If instanced mesh exists, set instance matrix; otherwise fallback to single mesh
-                        if (wallInst) {
-                            tempMatrix.makeTranslation(pos.x, 1.75, pos.z);
-                            wallInst.setMatrixAt(wallIdx++, tempMatrix);
-                            // set color per-instance not supported without extra attributes; use default material
-                        } else {
-                            const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE * 0.85, 3.5, CELL_SIZE * 0.85), new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.8 }));
-                            mesh.position.set(pos.x, 1.75, pos.z);
-                            worldOverworldGroup.add(mesh);
-                        }
-                        obstacles.push({ r: worldRow, c: worldCol });
-                    } else if (cell === 6) {
+        if (cell === 1) {
+            let wallColor = new THREE.Color(0x78716c); // Create a Three.js Color object
+            
+            if (wallInst) {
+                tempMatrix.makeTranslation(pos.x, 1.75, pos.z);
+                wallInst.setMatrixAt(wallIdx, tempMatrix);
+                wallInst.setColorAt(wallIdx, wallColor); // <-- Set the color for this instance
+                wallIdx++; // Increment after using it
+            } else {
+                const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE * 0.85, 3.5, CELL_SIZE * 0.85), new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.8 }));
+                mesh.position.set(pos.x, 1.75, pos.z);
+                worldOverworldGroup.add(mesh);
+            }
+        } else if (cell === 5) {
+            let wallColor = new THREE.Color(0x878787); // Create a different Color object
+            
+            if (wallInst) {
+                tempMatrix.makeTranslation(pos.x, 1.75, pos.z);
+                wallInst.setMatrixAt(wallIdx, tempMatrix);
+                wallInst.setColorAt(wallIdx, wallColor); // <-- Set the color for this instance
+                wallIdx++; // Increment after using it
+            } else {
+                const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE * 0.85, 3.5, CELL_SIZE * 0.85), new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.8 }));
+                mesh.position.set(pos.x, 1.75, pos.z);
+                worldOverworldGroup.add(mesh);
+            }
+            obstacles.push({ r: worldRow, c: worldCol });
+        } else if (cell === 6) {
                         const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE * 0.95, 0.3, CELL_SIZE * 0.95), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.95 }));
                         mesh.position.set(pos.x, 0.15, pos.z);
                         worldOverworldGroup.add(mesh);
@@ -1912,6 +1941,22 @@ function openNpcDialogueOverlay(npcObject) {
                         gameState = "EXPLORE";
                     };
                 };
+            } else if(npcObject.isProf) {
+                // --- PROF LOGIC ---
+                triggerBtn.innerText = "Check Creature Dex";
+                triggerBtn.onclick = () => {
+                    // Check Creature Dex
+                    if (percent === 100) {
+                        document.getElementById('dialogue-body-text').innerText = "Your Creature Dex is fully complete! Impressive work, explorer!";
+                    } else {
+                        document.getElementById('dialogue-body-text').innerText = `Your Creature Dex is ${percent}% complete. Keep exploring to discover more companions!`;
+                    }
+                    triggerBtn.innerText = "Farewell";
+                    triggerBtn.onclick = () => {
+                        modal.classList.add('hidden');
+                        gameState = "EXPLORE";
+                    };
+                };
             } else {
                 // --- NORMAL BATTLE LOGIC ---
                 triggerBtn.innerText = "Initialize Battle Matrix";
@@ -2634,20 +2679,25 @@ function executeEnemyActionPhase(nextCallback) {
             }
         });
 
-        function checkNpcProximity() {
-            // Check if any NPC is 1 row or 1 column away (straight line only, no diagonals)
-            for (const npcEntry of npcOverworldRegistry) {
-                const rowDist = Math.abs(playerGridZ - npcEntry.r);
-                const colDist = Math.abs(playerGridX - npcEntry.c);
-                
-                // Trigger only if 1 row away in same column OR 1 column away in same row
-                if ((rowDist === 1 && colDist === 0) || (rowDist === 0 && colDist === 1)) {
-                    openNpcDialogueOverlay(npcEntry.data);
-                    return true;
-                }
-            }
-            return false;
+function checkNpcProximity() {
+    // Check if any NPC is 1 row or 1 column away (straight line only, no diagonals)
+    for (const npcEntry of npcOverworldRegistry) {
+        const rowDist = Math.abs(playerGridZ - npcEntry.r);
+        const colDist = Math.abs(playerGridX - npcEntry.c);
+        
+        // 1. Group the distance logic together so it evaluates as one condition
+        const isAdjacent = (rowDist === 1 && colDist === 0) || (rowDist === 0 && colDist === 1);
+        
+        // 2. Check that the NPC is NOT a professor AND NOT a veterinarian
+        const isExempt = npcEntry.data.isProf || npcEntry.data.isVet || npcEntry.data.isBoss || npcEntry.data.isSecret; // Also exempt trainers and bosses from proximity dialogue
+
+        if (isAdjacent && !isExempt) {
+            openNpcDialogueOverlay(npcEntry.data);
+            return true;
         }
+    }
+    return false;
+}
 
         function digestOverworldInputBuffer() {
             if (gameState !== "EXPLORE" || isPlayerMoving) return;
