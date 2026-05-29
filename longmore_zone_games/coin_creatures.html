@@ -331,7 +331,7 @@ const CONFIG_DATA = {
         },
         "igniguana": {
             "id": "igniguana", "displayName": "Igniguana", "elementalType": ["fire"],
-            "maxHp": 60, "attack": 80, "defense": 50, "speed": 80, "baseCatchRate": 0.40,
+            "maxHp": 60, "attack": 1000, "defense": 50, "speed": 80, "baseCatchRate": 0.40,
             "baseExpYield": 55, "growth": { "hp": 2, "attack": 4, "defense": 2, "speed": 4 },
             "moves": ["cinder_chomp", "blitz"],
             "learnset": [
@@ -791,7 +791,7 @@ const CONFIG_DATA = {
             "roster": [{ "type": "sparkbark", "level": 30 }, { "type": "aeroeagle", "level": 33 }, { "type": "solastag", "level": 34 }] 
         },
         { 
-            "id": "npc_13", "name": "Ninja Kage", "r": 16, "c": 22, "isBoss": false, "shirtColor": 0x334155,
+            "id": "npc_13", "name": "Ninja Kage", "r": 6, "c": 22, "isBoss": false, "shirtColor": 0x334155,
             "dialogue": {
                 "greeting": "Out of the shadows, my feline strikes! You won't even see this coming.",
                 "victory": "A flawless counter-attack. You possess true focus."
@@ -2703,15 +2703,28 @@ function executePlayerActionPhase(moveKey, nextCallback) {
             const mult = getMultiTypeEffectiveness(mSpec.type, ctx.enemyEntity.type);
             const effAtk = ctx.playerCreature.attack * ctx.playerModifiers.attack;
             const effDef = ctx.enemyEntity.defense * ctx.enemyModifiers.defense;
-            const rawBase = Math.floor((((2 * ctx.playerCreature.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 50) + 2);
-            const totalDmg = Math.floor(rawBase * mult * (0.85 + Math.random() * 0.15));
+            
+            // 1. Calculate raw base damage as a float
+            const rawBase = (((2 * ctx.playerCreature.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 50) + 2;
+            
+            // 2. Calculate discrete random modifier (85% to 100%)
+            const randomModifier = (Math.floor(Math.random() * 16) + 85) / 100;
+            
+            // 3. Apply multipliers and floor at the very end
+            const totalDmg = Math.floor(rawBase * mult * randomModifier);
+            
+            // 4. Ensure a minimum of 1 damage, unless the target is immune (mult === 0)
+            const finalDmg = mult === 0 ? 0 : Math.max(1, totalDmg);
 
-            ctx.enemyEntity.hp = Math.max(0, ctx.enemyEntity.hp - totalDmg);
-            let message = `${ctx.playerCreature.displayName} hits opposing ${ctx.enemyEntity.displayName} with ${mSpec.name}! Dealt ${totalDmg} damage.`;
+            ctx.enemyEntity.hp = Math.max(0, ctx.enemyEntity.hp - finalDmg);
+            
+            let message = `${ctx.playerCreature.displayName} hits opposing ${ctx.enemyEntity.displayName} with ${mSpec.name}! Dealt ${finalDmg} damage.`;
             if (mult >= 2.0) message += " ✨ SUPER EFFECTIVE!";
             if (mult > 0 && mult <= 0.5) message += " 🛡️ Not very effective...";
             if (mult === 0) message += " It had no effect...";
+            
             document.getElementById('announcer-msg').innerText = message;
+            
         } else if (mSpec.category === "status") {
             const targetMods = mSpec.target === "self" ? ctx.playerModifiers : ctx.enemyModifiers;
             const result = applyStatModifier(targetMods, mSpec.stat, mSpec.operator, mSpec.value);
@@ -2721,6 +2734,7 @@ function executePlayerActionPhase(moveKey, nextCallback) {
             if (result === "maxed") message += `${targetName}'s ${mSpec.stat} won't go any higher!`;
             else if (result === "minned") message += `${targetName}'s ${mSpec.stat} won't go any lower!`;
             else message += `${targetName}'s ${mSpec.stat} ${mSpec.operator === "multiply" ? "rose" : "fell"}!`;
+            
             document.getElementById('announcer-msg').innerText = message;
         }
 
@@ -2740,14 +2754,28 @@ function executeEnemyActionPhase(nextCallback) {
             const mult = getMultiTypeEffectiveness(mSpec.type, ctx.playerCreature.type);
             const effAtk = ctx.enemyEntity.attack * ctx.enemyModifiers.attack;
             const effDef = ctx.playerCreature.defense * ctx.playerModifiers.defense;
-            const rawBase = Math.floor((((2 * ctx.enemyEntity.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 50) + 2);
-            const totalDmg = Math.floor(rawBase * mult * (0.85 + Math.random() * 0.15));
+            
+            // 1. Calculate raw base damage as a float
+            const rawBase = (((2 * ctx.enemyEntity.level / 5) + 2) * mSpec.power * (effAtk / effDef) / 50) + 2;
+            
+            // 2. Calculate discrete random modifier (85% to 100%)
+            const randomModifier = (Math.floor(Math.random() * 16) + 85) / 100;
+            
+            // 3. Apply multipliers and floor at the very end
+            const totalDmg = Math.floor(rawBase * mult * randomModifier);
+            
+            // 4. Ensure a minimum of 1 damage, unless the player is immune (mult === 0)
+            const finalDmg = mult === 0 ? 0 : Math.max(1, totalDmg);
 
-            ctx.playerCreature.hp = Math.max(0, ctx.playerCreature.hp - totalDmg);
-            let message = `Opposing ${ctx.enemyEntity.displayName} retaliates using ${mSpec.name}! Reduced health by ${totalDmg}.`;
+            ctx.playerCreature.hp = Math.max(0, ctx.playerCreature.hp - finalDmg);
+            
+            let message = `Opposing ${ctx.enemyEntity.displayName} retaliates using ${mSpec.name}! Reduced health by ${finalDmg}.`;
             if (mult >= 2.0) message += " ✨ SUPER EFFECTIVE!";
             if (mult > 0 && mult <= 0.5) message += " 🛡️ You resisted it!";
+            if (mult === 0) message += " It had no effect..."; // Added immunity handler here just in case!
+            
             document.getElementById('announcer-msg').innerText = message;
+            
         } else if (mSpec.category === "status") {
             const targetMods = mSpec.target === "self" ? ctx.enemyModifiers : ctx.playerModifiers;
             const result = applyStatModifier(targetMods, mSpec.stat, mSpec.operator, mSpec.value);
@@ -2757,6 +2785,7 @@ function executeEnemyActionPhase(nextCallback) {
             if (result === "maxed") message += `${targetName}'s ${mSpec.stat} won't go any higher!`;
             else if (result === "minned") message += `${targetName}'s ${mSpec.stat} won't go any lower!`;
             else message += `${targetName}'s ${mSpec.stat} ${mSpec.operator === "multiply" ? "rose" : "fell"}!`;
+            
             document.getElementById('announcer-msg').innerText = message;
         }
 
