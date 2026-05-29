@@ -264,11 +264,11 @@ const CONFIG_DATA = {
                 "rows": 25, "cols": 25, "cellSize": 4,
                 "layout": [
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 6, 6, 8, 1, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 0, 0, 1, 6, 6, 6, 1],
-                    [1, 6, 6, 6, 1, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 0, 0, 0, 1, 6, 6, 6, 1],
-                    [1, 6, 6, 7, 1, 0, 0, 1, 0, 0, 0, 0, 1, 3, 0, 1, 4, 0, 1, 1, 1, 1, 6, 6, 1],
+                    [1, 6, 6, 8, 1, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 3, 0, 0, 4, 4, 1, 6, 6, 6, 1],
+                    [1, 6, 6, 6, 1, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 0, 0, 4, 4, 4, 1, 6, 6, 6, 1],
+                    [1, 6, 6, 7, 1, 0, 0, 1, 0, 0, 0, 0, 1, 3, 0, 1, 4, 0, 0, 0, 1, 1, 6, 6, 1],
                     [1, 1, 6, 1, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 4, 0, 0, 0, 1, 6, 6, 6, 1],
-                    [5, 0, 0, 7, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 4, 4, 0, 0, 1, 6, 6, 1, 1],
+                    [1, 0, 0, 7, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 4, 4, 0, 0, 1, 6, 6, 1, 1],
                     [1, 0, 0, 0, 1, 0, 0, 1, 2, 2, 0, 0, 1, 0, 3, 1, 1, 1, 4, 0, 1, 6, 6, 6, 1],
                     [1, 0, 0, 0, 1, 0, 0, 1, 2, 2, 0, 0, 1, 3, 0, 1, 1, 1, 0, 4, 1, 1, 6, 6, 1],
                     [1, 0, 0, 0, 1, 0, 0, 1, 2, 3, 0, 0, 1, 3, 0, 1, 0, 0, 0, 4, 1, 6, 6, 6, 1],
@@ -285,8 +285,8 @@ const CONFIG_DATA = {
                     [1, 0, 0, 0, 1, 2, 2, 1, 3, 3, 0, 0, 1, 0, 3, 1, 4, 0, 1, 1, 1, 0, 4, 4, 1],
                     [1, 0, 0, 0, 1, 2, 2, 1, 3, 3, 0, 0, 1, 3, 3, 1, 4, 0, 0, 0, 0, 0, 4, 4, 1],
                     [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 4, 4, 0, 0, 0, 0, 0, 0, 1],
-                    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1],
+                    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1],
+                    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 5, 1],
                     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
                 ]
             },
@@ -527,9 +527,9 @@ const CONFIG_DATA = {
                     "roster": [] 
                 },
                                 { 
-                    "id": "npc_secret1", "name": "Ancient Carving", "r": 6, "c": 1, "isBoss": false, "isSecret": true, "shirtColor": 0xFFFFFF,
+                    "id": "npc_secret1", "name": "Ancient Carving", "r": 24, "c": 24, "isBoss": false, "isSecret": true, "shirtColor": 0xFFFFFF,
                     "dialogue": {
-                        "greeting": "IV",
+                        "greeting": "You found a secret! Thank you so much for being such a great class and I will sincerly miss you! -Mr. Longmore",
                         "victory": "" // Not needed for Secret
                     },
                     "roster": [] 
@@ -887,33 +887,42 @@ for (let row = 0; row < layout.length; row++) {
         const worldCol = col + 1;
         const pos = gridToWorld(worldRow, worldCol);
 
-        if (cell === 1) {
-            let wallColor = new THREE.Color(0x78716c); // Create a Three.js Color object
+       if (cell === 1) {
+            let wallColor = new THREE.Color(0x78716c);
             
             if (wallInst) {
                 tempMatrix.makeTranslation(pos.x, 1.75, pos.z);
                 wallInst.setMatrixAt(wallIdx, tempMatrix);
-                wallInst.setColorAt(wallIdx, wallColor); // <-- Set the color for this instance
-                wallIdx++; // Increment after using it
+                wallInst.setColorAt(wallIdx, wallColor);
+                wallIdx++;
             } else {
                 const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE * 0.85, 3.5, CELL_SIZE * 0.85), new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.8 }));
                 mesh.position.set(pos.x, 1.75, pos.z);
                 worldOverworldGroup.add(mesh);
             }
-        } else if (cell === 5) {
-            let wallColor = new THREE.Color(0x878787); // Create a different Color object
-            
-            if (wallInst) {
-                tempMatrix.makeTranslation(pos.x, 1.75, pos.z);
-                wallInst.setMatrixAt(wallIdx, tempMatrix);
-                wallInst.setColorAt(wallIdx, wallColor); // <-- Set the color for this instance
-                wallIdx++; // Increment after using it
-            } else {
-                const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE * 0.85, 3.5, CELL_SIZE * 0.85), new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.8 }));
-                mesh.position.set(pos.x, 1.75, pos.z);
-                worldOverworldGroup.add(mesh);
-            }
+            // CRITICAL FIX: Track regular walls as obstacles so players can't walk through them!
             obstacles.push({ r: worldRow, c: worldCol });
+
+        } else if (cell === 5) {
+            let wallColor = new THREE.Color(0x878787);
+            
+            if (wallInst) {
+                tempMatrix.makeTranslation(pos.x, 1.75, pos.z);
+                wallInst.setMatrixAt(wallIdx, tempMatrix);
+                wallInst.setColorAt(wallIdx, wallColor);
+                wallIdx++;
+            } else {
+                const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE * 0.85, 3.5, CELL_SIZE * 0.85), new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.8 }));
+                mesh.position.set(pos.x, 1.75, pos.z);
+                worldOverworldGroup.add(mesh);
+            }
+            // Track secret walls as obstacles too
+            obstacles.push({ r: worldRow, c: worldCol });
+
+            // Optional: Re-add the secret sign registration if you want it to act as a signpost
+            const secretSignData = lookupInteractable(worldRow, worldCol) || { title: 'Wall', text: 'It\'s a solid wall.' };
+            interactableRegistry.push({ r: worldRow, c: worldCol, type: 'sign', ...secretSignData });
+
         } else if (cell === 6) {
                         const mesh = new THREE.Mesh(new THREE.BoxGeometry(CELL_SIZE * 0.95, 0.3, CELL_SIZE * 0.95), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.95 }));
                         mesh.position.set(pos.x, 0.15, pos.z);
@@ -1957,6 +1966,14 @@ function openNpcDialogueOverlay(npcObject) {
                         gameState = "EXPLORE";
                     };
                 };
+            } else if(npcObject.isSecret) {
+                // --- Secret LOGIC ---
+
+                    triggerBtn.innerText = "Farewell";
+                    triggerBtn.onclick = () => {
+                        modal.classList.add('hidden');
+                        gameState = "EXPLORE";
+                    };
             } else {
                 // --- NORMAL BATTLE LOGIC ---
                 triggerBtn.innerText = "Initialize Battle Matrix";
