@@ -57,6 +57,7 @@
         }
 
         .pupil {
+            
             animation: lookAround 5s ease-in-out infinite;
             background-color: #3b82f6; /* Match head color */
             box-shadow: 0 0 8px #60a5fa; /* Glowing effect */
@@ -267,31 +268,33 @@ function getLevenshteinDistance(a, b) {
 // 4. Input handling algorithm
 function findTerm(userInput) {
     const processedInput = userInput.trim().toUpperCase();
-    if (!processedInput) return null;
+    if (!processedInput) return { exactMatch: null, suggestions: [] };
 
-    // Direct Match
+    // Direct Exact Match
     if (globalTermBank[processedInput]) {
-        return globalTermBank[processedInput];
+        return { exactMatch: globalTermBank[processedInput], suggestions: [] };
     }
 
-    // Fuzzy Match (Failsafe for minor spelling variations)
-    let bestMatchKey = null;
-    let lowestDistance = Infinity;
+    // Collect Fuzzy Matches
+    const suggestions = [];
     const maxTypoThreshold = processedInput.length <= 4 ? 1 : 2;
 
     for (const dictionaryKey in globalTermBank) {
         const distance = getLevenshteinDistance(processedInput, dictionaryKey);
-        if (distance < lowestDistance) {
-            lowestDistance = distance;
-            bestMatchKey = dictionaryKey;
+        if (distance <= maxTypoThreshold) {
+            suggestions.push({
+                term: globalTermBank[dictionaryKey].original,
+                data: globalTermBank[dictionaryKey],
+                distance: distance
+            });
         }
     }
 
-    if (lowestDistance <= maxTypoThreshold && bestMatchKey) {
-        return globalTermBank[bestMatchKey];
-    }
+    // Sort closest matches first and limit to top 3
+    suggestions.sort((a, b) => a.distance - b.distance);
+    const topSuggestions = suggestions.slice(0, 3);
 
-    return null;
+    return { exactMatch: null, suggestions: topSuggestions };
 }
 
 // 5. Update Chat Interface without reloading the page
@@ -300,23 +303,56 @@ const chatInput = document.getElementById('chat-input');
 const gifDisplay = document.getElementById('gif-display');
 const welcomeMessage = document.getElementById('welcome-message');
 
+// Helper to display the selected sign GIF
+function displaySign(termData) {
+    welcomeMessage.classList.add('hidden');
+    gifDisplay.src = termData.gif;
+    gifDisplay.classList.remove('hidden');
+}
+
 chatForm.addEventListener('submit', (e) => {
-    e.preventDefault(); // Blocks the browser from refreshing the tab
+    e.preventDefault();
     
     const userInput = chatInput.value;
-    const termData = findTerm(userInput);
-    
-    if (termData) {
-        welcomeMessage.classList.add('hidden');
-        gifDisplay.src = termData.gif;
-        gifDisplay.classList.remove('hidden');
-    } else {
+    const { exactMatch, suggestions } = findTerm(userInput);
+
+    if (exactMatch) {
+        displaySign(exactMatch);
+    } else if (suggestions.length > 0) {
+        // Hide GIF if visible
         gifDisplay.classList.add('hidden');
-        welcomeMessage.innerHTML = `<p class="text-lg font-semibold">Not Found</p><p>Sorry, I couldn't find a sign for "${userInput}".</p>`;
+        
+        // Build "Did you mean..." UI with clickable buttons
+        let html = `<p class="text-base font-semibold text-gray-700 mb-2">Did you mean...</p>`;
+        html += `<div class="flex flex-wrap gap-2 justify-center mt-1">`;
+        
+        suggestions.forEach((item, index) => {
+            html += `<button type="button" class="suggestion-btn bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium px-3 py-1 rounded-full text-sm transition-colors" data-index="${index}">
+                        ${item.term}
+                     </button>`;
+        });
+        
+        html += `</div>`;
+        
+        welcomeMessage.innerHTML = html;
+        welcomeMessage.classList.remove('hidden');
+
+        // Attach click listeners to the generated suggestion buttons
+        const buttons = welcomeMessage.querySelectorAll('.suggestion-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = btn.getAttribute('data-index');
+                displaySign(suggestions[idx].data);
+            });
+        });
+    } else {
+        // No matches or suggestions found
+        gifDisplay.classList.add('hidden');
+        welcomeMessage.innerHTML = `<p class="text-lg font-semibold">Not Found</p><p class="text-sm">Sorry, I couldn't find a sign for "${userInput}".</p>`;
         welcomeMessage.classList.remove('hidden');
     }
 
-    chatInput.value = ''; // Clears input box for the next search
+    chatInput.value = ''; // Clear input field
 });
 
 // Execute the async network fetch immediately when script runs
