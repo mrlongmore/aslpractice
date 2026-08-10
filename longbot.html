@@ -265,7 +265,7 @@ function getLevenshteinDistance(a, b) {
     return tmp[a.length][b.length];
 }
 
-// 4. Input handling algorithm
+// 4. Enhanced Input handling algorithm with dynamic typo tolerance
 function findTerm(userInput) {
     const processedInput = userInput.trim().toUpperCase();
     if (!processedInput) return { exactMatch: null, suggestions: [] };
@@ -275,12 +275,26 @@ function findTerm(userInput) {
         return { exactMatch: globalTermBank[processedInput], suggestions: [] };
     }
 
-    // Collect Fuzzy Matches
+    // Collect Fuzzy & Partial Matches
     const suggestions = [];
-    const maxTypoThreshold = processedInput.length <= 4 ? 1 : 2;
+    const inputLen = processedInput.length;
+
+    // Dynamic typo threshold: scales tolerance with word length
+    let maxTypoThreshold;
+    if (inputLen <= 3) maxTypoThreshold = 1;      // e.g. CAT -> HAT
+    else if (inputLen <= 6) maxTypoThreshold = 2; // e.g. APLE -> APPLE
+    else if (inputLen <= 9) maxTypoThreshold = 3; // e.g. ELEPHNT -> ELEPHANT
+    else maxTypoThreshold = 4;                    // e.g. FINGERSPELING -> FINGERSPELLING
 
     for (const dictionaryKey in globalTermBank) {
-        const distance = getLevenshteinDistance(processedInput, dictionaryKey);
+        let distance = getLevenshteinDistance(processedInput, dictionaryKey);
+
+        // Substring / partial match bonus (e.g. searching "WALK" matches "WALKING")
+        if (dictionaryKey.includes(processedInput) || processedInput.includes(dictionaryKey)) {
+            const lengthDifference = Math.abs(dictionaryKey.length - inputLen);
+            distance = Math.min(distance, lengthDifference);
+        }
+
         if (distance <= maxTypoThreshold) {
             suggestions.push({
                 term: globalTermBank[dictionaryKey].original,
@@ -290,20 +304,28 @@ function findTerm(userInput) {
         }
     }
 
-    // Sort closest matches first and limit to top 3
+    // Sort closest matches first and limit to top 3 unique suggestions
     suggestions.sort((a, b) => a.distance - b.distance);
-    const topSuggestions = suggestions.slice(0, 3);
+    
+    // Deduplicate suggestions by term
+    const uniqueSuggestions = [];
+    const seenTerms = new Set();
+    for (const item of suggestions) {
+        if (!seenTerms.has(item.term)) {
+            seenTerms.add(item.term);
+            uniqueSuggestions.push(item);
+        }
+    }
 
-    return { exactMatch: null, suggestions: topSuggestions };
+    return { exactMatch: null, suggestions: uniqueSuggestions.slice(0, 3) };
 }
 
-// 5. Update Chat Interface without reloading the page
+// 5. Update Chat Interface
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const gifDisplay = document.getElementById('gif-display');
 const welcomeMessage = document.getElementById('welcome-message');
 
-// Helper to display the selected sign GIF
 function displaySign(termData) {
     welcomeMessage.classList.add('hidden');
     gifDisplay.src = termData.gif;
@@ -313,16 +335,17 @@ function displaySign(termData) {
 chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
-    const userInput = chatInput.value;
+    const userInput = chatInput.value.trim();
+    if (!userInput) return;
+
     const { exactMatch, suggestions } = findTerm(userInput);
 
     if (exactMatch) {
         displaySign(exactMatch);
     } else if (suggestions.length > 0) {
-        // Hide GIF if visible
+        // Show "Did you mean..." UI
         gifDisplay.classList.add('hidden');
         
-        // Build "Did you mean..." UI with clickable buttons
         let html = `<p class="text-base font-semibold text-gray-700 mb-2">Did you mean...</p>`;
         html += `<div class="flex flex-wrap gap-2 justify-center mt-1">`;
         
@@ -337,7 +360,7 @@ chatForm.addEventListener('submit', (e) => {
         welcomeMessage.innerHTML = html;
         welcomeMessage.classList.remove('hidden');
 
-        // Attach click listeners to the generated suggestion buttons
+        // Attach click handlers to suggestion buttons
         const buttons = welcomeMessage.querySelectorAll('.suggestion-btn');
         buttons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -346,13 +369,16 @@ chatForm.addEventListener('submit', (e) => {
             });
         });
     } else {
-        // No matches or suggestions found
+        // Explicit "Not in database" feedback when input is too far off or missing
         gifDisplay.classList.add('hidden');
-        welcomeMessage.innerHTML = `<p class="text-lg font-semibold">Not Found</p><p class="text-sm">Sorry, I couldn't find a sign for "${userInput}".</p>`;
+        welcomeMessage.innerHTML = `
+            <p class="text-lg font-semibold text-gray-700">Word Not Found</p>
+            <p class="text-sm text-gray-500 mt-1">"${userInput}" isn't in our ASL database yet.</p>
+        `;
         welcomeMessage.classList.remove('hidden');
     }
 
-    chatInput.value = ''; // Clear input field
+    chatInput.value = '';
 });
 
 // Execute the async network fetch immediately when script runs
