@@ -187,38 +187,62 @@
     </div>
 
 <script>
-// Memory object to store words pointing strictly to their CORRECT GIF
+// Memory object to store terms mapped to their media content
 let globalTermBank = {};
 
-// 1. Populate standard ASL Dictionary
-function loadVocab() {
-    const vocabList = [
-        { term: "HELLO", gif: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZydWp3bm01OGhhMDdycnNxcWZicGJvdWV3bTFsa3hxaTFydmV0ZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKp5Kk4nSThGszK/giphy.gif" },
-        { term: "THANK YOU", gif: "https://media.giphy.com/media/3o7TKHV0Si3cR9eS1y/giphy.gif" },
-        { term: "PLEASE", gif: "https://media.giphy.com/media/xT5LMz1RDC4M6qL30E/giphy.gif" },
-        { term: "CAT", gif: "https://media.giphy.com/media/13CoXDiaCcCoyk/giphy.gif" },
-        { term: "DOG", gif: "https://media.giphy.com/media/4Zo41lhzKt6iZ8xff9/giphy.gif" },
-        { term: "LOVE", gif: "https://media.giphy.com/media/3o7TKoWXm3okO1mgHC/giphy.gif" },
-        { term: "HELP", gif: "https://media.giphy.com/media/3o7TKJpC4sLhN6L8wM/giphy.gif" },
-        { term: "ROBOT", gif: "https://media.giphy.com/media/u01ioCe6G8RBsZBL0B/giphy.gif" },
-        { term: "LEARN", gif: "https://media.giphy.com/media/l2JdU3sT1tVpP71Is/giphy.gif" },
-        { term: "SIGN", gif: "https://media.giphy.com/media/xT0xezQGU5xCDJuCPe/giphy.gif" },
-        { term: "FRIEND", gif: "https://media.giphy.com/media/3o6Zt8qDiPE2p3C1K0/giphy.gif" },
-        { term: "YES", gif: "https://media.giphy.com/media/111ebonMs90YLu/giphy.gif" },
-        { term: "NO", gif: "https://media.giphy.com/media/q49YSnLzrvghy/giphy.gif" },
-        { term: "WATER", gif: "https://media.giphy.com/media/3o7TKBcOTDTE6VA6GI/giphy.gif" },
-        { term: "EAT", gif: "https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif" }
-    ];
-
-    vocabList.forEach(item => {
-        globalTermBank[item.term.toUpperCase()] = {
-            original: item.term,
-            gif: item.gif
-        };
-    });
+// 1. Fetch JSON asynchronously from vocab.json
+async function loadVocab() {
+    try {
+        const response = await fetch('./vocab.json');
+        if (!response.ok) throw new Error('Failed to fetch vocab data');
+        
+        const data = await response.json();
+        globalTermBank = parseVocabIntoSearchBank(data);
+        console.log("Successfully indexed terms:", Object.keys(globalTermBank));
+    } catch (error) {
+        console.error("Error loading vocab configuration:", error);
+    }
 }
 
-// 2. Damerau-Levenshtein Distance Algorithm
+// 2. Flexible parser for vocab.json structures
+function parseVocabIntoSearchBank(jsonData) {
+    const termBank = {};
+    const categories = Array.isArray(jsonData) ? { default: { questions: jsonData } } : jsonData;
+
+    for (const categoryKey in categories) {
+        const category = categories[categoryKey];
+        const questions = category && category.questions ? category.questions : (Array.isArray(category) ? category : []);
+
+        if (Array.isArray(questions)) {
+            questions.forEach(item => {
+                let cleanTerm = null;
+                const assetUrl = item.image || item.gif || item.url || item.src;
+
+                // Format A: Standard quiz with options + correct index
+                if (item.options && typeof item.correct === 'number' && item.options[item.correct]) {
+                    cleanTerm = item.options[item.correct];
+                } 
+                // Format B: Direct term or word property
+                else if (item.term || item.word || item.name) {
+                    cleanTerm = item.term || item.word || item.name;
+                }
+
+                if (cleanTerm && assetUrl) {
+                    const key = cleanTerm.trim().toUpperCase();
+                    if (!termBank[key]) {
+                        termBank[key] = {
+                            gif: assetUrl,
+                            original: cleanTerm.trim()
+                        };
+                    }
+                }
+            });
+        }
+    }
+    return termBank;
+}
+
+// 3. Damerau-Levenshtein distance (handles insertions, deletions, substitutions, and letter swaps)
 function getDamerauLevenshteinDistance(a, b) {
     const m = a.length, n = b.length;
     const d = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
@@ -235,7 +259,7 @@ function getDamerauLevenshteinDistance(a, b) {
                 d[i - 1][j - 1] + cost // Substitution
             );
 
-            // Letter Transposition (e.g. 'DGO' -> 'DOG')
+            // Letter transposition (e.g., 'HELP' -> 'HELP')
             if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
                 d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + cost);
             }
@@ -244,62 +268,39 @@ function getDamerauLevenshteinDistance(a, b) {
     return d[m][n];
 }
 
-// 3. Similarity Score Calculation
-function getSimilarityScore(input, target) {
-    const s1 = input.toUpperCase();
-    const s2 = target.toUpperCase();
-
-    if (s1 === s2) return 1.0;
-
-    const maxLen = Math.max(s1.length, s2.length);
-    if (maxLen === 0) return 1.0;
-
-    const distance = getDamerauLevenshteinDistance(s1, s2);
-    let score = 1.0 - (distance / maxLen);
-
-    // Boost score if input starts with target or target starts with input
-    if (s2.startsWith(s1) && s1.length >= 2) {
-        score = Math.max(score, 0.75);
-    }
-
-    return score;
-}
-
-// 4. Search Engine
+// 4. Fuzzy search algorithm to populate suggestions for typos
 function findTerm(userInput) {
     const processedInput = userInput.trim().toUpperCase();
     if (!processedInput) return { exactMatch: null, suggestions: [] };
 
-    // EXACT MATCH
+    // Exact Match
     if (globalTermBank[processedInput]) {
         return { exactMatch: globalTermBank[processedInput], suggestions: [] };
     }
 
-    // FUZZY MATCHING FOR TYPOS
+    // Fuzzy matching candidates
     const suggestions = [];
 
     for (const dictionaryKey in globalTermBank) {
         const distance = getDamerauLevenshteinDistance(processedInput, dictionaryKey);
-        const score = getSimilarityScore(processedInput, dictionaryKey);
+        
+        // Dynamic threshold: 1 edit for short words (<=4 letters), 2 edits for longer words
+        const maxThreshold = processedInput.length <= 4 ? 1 : 2;
+        
+        // Also check if dictionary key starts with input (Prefix match)
+        const isPrefix = processedInput.length >= 2 && dictionaryKey.startsWith(processedInput);
 
-        // Include terms if 1-2 letters off OR score threshold met
-        if (distance <= 2 || score >= 0.50) {
+        if (distance <= maxThreshold || isPrefix) {
             suggestions.push({
                 term: globalTermBank[dictionaryKey].original,
                 data: globalTermBank[dictionaryKey],
-                score: score,
                 distance: distance
             });
         }
     }
 
-    // Sort by smallest distance, then highest similarity score
-    suggestions.sort((a, b) => {
-        if (a.distance !== b.distance) {
-            return a.distance - b.distance;
-        }
-        return b.score - a.score;
-    });
+    // Sort by smallest edit distance first
+    suggestions.sort((a, b) => a.distance - b.distance);
 
     // Remove duplicates
     const uniqueSuggestions = [];
@@ -314,7 +315,7 @@ function findTerm(userInput) {
     return { exactMatch: null, suggestions: uniqueSuggestions.slice(0, 3) };
 }
 
-// 5. Interface Event Handlers
+// 5. Interface & DOM Event Handling
 const appContainer = document.getElementById('app-container');
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
@@ -336,8 +337,8 @@ function displaySign(termData) {
 chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
-    const userInput = chatInput.value.trim();
-    if (!userInput) return;
+    const userInput = chatInput.value;
+    if (!userInput.trim()) return;
 
     const { exactMatch, suggestions } = findTerm(userInput);
 
@@ -374,7 +375,7 @@ chatForm.addEventListener('submit', (e) => {
         gifDisplay.classList.add('hidden');
         welcomeMessage.innerHTML = `
             <p class="text-lg font-semibold text-gray-700">Not Found</p>
-            <p class="text-sm text-gray-500 mt-1">Sorry, "${userInput}" isn't in our dictionary.</p>
+            <p class="text-sm text-gray-500 mt-1">Sorry, I couldn't find a sign for "${userInput}".</p>
         `;
         welcomeMessage.classList.remove('hidden');
     }
@@ -382,7 +383,7 @@ chatForm.addEventListener('submit', (e) => {
     chatInput.value = '';
 });
 
-// Load vocabulary data on page setup
+// Load vocab file when script initializes
 loadVocab();
 </script>
 
