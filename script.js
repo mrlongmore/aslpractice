@@ -137,7 +137,7 @@ function startQuiz(questions) {
 // Certificate modal population
 function displayCertificate() {
     certificate_header.innerHTML = `<h1>Great work, ${user_name}!</h1>`;
-    results_area.innerHTML = `<h1>You got ${questions_correct} question(s) correct and ${questions_incorrect} question(s) incorrect out of ${questions_total} questions total.</h1>
+    results_area.innerHTML = `<h1>You answered all ${questions_total} question(s), with ${questions_incorrect} question(s) incorrect and ${questions_correct} questions correct.</h1>
     <p>Take a screenshot of your results and upload them to Google Classroom!</p>`;
 }
 
