@@ -193,126 +193,89 @@
 // This memory object will store words pointing strictly to their CORRECT gif
 let globalTermBank = {};
 
-// 1. Fetch JSON asynchronously from your GitHub Pages workspace folder
-async function loadVocab() {
-    try {
-        const response = await fetch('./vocab.json');
-        if (!response.ok) throw new Error('Failed to fetch vocab data');
-        
-        const data = await response.json();
-        
-        // Build the dictionary securely using correct options
-        globalTermBank = parseVocabIntoSearchBank(data);
-        console.log("Successfully indexed correct terms:", Object.keys(globalTermBank));
-    } catch (error) {
-        console.error("Error loading vocab configuration:", error);
-    }
-}
+// 1. Damerau-Levenshtein Algorithm (Handles insertions, deletions, substitutions, and letter swaps)
+function getDamerauLevenshteinDistance(a, b) {
+    const m = a.length, n = b.length;
+    const d = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
 
-// 2. Parsers look up ONLY the correct answers, ignoring wrong options
-function parseVocabIntoSearchBank(jsonData) {
-    const termBank = {};
+    for (let i = 0; i <= m; i++) d[i][0] = i;
+    for (let j = 0; j <= n; j++) d[0][j] = j;
 
-    // Cycle through your root objects (fingerspelling, fingerspelling_numbers, etc.)
-    for (const categoryKey in jsonData) {
-        const category = jsonData[categoryKey];
-        
-        if (category && Array.isArray(category.questions)) {
-            category.questions.forEach(item => {
-                
-                // Validate required fields exist safely
-                if (item.options && typeof item.correct === 'number') {
-                    
-                    // GET THE CORRECT VALUE EXCLUSIVELY BY ITS INDEX
-                    const correctOptionString = item.options[item.correct];
-                    
-                    if (correctOptionString) {
-                        // Standardize string formatting for clean matching matches
-                        const cleanTerm = correctOptionString.trim().toUpperCase();
-                        
-                        // Extract target asset url (handling both item.image and item.gif definitions)
-                        const assetUrl = item.image || item.gif;
-
-                        // Associate the term with its verified target image asset
-                        if (assetUrl && !termBank[cleanTerm]) {
-                            termBank[cleanTerm] = {
-                                gif: assetUrl,
-                                original: correctOptionString
-                            };
-                        }
-                    }
-                }
-            });
-        }
-    }
-    return termBank;
-}
-
-// 3. Simple Distance Algorithm to absorb human typos
-function getLevenshteinDistance(a, b) {
-    const tmp = [];
-    for (let i = 0; i <= a.length; i++) tmp[i] = [i];
-    for (let j = 0; j <= b.length; j++) tmp[0][j] = j;
-    for (let i = 1; i <= a.length; i++) {
-        for (let j = 1; j <= b.length; j++) {
-            tmp[i][j] = Math.min(
-                tmp[i - 1][j] + 1,
-                tmp[i][j - 1] + 1,
-                tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            d[i][j] = Math.min(
+                d[i - 1][j] + 1,      // Deletion
+                d[i][j - 1] + 1,      // Insertion
+                d[i - 1][j - 1] + cost // Substitution
             );
+
+            // Letter Transposition (e.g., 'CTA' -> 'CAT')
+            if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+                d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + cost);
+            }
         }
     }
-    return tmp[a.length][b.length];
+    return d[m][n];
 }
 
-// 4. Enhanced Input handling algorithm with dynamic typo tolerance
+// 2. Normalized Similarity Percentage (0.0 = completely different, 1.0 = exact match)
+function getSimilarityScore(input, target) {
+    const s1 = input.toUpperCase();
+    const s2 = target.toUpperCase();
+
+    if (s1 === s2) return 1.0;
+
+    const maxLen = Math.max(s1.length, s2.length);
+    if (maxLen === 0) return 1.0;
+
+    const distance = getDamerauLevenshteinDistance(s1, s2);
+    let score = 1.0 - (distance / maxLen);
+
+    // Boost score if the target starts with the user's input (Prefix Match)
+    if (s2.startsWith(s1) && s1.length >= 2) {
+        score = Math.max(score, 0.75);
+    }
+
+    return score;
+}
+
+// 3. Search Engine
 function findTerm(userInput) {
     const processedInput = userInput.trim().toUpperCase();
     if (!processedInput) return { exactMatch: null, suggestions: [] };
 
-    // Direct Exact Match
+    // STRICT EXACT MATCH ONLY -> Auto-play GIF
     if (globalTermBank[processedInput]) {
         return { exactMatch: globalTermBank[processedInput], suggestions: [] };
     }
 
-    // Collect Fuzzy & Partial Matches
+    // FUZZY MATCHING -> Collect candidate suggestions
     const suggestions = [];
-    const inputLen = processedInput.length;
-
-    // Dynamic typo threshold: scales tolerance with word length
-    let maxTypoThreshold;
-    if (inputLen <= 3) maxTypoThreshold = 1;      // e.g. CAT -> HAT
-    else if (inputLen <= 6) maxTypoThreshold = 2; // e.g. APLE -> APPLE
-    else if (inputLen <= 9) maxTypoThreshold = 3; // e.g. ELEPHNT -> ELEPHANT
-    else maxTypoThreshold = 4;                    // e.g. FINGERSPELING -> FINGERSPELLING
+    // 3-letter words require 60% similarity; longer words require 50%
+    const minSimilarity = processedInput.length <= 3 ? 0.60 : 0.50;
 
     for (const dictionaryKey in globalTermBank) {
-        let distance = getLevenshteinDistance(processedInput, dictionaryKey);
+        const score = getSimilarityScore(processedInput, dictionaryKey);
 
-        // Substring / partial match bonus (e.g. searching "WALK" matches "WALKING")
-        if (dictionaryKey.includes(processedInput) || processedInput.includes(dictionaryKey)) {
-            const lengthDifference = Math.abs(dictionaryKey.length - inputLen);
-            distance = Math.min(distance, lengthDifference);
-        }
-
-        if (distance <= maxTypoThreshold) {
+        if (score >= minSimilarity) {
             suggestions.push({
                 term: globalTermBank[dictionaryKey].original,
                 data: globalTermBank[dictionaryKey],
-                distance: distance
+                score: score
             });
         }
     }
 
-    // Sort closest matches first and limit to top 3 unique suggestions
-    suggestions.sort((a, b) => a.distance - b.distance);
-    
-    // Deduplicate suggestions by term
+    // Sort by highest similarity match first
+    suggestions.sort((a, b) => b.score - a.score);
+
+    // Remove duplicates
     const uniqueSuggestions = [];
-    const seenTerms = new Set();
+    const seen = new Set();
     for (const item of suggestions) {
-        if (!seenTerms.has(item.term)) {
-            seenTerms.add(item.term);
+        if (!seen.has(item.term)) {
+            seen.add(item.term);
             uniqueSuggestions.push(item);
         }
     }
@@ -320,7 +283,7 @@ function findTerm(userInput) {
     return { exactMatch: null, suggestions: uniqueSuggestions.slice(0, 3) };
 }
 
-// 5. Update Chat Interface
+// 4. Interface Event Handler
 const chatForm = document.getElementById('chat-form');
 const chatInput = document.getElementById('chat-input');
 const gifDisplay = document.getElementById('gif-display');
@@ -341,9 +304,10 @@ chatForm.addEventListener('submit', (e) => {
     const { exactMatch, suggestions } = findTerm(userInput);
 
     if (exactMatch) {
+        // Exact match found -> Play sign immediately
         displaySign(exactMatch);
     } else if (suggestions.length > 0) {
-        // Show "Did you mean..." UI
+        // Misspelled or partial word -> NEVER auto-play, render clickable options only
         gifDisplay.classList.add('hidden');
         
         let html = `<p class="text-base font-semibold text-gray-700 mb-2">Did you mean...</p>`;
@@ -360,7 +324,7 @@ chatForm.addEventListener('submit', (e) => {
         welcomeMessage.innerHTML = html;
         welcomeMessage.classList.remove('hidden');
 
-        // Attach click handlers to suggestion buttons
+        // Attach click handlers to options
         const buttons = welcomeMessage.querySelectorAll('.suggestion-btn');
         buttons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -369,11 +333,11 @@ chatForm.addEventListener('submit', (e) => {
             });
         });
     } else {
-        // Explicit "Not in database" feedback when input is too far off or missing
+        // Completely unrecognized input
         gifDisplay.classList.add('hidden');
         welcomeMessage.innerHTML = `
-            <p class="text-lg font-semibold text-gray-700">Word Not Found</p>
-            <p class="text-sm text-gray-500 mt-1">"${userInput}" isn't in our ASL database yet.</p>
+            <p class="text-lg font-semibold text-gray-700">Not Found</p>
+            <p class="text-sm text-gray-500 mt-1">Sorry, "${userInput}" isn't in our dictionary.</p>
         `;
         welcomeMessage.classList.remove('hidden');
     }
