@@ -12,6 +12,7 @@ let data;
 let questions_correct = 0;
 let questions_incorrect = 0;
 let questions_total = 0;
+let percentage_correct = 0;
 
 name_modal.classList.add("active");
 
@@ -134,10 +135,13 @@ function startQuiz(questions) {
     displayQuestion();
 }
 
+function calculatePercentage() {
+    percentage_correct = questions_correct / questions_total;
+}
 // Certificate modal population
 function displayCertificate() {
     certificate_header.innerHTML = `<h1>Great work, ${user_name}!</h1>`;
-    results_area.innerHTML = `<h1>You answered all ${questions_total} question(s), with ${questions_incorrect} question(s) incorrect and ${questions_correct} questions correct.</h1>
+    results_area.innerHTML = `<h1>You answered all ${questions_total} question(s), with ${questions_incorrect} question(s) incorrect and ${questions_correct} question(s) correct.</h1>
     <p>Take a screenshot of your results and upload them to Google Classroom!</p>`;
 }
 
@@ -145,4 +149,8 @@ function displayCertificate() {
 document.querySelector('#certificate-button').addEventListener('click', () => {
     certificate_modal.classList.remove('active');
     topic_modal.classList.add('active');
+    // Answer reset
+    questions_correct = 0;
+    questions_incorrect = 0;
+    questions_total = 0;
 });
