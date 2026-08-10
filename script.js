@@ -140,8 +140,9 @@ function calculatePercentage() {
 }
 // Certificate modal population
 function displayCertificate() {
+    calculatePercentage()
     certificate_header.innerHTML = `<h1>Great work, ${user_name}!</h1>`;
-    results_area.innerHTML = `<h1>You answered all ${questions_total} question(s), with ${questions_incorrect} question(s) incorrect and ${questions_correct} question(s) correct. Your percentage correct is ${percentage_correct}</h1>
+    results_area.innerHTML = `<h1>You answered all ${questions_total} question(s), with ${questions_incorrect} question(s) incorrect and ${questions_correct} question(s) correct. Your percentage correct is ${percentage_correct}%</h1>
     <p>Take a screenshot of your results and upload them to Google Classroom!</p>`;
 }
 
