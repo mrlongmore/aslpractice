@@ -220,29 +220,30 @@
         
 async function load_data() {
     try {
-        const response = await fetch('../vocab.json'); // Adjust path (e.g., '../vocab.json') if needed
+        const response = await fetch('../vocab.json');
         if (!response.ok) throw new Error("Network response was not ok");
-        return await response.json(); 
+        const data = await response.json();
+        if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+            throw new Error('Loaded vocab.json is empty or invalid');
+        }
+        return data;
     } catch (error) {
         console.error('Error loading question bank:', error);
-        return null; 
+        return null;
     }
 }
 
-// 2. Build the checkboxes
+// Populate the topic menu after loading the JSON data
 async function initMenu() {
-    // Load the JSON into our global variable
     quizTopics = await load_data();
 
-    if (!quizTopics) {
-        console.log('Failed to load quiz topics. Cannot initialize menu.');
-        return;
+    if (!quizTopics || Object.keys(quizTopics).length === 0) {
+        console.error('Failed to load quiz topics. Cannot initialize menu.');
+        return false;
     }
+
+    return true;
 }
-initMenu();
-
-
-
 
         // --- Level Design ---
         const levels = [ /* ... Level data remains unchanged ... */ { startX:100,startY:450,platforms:[{x:50,y:500,width:150,height:20},{x:300,y:400,width:100,height:20},{x:500,y:300,width:100,height:20},{x:650,y:200,width:100,height:20,isGoal:true},]},{startX:100,startY:450,platforms:[{x:50,y:500,width:150,height:20},{x:250,y:450,width:50,height:20},{x:400,y:350,width:100,height:20},{x:250,y:250,width:50,height:20},{x:450,y:150,width:100,height:20},{x:650,y:100,width:100,height:20,isGoal:true},]},{startX:100,startY:550,platforms:[{x:50,y:580,width:150,height:20},{x:250,y:450,width:120,height:20,isMoving:true,moveSpeed:1.2,moveRange:150,startX:250},{x:600,y:350,width:100,height:20},{x:400,y:250,width:80,height:20},{x:150,y:150,width:100,height:20,isGoal:true},]  },
@@ -427,11 +428,18 @@ initMenu();
         function showTopicModal() {
             messageBox.classList.add('hidden'); // Hide any existing messages
             topicButtonsContainer.innerHTML = ''; // Clear old buttons
-            Object.keys(quizTopics).forEach(key => {
+
+            const topicKeys = Object.keys(quizTopics || {});
+            if (topicKeys.length === 0) {
+                showMessage('No quiz topics are available right now. Please refresh the page.');
+                return;
+            }
+
+            topicKeys.forEach(key => {
                 const topic = quizTopics[key];
                 const button = document.createElement('button');
                 button.className = 'w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg text-sm md:text-base whitespace-normal';
-                button.textContent = topic.title;
+                button.textContent = topic.title || key;
                 button.onclick = () => selectTopic(key);
                 topicButtonsContainer.appendChild(button);
             });
@@ -486,7 +494,14 @@ initMenu();
         }
 
         // --- Event Listeners ---
-        window.addEventListener('load', init);
+        window.addEventListener('load', async () => {
+            const ready = await initMenu();
+            if (ready) {
+                init();
+            } else {
+                showMessage('Unable to load quiz topics. Please refresh the page.');
+            }
+        });
         
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {

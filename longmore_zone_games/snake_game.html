@@ -157,7 +157,11 @@ async function load_data() {
     try {
         const response = await fetch('../vocab.json'); // Adjust path (e.g., '../vocab.json') if needed
         if (!response.ok) throw new Error("Network response was not ok");
-        return await response.json(); 
+        const data = await response.json();
+        if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+            throw new Error('Loaded vocab.json is empty or invalid');
+        }
+        return data;
     } catch (error) {
         console.error('Error loading question bank:', error);
         return null; 
@@ -166,18 +170,26 @@ async function load_data() {
 
 // 2. Build the checkboxes
 async function initMenu() {
-    // Load the JSON into our global variable
     quizTopics = await load_data();
 
-    if (!quizTopics) {
-        console.log('Failed to load quiz topics. Cannot initialize menu.');
-        return;
+    if (!quizTopics || Object.keys(quizTopics).length === 0) {
+        console.error('Failed to load quiz topics. Cannot initialize menu.');
+        return false;
     }
+
+    return true;
 }
-initMenu();
 
         // --- Game Initialization & State Management ---
-        window.addEventListener('load', init);
+        window.addEventListener('load', async () => {
+            const ready = await initMenu();
+            if (ready) {
+                init();
+            } else {
+                showTopicSelector();
+                showMessage('Unable to load quiz topics. Please refresh the page.');
+            }
+        });
         window.addEventListener('resize', setupCanvas);
         
         function init() {
@@ -191,7 +203,7 @@ initMenu();
                 const topic = quizTopics[key];
                 const button = document.createElement('button');
                 button.className = 'w-full h-auto whitespace-normal break-words bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-lg text-sm md:text-base transform hover:scale-105';
-                button.textContent = topic.title;
+                button.textContent = topic.title || key;
                 button.onclick = () => startGame(key);
                 topicButtonsContainer.appendChild(button);
             }
