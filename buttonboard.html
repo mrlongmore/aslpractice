@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ASL Vocabulary Board</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Touch optimization & text wrapping guarantees */
+        button {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+            hyphens: auto;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-800/80 backdrop-blur border-b border-slate-700 sticky top-0 z-30 px-4 py-3 sm:px-6">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button id="backBtn" onclick="showTopicsView()" class="hidden bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors text-sm sm:text-base">
+                    <span>←</span>
+                    <span>Topics</span>
+                </button>
+                <h1 id="headerTitle" class="text-xl sm:text-2xl font-bold tracking-wide text-indigo-400">Select a Topic</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Board Area -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6">
+        <!-- Topic Selection Grid -->
+        <section id="topicsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+            <!-- Dynamically populated from vocab.json -->
+        </section>
+
+        <!-- Vocabulary Term Button Board -->
+        <section id="termsContainer" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            <!-- Dynamically populated when topic is selected -->
+        </section>
+    </main>
+
+    <!-- GIF Display Modal -->
+    <div id="gifModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closeModal(event)">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-6 max-w-2xl w-full flex flex-col items-center gap-4 shadow-2xl transform transition-all" onclick="event.stopPropagation()">
+            <div class="w-full flex justify-between items-center border-b border-slate-700 pb-3">
+                <h2 id="modalTermTitle" class="text-xl sm:text-2xl font-bold text-indigo-300 btn-text max-w-[85%]">Term Name</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl font-bold p-1 rounded-lg hover:bg-slate-700 leading-none">&times;</button>
+            </div>
+            
+            <div class="w-full aspect-video bg-slate-950 rounded-xl overflow-hidden flex items-center justify-center relative border border-slate-800">
+                <img id="modalGifImage" src="" alt="ASL Sign GIF" class="max-h-full max-w-full object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2394a3b8%22 stroke-width=%222%22><path d=%22M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71%22/><path d=%22M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71%22/></svg>';">
+            </div>
+
+            <button onclick="closeModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg text-base">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // Default structure fallback matching vocab.json specifications
+        const fallbackVocab = {
+            "topics": [
+                {
+                    "topic": "School Subjects",
+                    "questions": [
+                        { "options": ["TAKE-UP", "CLASS", "STUDY"], "correct": 1, "image": "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHY5bXByZ24ydTY3OWptZ3R2YXR4eWZpMm95ZGQ5dmdqMWR3aWZvbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l2JdZOpM4vV8A2Mzm/giphy.gif" },
+                        { "options": ["MATH", "GEOMETRY", "ALGEBRA"], "correct": 0, "image": "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmI0ZXAwbWExNnVhdHRhcnlyZmR2YTYzZXlwdm9mdjIyd3ZreWZicSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKPxJp2M5L1x0m/giphy.gif" },
+                        { "options": ["PHYSICS", "BIOLOGY", "SCIENCE"], "correct": 2, "image": "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOTh3bWhicHJhbHFkMmcxcXV3czRzNW1ydWVxYzA5eTRydThzeDRiZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26fb3v19I669A0E3S/giphy.gif" }
+                    ]
+                },
+                {
+                    "topic": "General Terms",
+                    "questions": [
+                        { "options": ["READ", "STUDY", "WRITE"], "correct": 1, "image": "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnBjc2s5bzRyeXJzMnNsa2xkcTBxOWtrcmhieXV5ODRsaDF3OGU0YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6Zt93mK85mF8iQ00/giphy.gif" }
+                    ]
+                }
+            ]
+        };
+
+        let rawVocabData = null;
+        let normalizedTopics = [];
+
+        // Dynamic Color palette for topic & term buttons
+        const buttonColors = [
+            'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border-indigo-500',
+            'bg-purple-600 hover:bg-purple-500 active:bg-purple-700 border-purple-500',
+            'bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border-blue-500',
+            'bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 border-emerald-500',
+            'bg-amber-600 hover:bg-amber-500 active:bg-amber-700 border-amber-500',
+            'bg-rose-600 hover:bg-rose-500 active:bg-rose-700 border-rose-500',
+            'bg-teal-600 hover:bg-teal-500 active:bg-teal-700 border-teal-500'
+        ];
+
+        async function init() {
+            try {
+                const response = await fetch('vocab.json');
+                if (!response.ok) throw new Error('File fetch failed');
+                rawVocabData = await response.json();
+            } catch (err) {
+                console.warn('vocab.json fetch failed, using fallback structure:', err);
+                rawVocabData = fallbackVocab;
+            }
+
+            parseVocabData();
+            renderTopics();
+        }
+
+        // Parse JSON regardless of structure oddities
+        function parseVocabData() {
+            normalizedTopics = [];
+            
+            let topicsList = [];
+            if (Array.isArray(rawVocabData)) {
+                topicsList = rawVocabData;
+            } else if (rawVocabData.topics && Array.isArray(rawVocabData.topics)) {
+                topicsList = rawVocabData.topics;
+            } else if (typeof rawVocabData === 'object') {
+                // In case topics are object keys
+                topicsList = Object.keys(rawVocabData).map(key => ({
+                    topic: key,
+                    questions: Array.isArray(rawVocabData[key]) ? rawVocabData[key] : (rawVocabData[key].questions || [])
+                }));
+            }
+
+            topicsList.forEach((tObj, tIdx) => {
+                const topicName = tObj.topic || tObj.name || `Topic ${tIdx + 1}`;
+                const questionsArr = tObj.questions || tObj.items || [];
+                
+                const terms = [];
+                questionsArr.forEach(q => {
+                    // Extract term using the exact "correct" index inside options
+                    if (q.options && typeof q.correct !== 'undefined' && q.options[q.correct] !== undefined) {
+                        terms.push({
+                            term: q.options[q.correct],
+                            image: q.image || q.gif || q.gifUrl || ''
+                        });
+                    }
+                });
+
+                if (terms.length > 0) {
+                    normalizedTopics.push({ name: topicName, terms: terms });
+                }
+            });
+        }
+
+        // Render Topics Board
+        function renderTopics() {
+            const container = document.getElementById('topicsContainer');
+            container.innerHTML = '';
+
+            normalizedTopics.forEach((topic, idx) => {
+                const colorClass = buttonColors[idx % buttonColors.length];
+                const btn = document.createElement('button');
+                btn.className = `${colorClass} border-b-4 h-28 sm:h-36 p-3 rounded-2xl shadow-lg flex flex-col items-center justify-center transition-all transform active:scale-95 text-center`;
+                btn.onclick = () => openTopicBoard(idx);
+
+                btn.innerHTML = `
+                    <span class="btn-text font-bold text-base sm:text-xl text-white drop-shadow">${topic.name}</span>
+                    <span class="text-xs sm:text-sm text-slate-200 opacity-80 mt-1">${topic.terms.length} Terms</span>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        // Switch View to Term Button Board
+        function openTopicBoard(topicIndex) {
+            const topic = normalizedTopics[topicIndex];
+            if (!topic) return;
+
+            document.getElementById('headerTitle').textContent = topic.name;
+            document.getElementById('backBtn').classList.remove('hidden');
+            document.getElementById('topicsContainer').classList.add('hidden');
+
+            const termsContainer = document.getElementById('termsContainer');
+            termsContainer.classList.remove('hidden');
+            termsContainer.innerHTML = '';
+
+            topic.terms.forEach((item, idx) => {
+                const colorClass = buttonColors[idx % buttonColors.length];
+                const btn = document.createElement('button');
+                
+                // Optimized button styling to prevent text overflowing bounds
+                btn.className = `${colorClass} border-b-4 h-24 sm:h-28 p-2 sm:p-3 rounded-xl shadow-md flex items-center justify-center transition-all transform active:scale-95 text-center overflow-hidden`;
+                btn.onclick = () => showGifModal(item.term, item.image);
+
+                btn.innerHTML = `
+                    <span class="btn-text font-bold text-sm sm:text-base md:text-lg text-white leading-tight">${item.term}</span>
+                `;
+                termsContainer.appendChild(btn);
+            });
+        }
+
+        // Return to Topics View
+        function showTopicsView() {
+            document.getElementById('headerTitle').textContent = 'Select a Topic';
+            document.getElementById('backBtn').classList.add('hidden');
+            document.getElementById('termsContainer').classList.add('hidden');
+            document.getElementById('topicsContainer').classList.remove('hidden');
+        }
+
+        // Open Popup Modal with GIF Image
+        function showGifModal(termName, gifUrl) {
+            document.getElementById('modalTermTitle').textContent = termName;
+            const img = document.getElementById('modalGifImage');
+            img.src = gifUrl;
+            document.getElementById('gifModal').classList.remove('hidden');
+        }
+
+        function closeModal(e) {
+            document.getElementById('gifModal').classList.add('hidden');
+            document.getElementById('modalGifImage').src = '';
+        }
+
+        // Initialize on DOM Ready
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
