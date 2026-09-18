@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ASL Eyebrow Grammar Challenge</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aslBlue: '#2563eb',
+                        aslPurple: '#7c3aed',
+                        aslGreen: '#059669',
+                        aslRed: '#dc2626',
+                    },
+                    keyframes: {
+                        bounceShort: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-8px)' }
+                        },
+                        pulseFast: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.4' }
+                        },
+                        popIn: {
+                            '0%': { transform: 'scale(0.85)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        }
+                    },
+                    animation: {
+                        bounceShort: 'bounceShort 0.4s ease-in-out',
+                        pulseFast: 'pulseFast 0.6s infinite',
+                        popIn: 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+            height: 100dvh;
+            width: 100vw;
+        }
+
+        /* SVG Avatar eyebrow dynamic transitions */
+        .eyebrow-left, .eyebrow-right {
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), d 0.35s ease;
+            transform-origin: center;
+        }
+
+        .eye-lid {
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .avatar-mouth {
+            transition: d 0.3s ease;
+        }
+
+        /* Custom speech bubble tail */
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 16px 14px 0 14px;
+            border-style: solid;
+            border-color: #ffffff transparent transparent transparent;
+            display: block;
+            width: 0;
+            filter: drop-shadow(0 4px 2px rgba(0,0,0,0.05));
+        }
+
+        /* Responsive height & safe area insets for iPad viewport fitting */
+        .app-container {
+            height: 100dvh;
+            max-height: 100dvh;
+            padding-top: max(0.75rem, env(safe-area-inset-top));
+            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+            padding-left: max(1rem, env(safe-area-inset-left));
+            padding-right: max(1rem, env(safe-area-inset-right));
+        }
+
+        /* iPad Landscape height scaling adjustment */
+        @media (orientation: landscape) and (max-height: 820px) {
+            .speech-bubble-container {
+                padding-top: 0.5rem !important;
+                padding-bottom: 0.5rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            .avatar-svg-size {
+                width: 13rem !important;
+                height: 13rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 antialiased overflow-hidden">
+
+    <div class="app-container flex flex-col justify-between max-w-4xl mx-auto relative overflow-hidden">
+        
+        <!-- TOP NAVIGATION & METRICS BAR -->
+        <header class="w-full bg-slate-800/80 backdrop-blur-md rounded-2xl p-3 md:p-4 shadow-xl border border-slate-700/60 z-10">
+                    <div class="text-right">
+                        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Best</div>
+                        <div id="high-score-display" class="text-2xl md:text-3xl font-black text-emerald-400 leading-none">0</div>
+                    </div>
+                    <button id="btn-sound" class="bg-slate-700 hover:bg-slate-600 p-2.5 rounded-xl text-slate-300 transition-colors">
+                        <svg id="icon-sound-on" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                        </svg>
+                        <svg id="icon-sound-off" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Timer Bar Container -->
+            <div class="relative w-full h-3.5 bg-slate-900/90 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                <div id="timer-bar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 rounded-full transition-all duration-75 w-full"></div>
+            </div>
+        </header>
+
+        <!-- CENTER STAGE: SPEECH BUBBLE & REACTIVE AVATAR -->
+        <main class="flex-1 flex flex-col items-center justify-center relative my-1 sm:my-2 min-h-0 overflow-hidden">
+            
+            <!-- Speech Bubble Floating Above Head -->
+            <div id="speech-bubble" class="speech-bubble speech-bubble-container relative bg-white text-slate-900 px-5 py-3.5 sm:px-6 sm:py-4 rounded-3xl shadow-2xl max-w-lg w-11/12 text-center mb-4 sm:mb-6 border-4 border-indigo-200 transform transition-transform duration-200 animate-popIn">
+                <span class="inline-block px-2.5 py-0.5 mb-1 text-[11px] font-bold tracking-wider text-indigo-700 bg-indigo-100 rounded-full uppercase">ASL Gloss Order</span>
+                <div id="sentence-text" class="text-lg sm:text-2xl md:text-3xl font-black tracking-wide text-indigo-950 min-h-[2.25rem] flex items-center justify-center">
+                    READY?
+                </div>
+                <div id="sentence-translation" class="text-xs sm:text-sm text-slate-500 italic mt-0.5 min-h-[1.25rem]">
+                    (Tap Start or press any arrow key)
+                </div>
+            </div>
+
+            <!-- Avatar Vector Container with Swipe Gestures -->
+            <div id="avatar-touch-zone" class="relative cursor-pointer touch-none select-none my-1 sm:my-2 transition-transform active:scale-95 flex items-center justify-center" title="Swipe Up/Down or click controls below">
+                <div id="avatar-glow" class="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full transform scale-90"></div>
+                
+                <!-- SVG Reactive Avatar -->
+                <svg id="avatar-svg" class="avatar-svg-size w-48 h-48 sm:w-64 sm:h-64 md:w-72 md:h-72 drop-shadow-2xl relative z-0 transition-all duration-300" viewBox="0 0 300 300">
+                    <!-- Head / Skin Base -->
+                    <circle cx="150" cy="160" r="110" fill="#fbcfe8" class="transition-colors duration-300" id="avatar-head"/>
+                    <path d="M 50,160 Q 150,290 250,160" fill="#f43f5e" opacity="0.08" />
+                    
+                    <!-- Cheeks Blush -->
+                    <circle cx="95" cy="175" r="16" fill="#f43f5e" opacity="0.25"/>
+                    <circle cx="205" cy="175" r="16" fill="#f43f5e" opacity="0.25"/>
+
+                    <!-- Ears -->
+                    <circle cx="38" cy="160" r="18" fill="#fbcfe8"/>
+                    <circle cx="262" cy="160" r="18" fill="#fbcfe8"/>
+
+                    <!-- Eyes Group -->
+                    <g id="eyes-group">
+                        <!-- Left Eye -->
+                        <ellipse cx="100" cy="145" rx="16" ry="18" fill="#0f172a"/>
+                        <circle cx="104" cy="140" r="6" fill="#ffffff"/>
+                        <!-- Right Eye -->
+                        <ellipse cx="200" cy="145" rx="16" ry="18" fill="#0f172a"/>
+                        <circle cx="204" cy="140" r="6" fill="#ffffff"/>
+                    </g>
+
+                    <!-- Dynamic Eyebrows -->
+                    <g id="eyebrows-group">
+                        <!-- Left Eyebrow -->
+                        <path id="eyebrow-left" class="eyebrow-left" d="M 75 112 Q 100 110 125 112" stroke="#1e293b" stroke-width="10" stroke-linecap="round" fill="none"/>
+                        <!-- Right Eyebrow -->
+                        <path id="eyebrow-right" class="eyebrow-right" d="M 175 112 Q 200 110 225 112" stroke="#1e293b" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    </g>
+
+                    <!-- Nose -->
+                    <path d="M 150,145 Q 146,165 152,168" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+                    <!-- Mouth -->
+                    <path id="avatar-mouth" class="avatar-mouth" d="M 120,200 Q 150,225 180,200" stroke="#0f172a" stroke-width="7" stroke-linecap="round" fill="none"/>
+                </svg>
+
+                <!-- Swipe Visual Indicator Badge -->
+                <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-slate-800/90 border border-slate-700 text-slate-300 text-[11px] px-3 py-1 rounded-full font-medium shadow-lg backdrop-blur pointer-events-none flex items-center gap-1">
+                    <span>↕️ Swipe or Use Buttons</span>
+                </div>
+            </div>
+
+            <!-- Interactive Visual Feedback Overlay (Correct/Wrong overlay effects) -->
+            <div id="feedback-badge" class="absolute pointer-events-none opacity-0 transition-all duration-300 transform scale-50 font-black text-3xl md:text-5xl drop-shadow-lg z-20">
+                CORRECT!
+            </div>
+        </main>
+
+        <!-- BOTTOM TOUCH CONTROLS (iPad Optimized) -->
+        <footer class="w-full grid grid-cols-2 gap-3 sm:gap-4 pt-1 sm:pt-2">
+            <!-- Raised Eyebrows (UP / YES-NO) Button -->
+            <button id="btn-up" class="group relative bg-gradient-to-b from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:from-blue-800 active:to-blue-900 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl shadow-blue-900/40 border-2 border-blue-400/40 flex flex-col items-center justify-center transition-all duration-150 transform active:scale-95 touch-manipulation">
+                <div class="absolute top-2.5 right-3 bg-blue-900/50 text-blue-200 text-xs px-2.5 py-1 rounded-lg font-mono font-bold hidden sm:block">
+                    ▲ W / UP
+                </div>
+                <!-- Eyebrow Raised SVG Icon -->
+                <svg class="w-8 h-8 sm:w-11 sm:h-11 mb-1 transform group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10Q12 4 19 10 M5 15l7-7 7 7"/>
+                </svg>
+                <span class="text-lg sm:text-2xl font-black tracking-wide">RAISED</span>
+                <span class="text-[11px] sm:text-sm text-blue-200 font-semibold opacity-90">Eyebrows UP (Yes/No Question)</span>
+            </button>
+
+            <!-- Furrowed Eyebrows (DOWN / WH-) Button -->
+            <button id="btn-down" class="group relative bg-gradient-to-b from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 active:from-purple-800 active:to-purple-900 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl shadow-purple-900/40 border-2 border-purple-400/40 flex flex-col items-center justify-center transition-all duration-150 transform active:scale-95 touch-manipulation">
+                <div class="absolute top-2.5 right-3 bg-purple-900/50 text-purple-200 text-xs px-2.5 py-1 rounded-lg font-mono font-bold hidden sm:block">
+                    ▼ S / DOWN
+                </div>
+                <!-- Eyebrow Furrowed SVG Icon -->
+                <svg class="w-8 h-8 sm:w-11 sm:h-11 mb-1 transform group-hover:translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 6Q12 12 19 6 M5 14l7 7 7-7"/>
+                </svg>
+                <span class="text-lg sm:text-2xl font-black tracking-wide">FURROWED</span>
+                <span class="text-[11px] sm:text-sm text-purple-200 font-semibold opacity-90">Eyebrows DOWN (Wh- Question)</span>
+            </button>
+        </footer>
+    </div>
+
+    <!-- START / INSTRUCTIONS MODAL -->
+    <div id="modal-start" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl text-center animate-popIn">
+            <div class="w-20 h-20 bg-indigo-600/30 border border-indigo-500/40 text-indigo-400 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            
+            <h2 class="text-2xl sm:text-3xl font-black text-white mb-2">ASL Eyebrow Grammar</h2>
+            <p class="text-slate-300 text-sm sm:text-base mb-6 leading-relaxed">
+                In American Sign Language, facial expressions are vital grammar! Watch the sentence above the avatar's head and match the eyebrow position:
+            </p>
+
+            <div class="grid grid-cols-2 gap-3 text-left mb-6">
+                <div class="bg-blue-950/60 border border-blue-800/80 rounded-2xl p-3.5">
+                    <div class="text-blue-400 font-black text-sm mb-1 flex items-center gap-1.5">
+                        <span>⬆️ RAISED</span>
+                    </div>
+                    <div class="text-xs text-blue-200">For <strong>Yes/No Questions</strong> (e.g., <em>"YOU LIKE COFFEE YOU?"</em>)</div>
+                </div>
+                <div class="bg-purple-950/60 border border-purple-800/80 rounded-2xl p-3.5">
+                    <div class="text-purple-400 font-black text-sm mb-1 flex items-center gap-1.5">
+                        <span>⬇️ FURROWED</span>
+                    </div>
+                    <div class="text-xs text-purple-200">For <strong>Wh- Questions</strong> (Who, What, Where, When, Why, How)</div>
+                </div>
+            </div>
+
+            <p class="text-xs text-amber-400/90 mb-6 font-medium">
+                ⚡ Speed increases with every correct answer! One mistake ends the game.
+            </p>
+
+            <button id="btn-start-game" class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-black text-xl py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition-transform active:scale-95">
+                START GAME
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div id="modal-gameover" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl text-center animate-popIn">
+            <div id="gameover-icon-bg" class="w-20 h-20 bg-rose-600/20 border border-rose-500/30 text-rose-400 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+
+            <h2 id="gameover-title" class="text-3xl font-black text-white mb-1">Time's Up!</h2>
+            <p id="gameover-subtitle" class="text-slate-400 text-sm mb-6">Let's review the grammar rule!</p>
+
+            <!-- Score Stats Box -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="bg-slate-900/80 border border-slate-700 p-3.5 rounded-2xl">
+                    <div class="text-xs text-slate-400 font-semibold uppercase">Final Score</div>
+                    <div id="go-final-score" class="text-3xl font-black text-amber-400">0</div>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-700 p-3.5 rounded-2xl">
+                    <div class="text-xs text-slate-400 font-semibold uppercase">High Score</div>
+                    <div id="go-high-score" class="text-3xl font-black text-emerald-400">0</div>
+                </div>
+            </div>
+
+            <!-- Grammar Tip Explanation Box -->
+            <div class="bg-indigo-950/60 border border-indigo-800/80 rounded-2xl p-4 text-left mb-6">
+                <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">ASL Grammar Review</div>
+                <div id="go-sentence-gloss" class="text-base font-bold text-white mb-1">"YOU LIKE COFFEE YOU?"</div>
+                <div id="go-grammar-tip" class="text-xs sm:text-sm text-indigo-200 leading-relaxed">
+                    This is a Yes/No question! In ASL, Yes/No questions require <strong>RAISED eyebrows ( UP )</strong>, eyes open wide, and leaning slightly forward.
+                </div>
+            </div>
+
+            <button id="btn-restart" class="w-full bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-black text-xl py-4 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform active:scale-95">
+                PLAY AGAIN
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Audio Context Setup
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Sentence Database categorized by ASL Grammar Rules
+        const ASL_SENTENCES = [
+            // Yes / No Questions (Eyebrows UP)
+            { gloss: "YOU LIKE COFFEE YOU?", translation: "Do you like coffee?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP ), wide eyes, and a slight head tilt forward." },
+            { gloss: "STORE YOU GO WANT?", translation: "Do you want to go to the store?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+            { gloss: "HE / SHE TEACHER?", translation: "Is he/she a teacher?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP ) to ask if something is true." },
+            { gloss: "DOG YOU HAVE?", translation: "Do you have a dog?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+            { gloss: "TODAY RAIN IT?", translation: "Is it raining today?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+            { gloss: "ASL CLASS YOU TAKE?", translation: "Are you taking an ASL class?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+            { gloss: "PIZZA EAT YOU WANT?", translation: "Do you want to eat pizza?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+            { gloss: "CAR DRIVING KNOW YOU?", translation: "Do you know how to drive a car?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+            { gloss: "BOOK READ FINISH YOU?", translation: "Have you finished reading the book?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+            { gloss: "TOMORROW YOU BUSY?", translation: "Are you busy tomorrow?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+            { gloss: "CAT BLACK YOU SEE?", translation: "Did you see the black cat?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+            { gloss: "MOVIE WATCH WANT YOU?", translation: "Do you want to watch a movie?", type: "YN", tip: "Yes/No questions require RAISED eyebrows ( UP )." },
+
+            // Wh- Questions (Eyebrows DOWN)
+            { gloss: "NAME YOU WHAT?", translation: "What is your name?", type: "WH", tip: "Wh- questions (Who, What, Where, When, Why, How) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "YOU LIVE WHERE?", translation: "Where do you live?", type: "WH", tip: "Wh- questions (WHERE) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "CLASS START WHEN?", translation: "When does class start?", type: "WH", tip: "Wh- questions (WHEN) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "LATE YOU WHY?", translation: "Why are you late?", type: "WH", tip: "Wh- questions (WHY) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "FAVORITE COLOR WHAT?", translation: "What is your favorite color?", type: "WH", tip: "Wh- questions (WHAT) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "THAT PERSON WHO?", translation: "Who is that person?", type: "WH", tip: "Wh- questions (WHO) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "HOW-MANY DOG YOU HAVE?", translation: "How many dogs do you have?", type: "WH", tip: "Wh- questions (HOW-MANY) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "APPLE ORANGE WHICH YOU WANT?", translation: "Which do you want, apple or orange?", type: "WH", tip: "Wh- questions (WHICH) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "MEET WHERE?", translation: "Where shall we meet?", type: "WH", tip: "Wh- questions (WHERE) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "HOW YOU SIGN THAT?", translation: "How do you sign that?", type: "WH", tip: "Wh- questions (HOW) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "WORK FINISH TIME WHAT?", translation: "What time do you finish work?", type: "WH", tip: "Wh- questions (WHAT TIME) require FURROWED eyebrows ( DOWN )." },
+            { gloss: "SIGN LANGUAGE LEARN WHY?", translation: "Why are you learning sign language?", type: "WH", tip: "Wh- questions (WHY) require FURROWED eyebrows ( DOWN )." }
+        ];
+
+        // Game Engine Variables
+        let currentScore = 0;
+        let highScore = parseInt(localStorage.getItem('asl_eyebrow_highscore') || '0', 10);
+        let currentQuestion = null;
+        let previousQuestion = null;
+        let gameActive = false;
+        let canAnswer = false;
+
+        // Timer Variables
+        let timerInterval = null;
+        let timerStartTime = 0;
+        let timeAllowedMs = 20000; // Base start time limit (15 seconds)
+        const MIN_TIME_ALLOWED_MS = 3000; // Cap at max speed (3.0 seconds)
+
+        // DOM Element Cache
+        const scoreDisplay = document.getElementById('score-display');
+        const highScoreDisplay = document.getElementById('high-score-display');
+        const timerBar = document.getElementById('timer-bar');
+        const sentenceText = document.getElementById('sentence-text');
+        const sentenceTranslation = document.getElementById('sentence-translation');
+        const speechBubble = document.getElementById('speech-bubble');
+        const feedbackBadge = document.getElementById('feedback-badge');
+
+        // Avatar SVG elements
+        const eyebrowLeft = document.getElementById('eyebrow-left');
+        const eyebrowRight = document.getElementById('eyebrow-right');
+        const avatarMouth = document.getElementById('avatar-mouth');
+        const avatarHead = document.getElementById('avatar-head');
+        const eyesGroup = document.getElementById('eyes-group');
+
+        // Modals
+        const modalStart = document.getElementById('modal-start');
+        const modalGameOver = document.getElementById('modal-gameover');
+        const goFinalScore = document.getElementById('go-final-score');
+        const goHighScore = document.getElementById('go-high-score');
+        const goSentenceGloss = document.getElementById('go-sentence-gloss');
+        const goGrammarTip = document.getElementById('go-grammar-tip');
+        const gameoverTitle = document.getElementById('gameover-title');
+        const gameoverSubtitle = document.getElementById('gameover-subtitle');
+
+        // Buttons
+        const btnUp = document.getElementById('btn-up');
+        const btnDown = document.getElementById('btn-down');
+        const btnStartGame = document.getElementById('btn-start-game');
+        const btnRestart = document.getElementById('btn-restart');
+        const btnSound = document.getElementById('btn-sound');
+        const iconSoundOn = document.getElementById('icon-sound-on');
+        const iconSoundOff = document.getElementById('icon-sound-off');
+
+        // Avatar Eyebrow & Facial Expression Controller
+        function setAvatarExpression(state) {
+            if (state === 'UP') {
+                // Raised eyebrows (Y/N Question)
+                eyebrowLeft.setAttribute('d', 'M 75 95 Q 100 80 125 98');
+                eyebrowRight.setAttribute('d', 'M 175 98 Q 200 80 225 95');
+                avatarMouth.setAttribute('d', 'M 130,205 Q 150,230 170,205'); // O-shape mouth / slight open
+                eyesGroup.setAttribute('transform', 'scale(1.1) translate(-13, -12)');
+            } else if (state === 'DOWN') {
+                // Furrowed eyebrows (Wh- Question)
+                eyebrowLeft.setAttribute('d', 'M 75 115 Q 100 132 125 125');
+                eyebrowRight.setAttribute('d', 'M 175 125 Q 200 132 225 115');
+                avatarMouth.setAttribute('d', 'M 130,215 Q 150,205 170,215'); // Slightly furrowed mouth
+                eyesGroup.setAttribute('transform', 'scale(1, 0.75) translate(0, 35)');
+            } else if (state === 'HAPPY') {
+                // Correct answer celebration
+                eyebrowLeft.setAttribute('d', 'M 75 95 Q 100 85 125 95');
+                eyebrowRight.setAttribute('d', 'M 175 95 Q 200 85 225 95');
+                avatarMouth.setAttribute('d', 'M 115,195 Q 150,240 185,195'); // Big smile
+                eyesGroup.setAttribute('transform', 'scale(1) translate(0,0)');
+            } else if (state === 'SAD') {
+                // Wrong answer / Game Over
+                eyebrowLeft.setAttribute('d', 'M 75 125 Q 100 115 125 110');
+                eyebrowRight.setAttribute('d', 'M 175 110 Q 200 115 225 125');
+                avatarMouth.setAttribute('d', 'M 125,220 Q 150,190 175,220'); // Frown
+                eyesGroup.setAttribute('transform', 'scale(1) translate(0,0)');
+            } else {
+                // Neutral idle
+                eyebrowLeft.setAttribute('d', 'M 75 112 Q 100 110 125 112');
+                eyebrowRight.setAttribute('d', 'M 175 112 Q 200 110 225 112');
+                avatarMouth.setAttribute('d', 'M 120,200 Q 150,225 180,200');
+                eyesGroup.setAttribute('transform', 'scale(1) translate(0,0)');
+            }
+        }
+
+        // Idle Blinking Animation
+        setInterval(() => {
+            if (!gameActive) return;
+            eyesGroup.style.opacity = '0.1';
+            setTimeout(() => {
+                eyesGroup.style.opacity = '1';
+            }, 120);
+        }, 3800);
+
+        // Game Flow Controller
+        function startGame() {
+            initAudio();
+            currentScore = 0;
+            scoreDisplay.textContent = '0';
+            highScoreDisplay.textContent = highScore.toString();
+            
+            modalStart.classList.add('hidden');
+            modalGameOver.classList.add('hidden');
+            
+            gameActive = true;
+            nextQuestion();
+        }
+
+        function calculateTimeLimit(score) {
+            // Gentle decay curve: starts at 15.0s, decreases smoothly down to 3.0s minimum floor
+            const decayed = 15000 * Math.pow(0.965, score);
+            return Math.max(MIN_TIME_ALLOWED_MS, Math.round(decayed));
+        }
+
+        function nextQuestion() {
+            if (!gameActive) return;
+
+            canAnswer = true;
+            setAvatarExpression('NEUTRAL');
+
+            // Pick random question (prevent repeating immediate previous)
+            let available = ASL_SENTENCES.filter(q => q !== previousQuestion);
+            currentQuestion = available[Math.floor(Math.random() * available.length)];
+            previousQuestion = currentQuestion;
+
+            // Update Speech Bubble Text
+            speechBubble.classList.remove('animate-popIn');
+            void speechBubble.offsetWidth; // Trigger reflow for animation restart
+            speechBubble.classList.add('animate-popIn');
+
+            sentenceText.textContent = currentQuestion.gloss;
+            sentenceTranslation.textContent = `"${currentQuestion.translation}"`;
+
+            // Start Question Timer
+            timeAllowedMs = calculateTimeLimit(currentScore);
+            timerStartTime = Date.now();
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 20);
+        }
+
+        function updateTimer() {
+            if (!gameActive || !canAnswer) return;
+
+            const elapsed = Date.now() - timerStartTime;
+            const remaining = timeAllowedMs - elapsed;
+            const percentage = Math.max(0, (remaining / timeAllowedMs) * 100);
+
+            timerBar.style.width = percentage + '%';
+
+            // Change color warning threshold
+            if (percentage < 30) {
+                timerBar.className = "h-full bg-rose-500 rounded-full transition-all duration-75 w-full animate-pulseFast";
+            } else if (percentage < 60) {
+                timerBar.className = "h-full bg-amber-400 rounded-full transition-all duration-75 w-full";
+            } else {
+                timerBar.className = "h-full bg-emerald-500 rounded-full transition-all duration-75 w-full";
+            }
+
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                handleGameOver("Time Expired!");
+            }
+        }
+
+        function submitAnswer(userChoice) {
+            if (!gameActive || !canAnswer) return;
+            canAnswer = false;
+            clearInterval(timerInterval);
+
+            // Correct mapping: YN -> UP, WH -> DOWN
+            const expectedChoice = currentQuestion.type === 'YN' ? 'UP' : 'DOWN';
+            const isCorrect = userChoice === expectedChoice;
+
+            setAvatarExpression(userChoice);
+
+            if (isCorrect) {
+                currentScore++;
+                scoreDisplay.textContent = currentScore.toString();
+                
+                if (currentScore > highScore) {
+                    highScore = currentScore;
+                    localStorage.setItem('asl_eyebrow_highscore', highScore.toString());
+                    highScoreDisplay.textContent = highScore.toString();
+                }
+
+                playSound('correct');
+                showFeedbackBadge(true);
+                
+                // Allow eyebrows & happy expression to linger so player can absorb the grammar rule
+                setTimeout(() => {
+                    setAvatarExpression('HAPPY');
+                }, 400);
+
+                setTimeout(() => {
+                    nextQuestion();
+                }, 1400);
+            } else {
+                playSound('wrong');
+                setAvatarExpression('SAD');
+                showFeedbackBadge(false);
+
+                setTimeout(() => {
+                    handleGameOver("Wrong Eyebrow Position!");
+                }, 1400);
+            }
+        }
+
+        function showFeedbackBadge(isCorrect) {
+            feedbackBadge.textContent = isCorrect ? 'CORRECT! +1' : 'WRONG!';
+            feedbackBadge.className = `absolute pointer-events-none transition-all duration-300 transform font-black text-3xl md:text-5xl drop-shadow-2xl z-20 ${
+                isCorrect ? 'text-emerald-400 scale-110 -translate-y-4 opacity-100' : 'text-rose-500 scale-110 -translate-y-4 opacity-100'
+            }`;
+
+            setTimeout(() => {
+                feedbackBadge.className = "absolute pointer-events-none opacity-0 transition-all duration-300 transform scale-50 z-20";
+            }, 1200);
+        }
+
+        function playSound(type) {
+            if (!soundEnabled || !audioCtx) return;
+            
+            try {
+                const now = audioCtx.currentTime;
+                if (type === 'correct') {
+                    const freqs = [523.25, 659.25, 783.99];
+                    freqs.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+                        
+                        gain.gain.setValueAtTime(0.2, now + idx * 0.06);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.2);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        
+                        osc.start(now + idx * 0.06);
+                        osc.stop(now + idx * 0.06 + 0.2);
+                    });
+                } else if (type === 'wrong') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
+                    
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                }
+            } catch(e) {
+                console.error("Audio play error", e);
+            }
+        }
+
+        function handleGameOver(reason) {
+            gameActive = false;
+            canAnswer = false;
+            clearInterval(timerInterval);
+
+            setAvatarExpression('SAD');
+
+            gameoverTitle.textContent = reason;
+            gameoverSubtitle.textContent = reason === "Time Expired!" ? "You ran out of time!" : "Eyebrow rule mismatch!";
+            
+            goFinalScore.textContent = currentScore.toString();
+            goHighScore.textContent = highScore.toString();
+
+            if (currentQuestion) {
+                goSentenceGloss.textContent = `"${currentQuestion.gloss}"`;
+                goGrammarTip.textContent = currentQuestion.tip;
+            }
+
+            modalGameOver.classList.remove('hidden');
+        }
+
+        // TOUCH SWIPE CONTROLLER FOR AVATAR
+        let touchStartY = 0;
+        const avatarTouchZone = document.getElementById('avatar-touch-zone');
+
+        avatarTouchZone.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                touchStartY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        avatarTouchZone.addEventListener('touchend', (e) => {
+            if (e.changedTouches.length > 0) {
+                const touchEndY = e.changedTouches[0].clientY;
+                const deltaY = touchEndY - touchStartY;
+
+                if (Math.abs(deltaY) > 30) {
+                    if (deltaY < 0) {
+                        submitAnswer('UP');
+                    } else {
+                        submitAnswer('DOWN');
+                    }
+                }
+            }
+        }, { passive: true });
+
+        // KEYBOARD CONTROLS (Up/W for UP, Down/S for DOWN)
+        window.addEventListener('keydown', (e) => {
+            if (!gameActive || !canAnswer) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    if (!modalStart.classList.contains('hidden') || !modalGameOver.classList.contains('hidden')) {
+                        startGame();
+                    }
+                }
+                return;
+            }
+
+            const key = e.key.toLowerCase();
+            if (key === 'arrowup' || key === 'w') {
+                e.preventDefault();
+                btnUp.classList.add('scale-95');
+                setTimeout(() => btnUp.classList.remove('scale-95'), 150);
+                submitAnswer('UP');
+            } else if (key === 'arrowdown' || key === 's') {
+                e.preventDefault();
+                btnDown.classList.add('scale-95');
+                setTimeout(() => btnDown.classList.remove('scale-95'), 150);
+                submitAnswer('DOWN');
+            }
+        });
+
+        // BUTTON EVENT LISTENERS
+        btnUp.addEventListener('click', () => submitAnswer('UP'));
+        btnDown.addEventListener('click', () => submitAnswer('DOWN'));
+        btnStartGame.addEventListener('click', startGame);
+        btnRestart.addEventListener('click', startGame);
+
+        // Sound Toggle Button
+        btnSound.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) {
+                iconSoundOn.classList.remove('hidden');
+                iconSoundOff.classList.add('hidden');
+                initAudio();
+            } else {
+                iconSoundOn.classList.add('hidden');
+                iconSoundOff.classList.remove('hidden');
+            }
+        });
+
+        // INITIAL LOAD SETUP
+        window.addEventListener('load', () => {
+            highScoreDisplay.textContent = highScore.toString();
+            setAvatarExpression('NEUTRAL');
+        });
+    </script>
+</body>
+</html>
