@@ -137,7 +137,7 @@ function startQuiz(questions) {
 
 // Certificate modal population
 function displayCertificate() {
-    percentage_correct = (questions_total - questions_incorrect)/questions_total) * 100;
+    percentage_correct = ((questions_total - questions_incorrect)/questions_total) * 100;
     certificate_header.innerHTML = `<h1>Great work, ${user_name}!</h1>`;
     results_area.innerHTML = `<h1>You answered all ${questions_total} question(s) correctly with only ${questions_incorrect} question(s) incorrect! Your accuracy percentage is ${percentage_correct}%</h1>
     <p>Take a screenshot of your results and upload them to Google Classroom!</p>`;
