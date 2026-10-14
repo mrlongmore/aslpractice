@@ -826,7 +826,7 @@
             }
         ]
     },
-    "school": {
+    "School": {
         "title": "🏫 School and Deaf Culture",
         "questions": [
             {
@@ -1239,8 +1239,8 @@
     }
   ]
 },
-"Lunch" : {
-  "title": "🥪 Lunch",
+"Lunch + Dinner" : {
+  "title": "🥪 Lunch + 🍽️ Dinner",
   "questions": [
     {
       "question": "What is being signed?",
@@ -1283,12 +1283,7 @@
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656138/xx4nuglf977giozpgaw9.gif",
       "options": ["BURRITO", "SANDWICH", "WRAP", "TACO"],
       "correct": 3
-    }
-  ]
-},
-"Dinner" :{
-  "title": "🍽️ Dinner",
-  "questions": [
+    },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655305/n15fo6v2q7szkqsar62h.gif",
@@ -1317,6 +1312,12 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656241/h4vsewdifb7re3wo0w4j.gif",
       "options": ["CEREAL", "SOUP", "BOWL", "HOT-LIQUID"],
+      "correct": 1
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522620/mxwmynjm7sfbglcvxpyr.gif",
+      "options": ["BACON", "LASAGNA", "HASHBROWN", "POTATO"],
       "correct": 1
     }
   ]
@@ -1417,6 +1418,83 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656741/ezzcn76z2ht8ejczvjc6.gif",
       "options": ["CANDY", "SWEET", "SUGAR", "DESSERT"],
+      "correct": 2
+    }
+  ]
+},
+"Fruits" :{
+  "title": “🍎 Fruits",
+  "questions": [
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522489/rey0ivuagi0ky1zhmb5d.gif",
+      "options": ["APPLE", "CHERRY", "BERRY", "PEAR"],
+      "correct": 2
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/v1759522384/bdw0emx4ctgocuzgt7my.gif",
+      "options": ["FRUIT", "STRAWBERRY", "CHERRY", "BERRY"],
+      "correct": 0
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522306/cirsdn1himfbecuus0qf.gif",
+      "options": ["PEAR", "BANANA", "BERRY", "MANGO"],
+      "correct": 1
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522245/qukqgg2ef4yoi7i4jbsg.gif",
+      "options": ["WHO", "LIME", "LEMON", "CANDY"],
+      "correct": 2
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522229/n9p6vid4v94gzaifhs9o.gif",
+      "options": ["BEET", "CHERRY", "POTATO", "TOMATO"],
+      "correct": 3
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522163/bly0zbdjtjehql02dczu.gif",
+      "options": ["BERRY", "CHERRY", "TOMATO", "POTATO"],
+      "correct": 1
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522144/kc2or90y8ey4o8pbnnml.gif",
+      "options": ["BERRY", "CHERRY", "STRAWBERRY", "FRUIT"],
+      "correct": 2
+    },
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522055/nyrttcxrtgip9bxjdwkd.gif",
+      "options": ["BEET", "BREAD", "POTATO", "GRAPES"],
+      "correct": 3
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522034/gqtenzo7knkpqtq508kd.gif",
+      "options": ["BERRY", "MELON", "CHERRY", "GRAPES"],
+      "correct": 1
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522144/kc2or90y8ey4o8pbnnml.gif",
+      "options": ["BERRY", "CHERRY", "STRAWBERRY", "FRUIT"],
+      "correct": 2
+    },
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522021/ykfwo9jjenvwgyd2kxuy.gif",
+      "options": ["PEAR", "PEACH", "STRAWBERRY", "APPLE"],
+      "correct": 1
+    },      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759521931/v7hb4ie3bwtwd1oeiunk.gif",
+      "options": ["PEAR", "CHERRY", "PEACH", "APPLE"],
+      "correct": 0
+    },      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522144/kc2or90y8ey4o8pbnnml.gif",
+      "options": ["BERRY", "CHERRY", "STRAWBERRY", "FRUIT"],
       "correct": 2
     }
   ]
