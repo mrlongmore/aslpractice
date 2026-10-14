@@ -1467,6 +1467,7 @@
       "options": ["BERRY", "CHERRY", "STRAWBERRY", "FRUIT"],
       "correct": 2
     },
+    {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522055/nyrttcxrtgip9bxjdwkd.gif",
       "options": ["BEET", "BREAD", "POTATO", "GRAPES"],
