@@ -1493,6 +1493,53 @@
     }
   ]
 },
+"Vegetables" :{
+  "title": "🥬 Vegetables",
+  "questions": [
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522279/tmw6ztsbd0dljgtk9etz.gif",
+      "options": ["LEMON", "MELON", "BEANS", "BERRY"],
+      "correct": 2
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522214/e42mpmk5r9gvywlft1qt.gif",
+      "options": ["CORN", "CEREAL", "BERRY", "CHERRY"],
+      "correct": 0
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522200/lx5yqigsyf6snfzx6fp3.gif",
+      "options": ["APPLE", "ONION", "BERRY", "MANGO"],
+      "correct": 1
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522179/dtj1qx3buigtnhhlait0.gif",
+      "options": ["RADDISH", "LIME", "CARROT", "LEMON"],
+      "correct": 2
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522127/ww6h7rezhefjtlihgmqv.gif",
+      "options": ["BEET", "ARTICHOKE", "POTATO", "LETTUCE"],
+      "correct": 3
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522034/gqtenzo7knkpqtq508kd.gif",
+      "options": ["BEET", "PUMPKIN", "TOMATO", "POTATO"],
+      "correct": 1
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759521916/wli191zceppcq0w32z5g.gif",
+      "options": ["BERRY", "CHERRY", "VEGETABLE", "FRUIT"],
+      "correct": 2
+    }
+  ]
+},
 "Ordering & Feelings" :{
   "title": "📝 Ordering & Feelings",
   "questions": [
