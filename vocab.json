@@ -1481,12 +1481,6 @@
     },
     {
       "question": "What is being signed?",
-      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522144/kc2or90y8ey4o8pbnnml.gif",
-      "options": ["BERRY", "CHERRY", "STRAWBERRY", "FRUIT"],
-      "correct": 2
-    },
-    {
-      "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522021/ykfwo9jjenvwgyd2kxuy.gif",
       "options": ["PEAR", "PEACH", "STRAWBERRY", "APPLE"],
       "correct": 1
@@ -1496,12 +1490,6 @@
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759521931/v7hb4ie3bwtwd1oeiunk.gif",
       "options": ["PEAR", "CHERRY", "PEACH", "APPLE"],
       "correct": 0
-    },
-    {
-    "question": "What is being signed?",
-      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522144/kc2or90y8ey4o8pbnnml.gif",
-      "options": ["BERRY", "CHERRY", "STRAWBERRY", "FRUIT"],
-      "correct": 2
     }
   ]
 },
