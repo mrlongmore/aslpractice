@@ -2405,7 +2405,7 @@
             }
         ]
     },
-"colors": {
+"Colors": {
     "title": "🎨 ASL Colors",
     "questions": [
         {
@@ -2630,7 +2630,7 @@
     }
   ]
 },
-"General_and_Patterns": {
+"General and Patterns": {
     "title": "💈 General Clothing and Patterns",
     "questions": [
       {
