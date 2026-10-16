@@ -443,24 +443,24 @@
         const customGlbPaths = {
             "HAMBURGER": "./assets/burger.glb",
             "BURGER": "./assets/burger.glb",
-            "FRENCH-FRIES": "",
-            "PIZZA": "",
-            "TACO": "",
-            "DONUT": "",
+            "FRENCH-FRIES": "./assets/fries.glb",
+            "PIZZA": "./assets/pizza.glb",
+            "TACO": "./assets/taco.glb",
+            "DONUT": "./assets/donut.glb",
             "BAGEL": "",
-            "PANCAKE": "",
-            "WAFFLES": "",
-            "SANDWICH": "",
-            "COFFEE": "",
-            "SODA": "",
-            "MILK": "",
+            "PANCAKE": "./assets/pancakes.glb",
+            "WAFFLES": "./assets/waffle.glb",
+            "SANDWICH": "./assets/sandwich.glb",
+            "COFFEE": "./assets/cup-coffee.glb",
+            "SODA": "./assets/soda-can.glb",
+            "MILK": "./assets/carton.glb",
             "ORANGE JUICE": "",
-            "TEA": "",
+            "TEA": "./assets/cup-tea.glb",
             "WATER": "",
             "BURRITO": "",
-            "SALAD": "",
-            "CEREAL": "",
-            "EGG": ""
+            "SALAD": "./assets/salad.glb",
+            "CEREAL": "./assets/bowl-cereal.glb",
+            "EGG": "./assets/egg.glb",
         };
 
         function showToast(message, type = 'info') {
@@ -821,8 +821,22 @@
                     gltfLoader.load(
                         path,
                         (gltf) => {
-                            const model = gltf.scene;
-                            model.scale.set(0.4, 0.4, 0.4);
+                            const model = new THREE.Group();
+                            const sourceScene = gltf.scene;
+                            model.add(sourceScene);
+
+                            const bounds = new THREE.Box3().setFromObject(model);
+                            const size = bounds.getSize(new THREE.Vector3());
+                            const center = bounds.getCenter(new THREE.Vector3());
+                            const maxDimension = Math.max(size.x, size.y, size.z);
+
+                            if (maxDimension > 0) {
+                                sourceScene.position.x -= center.x;
+                                sourceScene.position.y -= bounds.min.y;
+                                sourceScene.position.z -= center.z;
+                                model.scale.setScalar(0.55 / maxDimension);
+                            }
+
                             model.traverse(child => {
                                 if (child.isMesh) {
                                     child.castShadow = true;
@@ -833,13 +847,15 @@
                             callback(model.clone(true));
                         },
                         undefined,
-                        () => {
+                        (error) => {
+                            console.error(`Could not load GLB for ${itemName} from ${path}`, error);
                             const fallback = createProceduralFoodMesh(itemName);
                             loadedMeshCache[itemName] = fallback;
                             callback(fallback.clone(true));
                         }
                     );
                 } catch(e) {
+                    console.error(`Could not load GLB for ${itemName} from ${path}`, e);
                     const fallback = createProceduralFoodMesh(itemName);
                     loadedMeshCache[itemName] = fallback;
                     callback(fallback.clone(true));
@@ -984,7 +1000,6 @@
                 }
 
                 mesh.position.set(0, 0, 0);
-                mesh.scale.set(0.65, 0.65, 0.65);
                 mesh.rotation.y = Math.PI / 5;
                 sharedMiniScene.add(mesh);
 
