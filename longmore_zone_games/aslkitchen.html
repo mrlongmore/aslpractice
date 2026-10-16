@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ASL Bistro - 3D Food & Sign Language Game</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Three.js GLTFLoader -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- Three.js OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        * {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1a1a2e;
+            touch-action: manipulation;
+            overscroll-behavior: none;
+        }
+        #webgl-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            touch-action: none;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .glass-panel-dark {
+            background: rgba(15, 23, 42, 0.90);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .pulse-glow {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); }
+            70% { box-shadow: 0 0 0 14px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        .bounce-gentle {
+            animation: gentle-bounce 2s infinite ease-in-out;
+        }
+        @keyframes gentle-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        /* Masking container to hide embedded text/captions inside ASL GIFs */
+        .asl-gif-mask {
+            position: relative;
+            overflow: hidden;
+            background-color: #0f172a;
+            border-radius: 1rem;
+        }
+        .asl-gif-mask img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.18);
+        }
+        .asl-gif-mask::before, .asl-gif-mask::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 15%;
+            background: #0f172a;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .asl-gif-mask::before { top: 0; }
+        .asl-gif-mask::after { bottom: 0; }
+
+        .touch-scroll {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.25); border-radius: 8px; }
+
+        button, label, input {
+            min-height: 44px;
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="relative w-full h-full text-slate-800 select-none">
+
+    <!-- Toast Notification Overlay -->
+    <div id="toast-container"></div>
+
+    <!-- 3D Canvas Container -->
+    <div id="webgl-container"></div>
+
+    <div id="ui-overlay" class="relative z-10 pointer-events-none w-full h-full flex flex-col justify-between p-3 md:p-6 pb-safe">
+        
+        <!-- Top Navigation & Score Bar -->
+        <header class="flex justify-between items-center w-full max-w-6xl mx-auto pointer-events-auto">
+            <!-- Brand Badge -->
+            <div class="glass-panel rounded-2xl p-2.5 md:p-3 px-4 md:px-5 flex items-center space-x-3 shadow-lg border-2 border-amber-300">
+                <div class="bg-amber-500 text-white rounded-xl p-2 px-3 shadow flex items-center justify-center">
+                    <i class="fa-solid font-bold text-lg md:text-xl fa-utensils"></i>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-xl font-bold tracking-wide text-slate-900 leading-none">ASL Bistro</h1>
+                    <span class="text-[10px] md:text-xs font-semibold text-amber-600 tracking-wider uppercase">iPad Ready • 3D Sign & Serve</span>
+                </div>
+            </div>
+
+            <!-- Stats Bar & Config Controls -->
+            <div class="flex items-center space-x-2 md:space-x-3">
+                <div class="glass-panel rounded-2xl p-2 md:p-2.5 px-3 md:px-4 flex items-center space-x-2.5 shadow-lg">
+                    <div class="text-emerald-500 bg-emerald-100 p-2 rounded-xl">
+                        <i class="fa-solid fa-sack-dollar text-base md:text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-[9px] md:text-[10px] uppercase tracking-wider text-slate-500 font-bold">Earnings</div>
+                        <div id="score-text" class="text-base md:text-xl font-bold text-slate-800">$0.00</div>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl p-2 md:p-2.5 px-3 md:px-4 flex items-center space-x-2.5 shadow-lg">
+                    <div class="text-rose-500 bg-rose-100 p-2 rounded-xl">
+                        <i class="fa-solid fa-heart text-base md:text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-[9px] md:text-[10px] uppercase tracking-wider text-slate-500 font-bold">Served</div>
+                        <div id="customers-served-text" class="text-base md:text-xl font-bold text-slate-800">0</div>
+                    </div>
+                </div>
+
+                <!-- Topics & Vocab Manager Button -->
+                <button id="btn-open-topic-config" class="glass-panel hover:bg-white text-slate-700 hover:text-amber-600 px-3.5 rounded-2xl shadow-lg transition active:scale-95 cursor-pointer flex items-center justify-center" title="Manage Dynamic ASL Topics">
+                    <i class="fa-solid fa-book-bookmark text-lg md:text-xl text-indigo-600"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Center Customer Order Speech Bubble -->
+        <div id="customer-order-container" class="pointer-events-auto w-full max-w-xl mx-auto my-auto flex flex-col items-center transition-all duration-300 transform">
+            <div id="customer-order-card" class="glass-panel rounded-3xl p-4 md:p-5 shadow-2xl border-4 border-amber-400 w-full relative bounce-gentle transition-all duration-300">
+                <!-- Speech Triangle -->
+                <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-t-[16px] border-t-amber-400"></div>
+
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center justify-center bg-amber-500 text-white w-8 h-8 rounded-full font-bold text-sm shadow">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <div>
+                            <h2 class="font-bold text-slate-800 text-base md:text-lg leading-tight">Customer Order</h2>
+                            <p class="text-[11px] text-slate-500 font-medium hidden sm:block">Tap cards for flashcards • Collect matching 3D GLBs from Kitchen!</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <!-- Hide / Show Order Toggle Button -->
+                        <button id="btn-toggle-order-visibility" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1.5 active:scale-95">
+                            <i id="order-visibility-icon" class="fa-solid fa-eye-slash text-amber-700"></i>
+                            <span id="order-visibility-label">Hide Order</span>
+                        </button>
+
+                        <!-- Patience Bar -->
+                        <div class="flex items-center space-x-1.5 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+                            <i class="fa-solid fa-clock text-amber-500 text-xs"></i>
+                            <div class="w-16 md:w-20 bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                                <div id="patience-bar" class="bg-emerald-500 h-full w-full transition-all duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Content -->
+                <div id="order-cards-visible" class="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+                    <!-- Order Cards populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Floating Show Order Button when speech bubble is hidden -->
+            <button id="btn-floating-show-order" class="hidden glass-panel hover:bg-white text-slate-800 font-bold px-5 py-2.5 rounded-2xl shadow-2xl border-2 border-amber-400 active:scale-95 transition flex items-center space-x-2 bounce-gentle">
+                <i class="fa-solid fa-eye text-amber-600 text-lg"></i>
+                <span>Show Customer Order</span>
+            </button>
+        </div>
+
+        <footer class="w-full max-w-5xl mx-auto pointer-events-auto flex flex-col space-y-2.5">
+            
+            <!-- View Navigation Switcher -->
+            <div class="flex justify-center space-x-3">
+                <button id="btn-view-counter" class="glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-amber-400 bg-amber-400/20 hover:bg-amber-400/30 transition flex items-center space-x-2 active:scale-95">
+                    <i class="fa-solid fa-store text-base md:text-lg text-amber-600"></i>
+                    <span class="text-xs md:text-sm">Front Counter</span>
+                </button>
+
+                <button id="btn-view-kitchen" class="glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-slate-200 hover:border-amber-400 hover:bg-amber-50 transition flex items-center space-x-2 active:scale-95">
+                    <i class="fa-solid fa-kitchen-set text-base md:text-lg text-indigo-600"></i>
+                    <span class="text-xs md:text-sm">Kitchen Shelf (3D GLBs)</span>
+                </button>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-3 md:p-4 shadow-2xl flex flex-col sm:flex-row items-center justify-between border-2 border-white/60 gap-2">
+                <!-- Tray Contents Indicator -->
+                <div class="flex items-center space-x-3 w-full sm:w-auto">
+                    <div class="bg-slate-800 text-amber-400 p-2.5 md:p-3 rounded-2xl shadow shrink-0">
+                        <i class="fa-solid fa-tray text-xl md:text-2xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] md:text-xs uppercase tracking-wide text-slate-500 font-bold">Serving Tray (<span id="tray-count">0</span>/4)</div>
+                        <div id="tray-items-preview" class="flex flex-wrap gap-1.5 mt-1 min-h-[32px] items-center">
+                            <span class="text-xs text-slate-400 italic">Tray empty. Tap Kitchen to select 3D food items!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tray Controls -->
+                <div class="flex items-center space-x-2.5 w-full sm:w-auto justify-end">
+                    <button id="btn-clear-tray" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3.5 py-2.5 rounded-xl transition text-xs md:text-sm flex items-center space-x-1.5 active:scale-95">
+                        <i class="fa-solid fa-trash-can text-slate-500"></i>
+                        <span>Clear</span>
+                    </button>
+                    <button id="btn-serve-customer" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-5 md:px-6 py-2.5 rounded-xl shadow-lg transition transform active:scale-95 text-xs md:text-sm flex items-center space-x-2 pulse-glow">
+                        <i class="fa-solid fa-bell text-base md:text-lg"></i>
+                        <span>Serve Order</span>
+                    </button>
+                </div>
+            </div>
+
+        </footer>
+    </div>
+
+    <div id="kitchen-panel" class="fixed inset-x-0 bottom-0 z-20 transform translate-y-full transition-transform duration-300 ease-in-out pointer-events-auto">
+        <div class="max-w-5xl mx-auto glass-panel rounded-t-3xl shadow-2xl border-t-4 border-amber-400 p-4 md:p-5 max-h-[75vh] flex flex-col">
+            
+            <!-- Kitchen Header -->
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center space-x-2.5">
+                    <div class="bg-indigo-600 text-white p-2 md:p-2.5 rounded-xl shadow">
+                        <i class="fa-solid fa-cubes text-lg md:text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base md:text-xl font-bold text-slate-900 leading-tight">3D GLB Kitchen Shelf</h3>
+                        <p class="text-[11px] text-slate-500">All items render as 3D GLB models. Tap "+ Tray" to build!</p>
+                    </div>
+                </div>
+                <button id="btn-close-kitchen" class="text-slate-400 hover:text-slate-700 p-2 text-xl active:scale-90">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Categories Tabs -->
+            <div id="kitchen-categories" class="flex space-x-2 border-b border-slate-200 pb-2.5 overflow-x-auto touch-scroll">
+                <!-- Dynamically populated from categories -->
+            </div>
+
+            <!-- Items Shelf Grid (3D Model Cards) -->
+            <div id="kitchen-items-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 mt-3 overflow-y-auto touch-scroll p-1 max-h-[45vh]">
+                <!-- Item Cards with 2D Canvas thumbnails populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <div id="asl-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl p-5 md:p-6 max-w-md w-full shadow-2xl border-2 border-amber-400 relative">
+            <button id="btn-close-asl-modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl p-2 active:scale-90">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="text-center">
+                <span id="modal-category" class="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100 px-3 py-1 rounded-full">ASL Flashcard</span>
+                <h3 id="modal-term-name" class="text-xl md:text-2xl font-bold text-slate-800 mt-2">Sign Practice</h3>
+            </div>
+
+            <div class="my-4 asl-gif-mask h-[200px] md:h-[220px] shadow-inner flex justify-center items-center">
+                <img id="modal-asl-gif" src="" alt="ASL Sign Animation">
+            </div>
+
+            <div class="space-y-2">
+                <p id="modal-question" class="text-xs md:text-sm font-medium text-slate-600 text-center">Select the correct food term signed above:</p>
+                <div id="modal-quiz-options" class="grid grid-cols-2 gap-2 mt-2.5">
+                    <!-- Quiz buttons dynamically injected -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="topic-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl p-5 md:p-6 max-w-2xl w-full shadow-2xl border-2 border-indigo-300 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                <div class="flex items-center space-x-2.5">
+                    <div class="bg-indigo-600 text-white p-2 md:p-2.5 rounded-xl">
+                        <i class="fa-solid fa-book-bookmark text-lg md:text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base md:text-xl font-bold text-slate-800 leading-tight">ASL Topic & Vocabulary Manager</h3>
+                        <p class="text-[11px] text-slate-500">Tap + / - to toggle food topics. Drinks are required & always active!</p>
+                    </div>
+                </div>
+                <button id="btn-close-topic-modal" class="text-slate-400 hover:text-slate-700 p-2 text-xl active:scale-90">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Active Topics Toggles -->
+            <div class="my-3 flex-1 overflow-y-auto touch-scroll space-y-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Active Bistro Menu Categories</h4>
+                <div id="topic-category-toggles" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <!-- Category toggles dynamically rendered -->
+                </div>
+
+                <div class="border-t border-slate-200 pt-3 mt-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Add Quick Custom Sign Word</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        <input id="input-new-word-name" type="text" placeholder="Word (e.g. APPLE)" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+                        <input id="input-new-word-category" type="text" placeholder="Category (e.g. Fruit)" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+                        <input id="input-new-word-gif" type="text" placeholder="ASL GIF URL" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <button id="btn-add-custom-word" class="mt-2.5 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-xs shadow transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>Add Word to Bistro Dataset</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-200 flex justify-end">
+                <button id="btn-save-topic-config" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl shadow transition text-xs md:text-sm">
+                    <i class="fa-solid fa-check mr-1"></i> Apply Topics
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DEFAULT_VOCAB_DATA = {
+            "Drinks": {
+                "title": "🥤 Drinks",
+                "enabled": true,
+                "questions": [
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655481/uevolhc2tg6yl6aptfkk.gif", "options": ["APPLE-JUICE", "ORANGE", "JUICE", "ORANGE JUICE"], "correct": 3 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655443/kau9hhbktahcfobxsjvi.gif", "options": ["MILK", "WATER", "WHITE-DRINK", "COW"], "correct": 0 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655418/j0vr3q9czs7rbyx5jj4s.gif", "options": ["COFFEE", "TEA", "HOT-DRINK", "CUP"], "correct": 1 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655400/kz85cfgkv3skuzpce1pi.gif", "options": ["POP", "COKE", "SODA", "FIZZY-DRINK"], "correct": 2 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655375/bo0ndjsbn2g4zwwin8of.gif", "options": ["TEA", "BLACK-DRINK", "HOT", "COFFEE"], "correct": 3 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655356/czc7ejlcjukv0bre6qrc.gif", "options": ["WATER", "DRINK", "CLEAR", "LIQUID"], "correct": 0 }
+                ]
+            },
+            "Breakfast": {
+                "title": "🥞 Breakfast",
+                "enabled": true,
+                "questions": [
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655855/bvdtrcqlgot5dv93ln9c.gif", "options": ["BAGEL", "DONUT", "COOKIE", "CIRCLE-BREAD"], "correct": 1 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655788/tcv4rbuleuqd9pzjqgww.gif", "options": ["CEREAL", "SOUP", "OATS", "BOWL-FOOD"], "correct": 0 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655820/eyhakpebq8mzm0htvgyd.gif", "options": ["PANCAKE", "WAFFLES", "BREAD", "GRID-CAKE"], "correct": 1 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655890/la96vn34fmofpxkoua0z.gif", "options": ["DONUT", "BREAD", "BAGEL", "ROUND-TOAST"], "correct": 2 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655803/yg9stwmvhsqkn3wd0txg.gif", "options": ["WAFFLE", "COOKIE", "FLAPJACK", "PANCAKE"], "correct": 3 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655604/kfspy75ze1v2ky90lpqb.gif", "options": ["CHICKEN", "BIRD", "EGG", "OVAL"], "correct": 2 }
+                ]
+            },
+            "Lunch & Dinner": {
+                "title": "🍔 Lunch & Dinner",
+                "enabled": true,
+                "questions": [
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655907/oxwivlgmpln9p8lt1bgg.gif", "options": ["SANDWICH", "BURGER", "BREAD", "LUNCH"], "correct": 0 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655967/c0qbizqwgicdc8yc1shr.gif", "options": ["FRIES", "FRENCH-FRIES", "POTATO-STICKS", "CHIPS"], "correct": 1 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655983/v38mf3jhr5juvlwz1tsi.gif", "options": ["SANDWICH", "BUN", "HAMBURGER", "MEAT-PATTY"], "correct": 2 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655999/c084vuouxaprlz8gu69c.gif", "options": ["SALAD", "VEGETABLES", "GREENS", "TOSS-FOOD"], "correct": 0 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655772/y2yyivagjjhwrzcbnoiv.gif", "options": ["TACO", "WRAP", "BURRITO", "ROLL"], "correct": 2 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656138/xx4nuglf977giozpgaw9.gif", "options": ["BURRITO", "SANDWICH", "WRAP", "TACO"], "correct": 3 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656016/vrytjkzltegtgegvt6g2.gif", "options": ["PEPPERONI", "CHEESE-BREAD", "PIE", "PIZZA"], "correct": 3 }
+                ]
+            }
+        };
+
+        let VOCAB_DATA = JSON.parse(localStorage.getItem('asl_bistro_vocab_topics')) || DEFAULT_VOCAB_DATA;
+
+        function enforceTopicRules() {
+            if (!VOCAB_DATA["Drinks"]) {
+                VOCAB_DATA["Drinks"] = DEFAULT_VOCAB_DATA["Drinks"];
+            }
+            VOCAB_DATA["Drinks"].enabled = true;
+
+            const activeFood = Object.keys(VOCAB_DATA).filter(k => !k.toLowerCase().includes('drink') && VOCAB_DATA[k].enabled !== false);
+            if (activeFood.length === 0) {
+                const firstFood = Object.keys(VOCAB_DATA).find(k => !k.toLowerCase().includes('drink'));
+                if (firstFood && VOCAB_DATA[firstFood]) {
+                    VOCAB_DATA[firstFood].enabled = true;
+                }
+            }
+            localStorage.setItem('asl_bistro_vocab_topics', JSON.stringify(VOCAB_DATA));
+        }
+
+        enforceTopicRules();
+
+        const customGlbPaths = {
+            "HAMBURGER": "",
+            "FRENCH-FRIES": "",
+            "PIZZA": "",
+            "TACO": "",
+            "DONUT": "",
+            "BAGEL": "",
+            "PANCAKE": "",
+            "WAFFLES": "",
+            "SANDWICH": "",
+            "COFFEE": "",
+            "SODA": "",
+            "MILK": "",
+            "ORANGE JUICE": "",
+            "TEA": "",
+            "WATER": "",
+            "BURRITO": "",
+            "SALAD": "",
+            "CEREAL": "",
+            "EGG": ""
+        };
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgColors = "bg-slate-800 text-white border-amber-400";
+            let icon = "fa-circle-info text-amber-400";
+            
+            if (type === 'success') {
+                bgColors = "bg-emerald-800 text-white border-emerald-400";
+                icon = "fa-circle-check text-emerald-300";
+            } else if (type === 'error') {
+                bgColors = "bg-rose-900 text-white border-rose-400";
+                icon = "fa-circle-exclamation text-rose-300";
+            }
+
+            toast.className = `toast glass-panel-dark ${bgColors} border-2 px-4 py-2.5 rounded-2xl shadow-xl flex items-center space-x-2.5 text-xs md:text-sm font-bold tracking-wide`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        const loadedMeshCache = {};
+        let audioSynth, audioChime;
+
+        function initAudio() {
+            try {
+                if (window.Tone) {
+                    audioSynth = new Tone.Synth({
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.2 }
+                    }).toDestination();
+                    audioChime = new Tone.PolySynth(Tone.Synth).toDestination();
+                }
+            } catch(e) {
+                console.log("Audio setup fallback:", e);
+            }
+        }
+
+        function playSound(type) {
+            try {
+                if (window.Tone && Tone.context.state !== 'running') Tone.start();
+                if (!audioSynth) initAudio();
+                if (type === 'click') audioSynth.triggerAttackRelease("C5", "8n");
+                else if (type === 'grab') audioSynth.triggerAttackRelease("E5", "16n");
+                else if (type === 'drop') audioSynth.triggerAttackRelease("G4", "8n");
+                else if (type === 'success') audioChime.triggerAttackRelease(["C5", "E5", "G5", "C6"], "8n");
+                else if (type === 'wrong') audioSynth.triggerAttackRelease("A3", "8n");
+            } catch(e) {}
+        }
+
+        const gameState = {
+            earnings: 0,
+            customersServed: 0,
+            currentOrder: [], 
+            trayItems: [],    
+            patience: 100,
+            patienceTimer: null,
+            activeCategory: "Drinks",
+            showTextHints: false,
+            isOrderVisible: true,
+            cameraMode: "counter"
+        };
+
+        let scene, camera, renderer, controls;
+        let customerGroup, trayGroup, trayBase;
+        let gltfLoader = new THREE.GLTFLoader();
+
+        function initThreeScene() {
+            const container = document.getElementById('webgl-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+            scene.fog = new THREE.FogExp2(0x1a1a2e, 0.035);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 3.2, 5.5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            
+            renderer.domElement.addEventListener('webglcontextlost', (event) => {
+                event.preventDefault();
+                showToast("WebGL Context Lost. Restoring...", "error");
+            }, false);
+
+            renderer.domElement.addEventListener('webglcontextrestored', () => {
+                showToast("WebGL Restored!", "success");
+            }, false);
+
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2.1;
+            controls.minDistance = 2;
+            controls.maxDistance = 10;
+            controls.target.set(0, 1.2, 0);
+
+            const ambientLight = new THREE.AmbientLight(0xfff5e6, 0.85);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0xfffaed, 1.4);
+            mainLight.position.set(5, 8, 5);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 1024;
+            mainLight.shadow.mapSize.height = 1024;
+            scene.add(mainLight);
+
+            const fillLight = new THREE.PointLight(0xffaa66, 0.6, 10);
+            fillLight.position.set(-4, 3, 2);
+            scene.add(fillLight);
+
+            buildEnvironment();
+            window.addEventListener('resize', onWindowResize);
+            animate(performance.now());
+        }
+
+        function buildEnvironment() {
+            const floorGeo = new THREE.PlaneGeometry(20, 20);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x2b2b40, roughness: 0.4 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            const counterGeo = new THREE.BoxGeometry(6, 1.1, 1.5);
+            const counterMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.3 });
+            const counter = new THREE.Mesh(counterGeo, counterMat);
+            counter.position.set(0, 0.55, 0.5);
+            counter.castShadow = true;
+            counter.receiveShadow = true;
+            scene.add(counter);
+
+            const trimGeo = new THREE.BoxGeometry(6.05, 0.1, 1.55);
+            const trimMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, metalness: 0.8, roughness: 0.2 });
+            const trim = new THREE.Mesh(trimGeo, trimMat);
+            trim.position.set(0, 1.1, 0.5);
+            scene.add(trim);
+
+            const wallGeo = new THREE.PlaneGeometry(20, 10);
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x3d3d5c, roughness: 0.8 });
+            const wall = new THREE.Mesh(wallGeo, wallMat);
+            wall.position.set(0, 5, -3);
+            scene.add(wall);
+
+            trayGroup = new THREE.Group();
+            trayBase = new THREE.Mesh(
+                new THREE.BoxGeometry(1.6, 0.05, 1.1),
+                new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.3, metalness: 0.2 })
+            );
+            trayBase.castShadow = true;
+            trayBase.receiveShadow = true;
+            trayGroup.add(trayBase);
+            trayGroup.position.set(0, 1.18, 0.6);
+            scene.add(trayGroup);
+
+            customerGroup = new THREE.Group();
+            customerGroup.position.set(0, 0, -0.6);
+            scene.add(customerGroup);
+        }
+
+        function createProceduralFoodMesh(itemName) {
+            const group = new THREE.Group();
+
+            switch(itemName) {
+                case "HAMBURGER":
+                case "BURGER": {
+                    const bunBot = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.28, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+                    bunBot.position.y = 0.05;
+                    const patty = new THREE.Mesh(new THREE.CylinderGeometry(0.31, 0.31, 0.08, 16), new THREE.MeshStandardMaterial({ color: 0x451a03 }));
+                    patty.position.y = 0.14;
+                    const cheese = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.02, 0.55), new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
+                    cheese.position.y = 0.19;
+                    cheese.rotation.y = Math.PI / 4;
+                    const bunTop = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+                    bunTop.position.y = 0.2;
+                    group.add(bunBot, patty, cheese, bunTop);
+                    break;
+                }
+                case "FRENCH-FRIES":
+                case "FRIES": {
+                    const box = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.4, 0.25), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+                    box.position.y = 0.2;
+                    group.add(box);
+                    for (let i = 0; i < 6; i++) {
+                        const fry = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.35, 0.05), new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
+                        fry.position.set((Math.random() - 0.5) * 0.25, 0.35, (Math.random() - 0.5) * 0.15);
+                        group.add(fry);
+                    }
+                    break;
+                }
+                case "PIZZA": {
+                    const slice = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.02, 0.06, 3, 1, false, 0, Math.PI / 3), new THREE.MeshStandardMaterial({ color: 0xf59e0b }));
+                    slice.rotation.y = -Math.PI / 6;
+                    group.add(slice);
+                    break;
+                }
+                case "TACO": {
+                    const shell = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.08, 12, 24, Math.PI), new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
+                    shell.rotation.x = Math.PI / 2;
+                    shell.position.y = 0.15;
+                    group.add(shell);
+                    break;
+                }
+                case "DONUT":
+                case "BAGEL": {
+                    const isDonut = itemName === "DONUT";
+                    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.09, 16, 32), new THREE.MeshStandardMaterial({ color: isDonut ? 0xd97706 : 0xf59e0b }));
+                    ring.rotation.x = Math.PI / 2;
+                    ring.position.y = 0.09;
+                    group.add(ring);
+                    if (isDonut) {
+                        const icing = new THREE.Mesh(new THREE.TorusGeometry(0.225, 0.07, 16, 32), new THREE.MeshStandardMaterial({ color: 0xec4899 }));
+                        icing.rotation.x = Math.PI / 2;
+                        icing.position.y = 0.12;
+                        group.add(icing);
+                    }
+                    break;
+                }
+                case "ORANGE JUICE":
+                case "JUICE": {
+                    const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.15, 0.4, 16), new THREE.MeshStandardMaterial({ color: 0xf97316, transparent: true, opacity: 0.9 }));
+                    glass.position.y = 0.2;
+                    const straw = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.5, 8), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+                    straw.position.set(0.05, 0.3, 0);
+                    straw.rotation.z = -0.2;
+                    group.add(glass, straw);
+                    break;
+                }
+                case "SODA":
+                case "POP": {
+                    const can = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.45, 24), new THREE.MeshStandardMaterial({ color: 0x3b82f6, metalness: 0.6 }));
+                    can.position.y = 0.225;
+                    group.add(can);
+                    break;
+                }
+                case "COFFEE":
+                case "TEA": {
+                    const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.15, 0.4, 24), new THREE.MeshStandardMaterial({ color: itemName === "TEA" ? 0x10b981 : 0x78350f }));
+                    cup.position.y = 0.2;
+                    const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.05, 24), new THREE.MeshStandardMaterial({ color: 0x1f2937 }));
+                    lid.position.y = 0.42;
+                    group.add(cup, lid);
+                    break;
+                }
+                case "MILK": {
+                    const carton = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.45, 0.24), new THREE.MeshStandardMaterial({ color: 0x3b82f6 }));
+                    carton.position.y = 0.225;
+                    const top = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.12, 4), new THREE.MeshStandardMaterial({ color: 0x2563eb }));
+                    top.position.y = 0.51;
+                    top.rotation.y = Math.PI / 4;
+                    group.add(carton, top);
+                    break;
+                }
+                case "WATER": {
+                    const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.45, 16), new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.7 }));
+                    bottle.position.y = 0.225;
+                    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.08, 16), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+                    cap.position.y = 0.48;
+                    group.add(bottle, cap);
+                    break;
+                }
+                case "PANCAKE":
+                case "WAFFLES": {
+                    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.08, 24), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+                    base.position.y = 0.04;
+                    const butter = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 0.1), new THREE.MeshStandardMaterial({ color: 0xfde047 }));
+                    butter.position.y = 0.1;
+                    group.add(base, butter);
+                    break;
+                }
+                case "CEREAL": {
+                    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.15, 0.2, 24), new THREE.MeshStandardMaterial({ color: 0x38bdf8 }));
+                    bowl.position.y = 0.1;
+                    const contents = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.02, 24), new THREE.MeshStandardMaterial({ color: 0xfef08a }));
+                    contents.position.y = 0.18;
+                    group.add(bowl, contents);
+                    break;
+                }
+                case "EGG": {
+                    const egg = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
+                    egg.scale.set(1, 1.3, 1);
+                    egg.rotation.x = Math.PI / 3;
+                    egg.position.y = 0.12;
+                    group.add(egg);
+                    break;
+                }
+                case "SANDWICH": {
+                    const bread1 = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.06, 0.45), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+                    bread1.position.y = 0.03;
+                    const filling = new THREE.Mesh(new THREE.BoxGeometry(0.43, 0.08, 0.43), new THREE.MeshStandardMaterial({ color: 0x22c55e }));
+                    filling.position.y = 0.1;
+                    const bread2 = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.06, 0.45), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+                    bread2.position.y = 0.17;
+                    group.add(bread1, filling, bread2);
+                    break;
+                }
+                case "SALAD": {
+                    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.15, 0.18, 24), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
+                    bowl.position.y = 0.09;
+                    const greens = new THREE.Mesh(new THREE.SphereGeometry(0.26, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x22c55e }));
+                    greens.position.y = 0.12;
+                    group.add(bowl, greens);
+                    break;
+                }
+                case "BURRITO": {
+                    const wrap = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.5, 16), new THREE.MeshStandardMaterial({ color: 0xfde047 }));
+                    wrap.rotation.z = Math.PI / 2;
+                    wrap.position.y = 0.12;
+                    group.add(wrap);
+                    break;
+                }
+                default: {
+                    const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.25, 0.1, 24), new THREE.MeshStandardMaterial({ color: 0x6366f1 }));
+                    plate.position.y = 0.05;
+                    group.add(plate);
+                    break;
+                }
+            }
+
+            group.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+
+            return group;
+        }
+
+        function loadItemMesh(itemName, callback) {
+            const path = customGlbPaths[itemName];
+            
+            if (loadedMeshCache[itemName]) {
+                callback(loadedMeshCache[itemName].clone(true));
+                return;
+            }
+
+            const isValidUrl = path && typeof path === 'string' && 
+                (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:'));
+
+            if (isValidUrl) {
+                try {
+                    gltfLoader.load(
+                        path,
+                        (gltf) => {
+                            const model = gltf.scene;
+                            model.scale.set(0.4, 0.4, 0.4);
+                            model.traverse(child => {
+                                if (child.isMesh) {
+                                    child.castShadow = true;
+                                    child.receiveShadow = true;
+                                }
+                            });
+                            loadedMeshCache[itemName] = model;
+                            callback(model.clone(true));
+                        },
+                        undefined,
+                        () => {
+                            const fallback = createProceduralFoodMesh(itemName);
+                            loadedMeshCache[itemName] = fallback;
+                            callback(fallback.clone(true));
+                        }
+                    );
+                } catch(e) {
+                    const fallback = createProceduralFoodMesh(itemName);
+                    loadedMeshCache[itemName] = fallback;
+                    callback(fallback.clone(true));
+                }
+            } else {
+                const fallback = createProceduralFoodMesh(itemName);
+                loadedMeshCache[itemName] = fallback;
+                callback(fallback.clone(true));
+            }
+        }
+
+        let sharedMiniRenderer = null;
+        let sharedMiniScene = null;
+        let sharedMiniCam = null;
+        let sharedMiniLight1 = null;
+        let sharedMiniLight2 = null;
+
+        function initSharedMiniRenderer() {
+            if (sharedMiniRenderer) return;
+            sharedMiniRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+            sharedMiniRenderer.setSize(160, 160);
+            sharedMiniRenderer.setPixelRatio(1);
+
+            sharedMiniScene = new THREE.Scene();
+            sharedMiniCam = new THREE.PerspectiveCamera(40, 1, 0.1, 10);
+            sharedMiniCam.position.set(0, 0.8, 1.2);
+            sharedMiniCam.lookAt(0, 0.1, 0);
+
+            sharedMiniLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
+            sharedMiniLight1.position.set(2, 3, 2);
+            sharedMiniLight2 = new THREE.AmbientLight(0xfff5e6, 0.9);
+            sharedMiniScene.add(sharedMiniLight1, sharedMiniLight2);
+        }
+
+        function buildKitchenUI() {
+            const categoriesContainer = document.getElementById('kitchen-categories');
+            categoriesContainer.innerHTML = '';
+
+            const enabledCategories = Object.keys(VOCAB_DATA).filter(k => VOCAB_DATA[k].enabled !== false);
+
+            if (enabledCategories.length === 0) {
+                const itemsGrid = document.getElementById('kitchen-items-grid');
+                if (itemsGrid) {
+                    itemsGrid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 font-bold text-sm">All categories are currently disabled. Please enable at least one topic in the Topic Manager!</div>`;
+                }
+                return;
+            }
+
+            if (!enabledCategories.includes(gameState.activeCategory)) {
+                gameState.activeCategory = enabledCategories[0];
+            }
+
+            enabledCategories.forEach(catKey => {
+                const btn = document.createElement('button');
+                btn.className = `px-3.5 py-2 rounded-xl font-bold text-xs whitespace-nowrap transition flex items-center space-x-1 ${
+                    gameState.activeCategory === catKey 
+                    ? 'bg-amber-500 text-white shadow' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`;
+                btn.innerText = VOCAB_DATA[catKey].title;
+                btn.onclick = () => {
+                    gameState.activeCategory = catKey;
+                    buildKitchenUI();
+                };
+                categoriesContainer.appendChild(btn);
+            });
+
+            const itemsGrid = document.getElementById('kitchen-items-grid');
+            itemsGrid.innerHTML = '';
+
+            if (!VOCAB_DATA[gameState.activeCategory]) return;
+
+            const questions = VOCAB_DATA[gameState.activeCategory].questions;
+
+            questions.forEach(q => {
+                const termName = q.options[q.correct];
+                
+                const card = document.createElement('div');
+                card.className = "bg-white border-2 border-slate-200 hover:border-amber-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-sm hover:shadow-md transition cursor-pointer transform hover:-translate-y-0.5 active:scale-95 relative group";
+                
+                card.innerHTML = `
+                    <div class="w-full h-24 sm:h-28 bg-slate-900 rounded-xl overflow-hidden relative flex items-center justify-center">
+                        <canvas id="glb-preview-${termName.replace(/\s+/g, '-')}" class="w-full h-full"></canvas>
+                        <span class="absolute top-1.5 left-1.5 bg-indigo-600/90 backdrop-blur-sm text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                            <i class="fa-solid fa-cube mr-0.5"></i> 3D
+                        </span>
+                        <button class="btn-card-flashcard absolute top-1.5 right-1.5 bg-amber-500 hover:bg-amber-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow transition border border-white/40" title="Check sign flashcard">
+                            <i class="fa-solid fa-hands-asl-interpreting"></i>
+                        </button>
+                    </div>
+
+                    <div class="mt-2 text-center">
+                        <h4 class="text-xs font-bold text-slate-800 tracking-wide">${termName}</h4>
+                    </div>
+
+                    <div class="mt-2 flex space-x-1">
+                        <button class="btn-card-add-tray w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-xl text-xs shadow transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>Tray</span>
+                        </button>
+                    </div>
+                `;
+
+                const flashcardBtn = card.querySelector('.btn-card-flashcard');
+                if (flashcardBtn) {
+                    flashcardBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        openAslModalForItem(termName);
+                    };
+                }
+
+                const addBtn = card.querySelector('.btn-card-add-tray');
+                if (addBtn) {
+                    addBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        addItemToTray(termName);
+                    };
+                }
+
+                card.onclick = () => addItemToTray(termName);
+                itemsGrid.appendChild(card);
+
+                setTimeout(() => renderMini3DCard(termName, `glb-preview-${termName.replace(/\s+/g, '-')}`), 20);
+            });
+        }
+
+        function renderMini3DCard(itemName, canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            initSharedMiniRenderer();
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            loadItemMesh(itemName, (mesh) => {
+                for (let i = sharedMiniScene.children.length - 1; i >= 0; i--) {
+                    const child = sharedMiniScene.children[i];
+                    if (child !== sharedMiniLight1 && child !== sharedMiniLight2) {
+                        sharedMiniScene.remove(child);
+                    }
+                }
+
+                mesh.position.set(0, 0, 0);
+                mesh.scale.set(0.65, 0.65, 0.65);
+                mesh.rotation.y = Math.PI / 5;
+                sharedMiniScene.add(mesh);
+
+                sharedMiniRenderer.render(sharedMiniScene, sharedMiniCam);
+
+                canvas.width = canvas.clientWidth || 160;
+                canvas.height = canvas.clientHeight || 120;
+                ctx.drawImage(sharedMiniRenderer.domElement, 0, 0, canvas.width, canvas.height);
+            });
+        }
+
+        function updateTray3D() {
+            if (!trayGroup) return;
+
+            for (let i = trayGroup.children.length - 1; i >= 0; i--) {
+                const child = trayGroup.children[i];
+                if (child !== trayBase) {
+                    trayGroup.remove(child);
+                }
+            }
+
+            const traySlots = [
+                { x: -0.4, z: -0.25 },
+                { x: 0.4, z: -0.25 },
+                { x: -0.4, z: 0.25 },
+                { x: 0.4, z: 0.25 }
+            ];
+
+            gameState.trayItems.forEach((itemName, index) => {
+                if (index < traySlots.length) {
+                    loadItemMesh(itemName, (mesh) => {
+                        if (!mesh) return;
+                        mesh.position.set(traySlots[index].x, 0.05, traySlots[index].z);
+                        trayGroup.add(mesh);
+                    });
+                }
+            });
+
+            document.getElementById('tray-count').innerText = gameState.trayItems.length;
+            const trayPreview = document.getElementById('tray-items-preview');
+            
+            if (gameState.trayItems.length === 0) {
+                trayPreview.innerHTML = `<span class="text-xs text-slate-400 italic">Tray empty. Tap Kitchen to select 3D food items!</span>`;
+            } else {
+                trayPreview.innerHTML = gameState.trayItems.map((item, idx) => `
+                    <span class="inline-flex items-center space-x-1.5 bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-xl text-xs font-bold shadow-sm">
+                        <span>${item}</span>
+                        <i class="fa-solid fa-xmark text-slate-400 hover:text-rose-600 cursor-pointer ml-1 p-0.5" onclick="removeItemFromTray(${idx})"></i>
+                    </span>
+                `).join('');
+            }
+        }
+
+        function addItemToTray(itemName) {
+            if (gameState.trayItems.length >= 4) {
+                playSound('wrong');
+                showToast("Tray is full! Maximum 4 items permitted.", "error");
+                return;
+            }
+            gameState.trayItems.push(itemName);
+            playSound('grab');
+            showToast(`Added ${itemName} to tray!`, "success");
+            updateTray3D();
+        }
+
+        function removeItemFromTray(index) {
+            const removed = gameState.trayItems.splice(index, 1);
+            playSound('drop');
+            showToast(`Removed ${removed[0]} from tray`, "info");
+            updateTray3D();
+        }
+
+        function clearTray() {
+            gameState.trayItems = [];
+            playSound('drop');
+            updateTray3D();
+        }
+
+        function spawnCustomer() {
+            while(customerGroup.children.length > 0){ 
+                customerGroup.remove(customerGroup.children[0]); 
+            }
+
+            const headColors = [0xffdbac, 0xf1c27d, 0xe0ac69, 0x8d5524, 0xc68642];
+            const shirtColors = [0xef4444, 0x3b82f6, 0x10b981, 0x8b5cf6, 0xf59e0b];
+
+            const skinColor = headColors[Math.floor(Math.random() * headColors.length)];
+            const shirtColor = shirtColors[Math.floor(Math.random() * shirtColors.length)];
+
+            const customerMesh = new THREE.Group();
+
+            const bodyGeo = new THREE.CylinderGeometry(0.45, 0.55, 1.4, 16);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: shirtColor });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.7;
+            body.castShadow = true;
+
+            const headGeo = new THREE.SphereGeometry(0.38, 32, 32);
+            const headMat = new THREE.MeshStandardMaterial({ color: skinColor });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.7;
+            head.castShadow = true;
+
+            const eyeGeo = new THREE.SphereGeometry(0.05, 16, 16);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+            const eyeLeft = new THREE.Mesh(eyeGeo, eyeMat);
+            eyeLeft.position.set(-0.13, 1.75, 0.32);
+            const eyeRight = new THREE.Mesh(eyeGeo, eyeMat);
+            eyeRight.position.set(0.13, 1.75, 0.32);
+
+            customerMesh.add(body, head, eyeLeft, eyeRight);
+            customerGroup.add(customerMesh);
+
+            customerGroup.position.z = -3;
+            let startTime = performance.now();
+            function animateEntry(now) {
+                let elapsed = (now - startTime) / 1000;
+                if (elapsed < 0.8) {
+                    customerGroup.position.z = THREE.MathUtils.lerp(-3, -0.5, elapsed / 0.8);
+                    requestAnimationFrame(animateEntry);
+                } else {
+                    customerGroup.position.z = -0.5;
+                }
+            }
+            requestAnimationFrame(animateEntry);
+        }
+
+        function generateNewCustomerOrder() {
+            spawnCustomer();
+
+            const enabledQuestions = [];
+            let drinkQuestions = [];
+            let foodQuestions = [];
+
+            Object.keys(VOCAB_DATA).forEach(catKey => {
+                if (VOCAB_DATA[catKey] && VOCAB_DATA[catKey].enabled !== false) {
+                    const questions = VOCAB_DATA[catKey].questions || [];
+                    enabledQuestions.push(...questions);
+                    if (catKey.toLowerCase().includes('drink')) {
+                        drinkQuestions.push(...questions);
+                    } else {
+                        foodQuestions.push(...questions);
+                    }
+                }
+            });
+
+            if (enabledQuestions.length === 0) {
+                const firstCatKey = Object.keys(VOCAB_DATA)[0];
+                if (firstCatKey && VOCAB_DATA[firstCatKey]) {
+                    VOCAB_DATA[firstCatKey].enabled = true;
+                    const fallbackQ = VOCAB_DATA[firstCatKey].questions || [];
+                    enabledQuestions.push(...fallbackQ);
+                    foodQuestions.push(...fallbackQ);
+                }
+            }
+
+            const numItems = Math.min(Math.random() > 0.4 ? 3 : 2, enabledQuestions.length);
+            const order = [];
+
+            if (drinkQuestions.length > 0 && foodQuestions.length > 0) {
+                const randDrink = drinkQuestions[Math.floor(Math.random() * drinkQuestions.length)];
+                order.push({ term: randDrink.options[randDrink.correct], questionObj: randDrink });
+
+                const randFood = foodQuestions[Math.floor(Math.random() * foodQuestions.length)];
+                order.push({ term: randFood.options[randFood.correct], questionObj: randFood });
+
+                if (numItems === 3 && enabledQuestions.length > 2) {
+                    let available = enabledQuestions.filter(q => !order.some(o => o.term === q.options[q.correct]));
+                    if (available.length === 0) available = enabledQuestions;
+                    const randExtra = available[Math.floor(Math.random() * available.length)];
+                    order.push({ term: randExtra.options[randExtra.correct], questionObj: randExtra });
+                }
+            } else {
+                const shuffled = [...enabledQuestions].sort(() => 0.5 - Math.random());
+                for (let i = 0; i < Math.min(numItems, shuffled.length); i++) {
+                    order.push({ term: shuffled[i].options[shuffled[i].correct], questionObj: shuffled[i] });
+                }
+            }
+
+            for (let i = order.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [order[i], order[j]] = [order[j], order[i]];
+            }
+
+            gameState.currentOrder = order;
+            gameState.patience = 100;
+
+            renderOrderUI();
+            startPatienceTimer();
+        }
+
+        function renderOrderUI() {
+            const visibleContainer = document.getElementById('order-cards-visible');
+            visibleContainer.innerHTML = '';
+
+            gameState.currentOrder.forEach((orderObj, idx) => {
+                const card = document.createElement('div');
+                card.className = "bg-white/95 rounded-2xl p-2 border border-amber-200 shadow hover:shadow-md transition cursor-pointer flex flex-col items-center group active:scale-95";
+                
+                card.onclick = () => openAslModal(orderObj, idx + 1);
+
+                card.innerHTML = `
+                    <div class="asl-gif-mask w-full h-20 md:h-24">
+                        <img src="${orderObj.questionObj.image}" alt="ASL Sign Animation">
+                    </div>
+                    <span class="text-[11px] font-bold text-amber-700 mt-1 flex items-center">
+                        <i class="fa-solid fa-hands-asl-interpreting mr-1 text-[10px]"></i>
+                        Item #${idx + 1}
+                    </span>
+                    <span class="text-[9px] text-slate-400 font-medium">Tap to Test Sign</span>
+                `;
+
+                visibleContainer.appendChild(card);
+            });
+        }
+
+        function toggleOrderVisibility() {
+            gameState.isOrderVisible = !gameState.isOrderVisible;
+            playSound('click');
+
+            const orderCard = document.getElementById('customer-order-card');
+            const floatingBtn = document.getElementById('btn-floating-show-order');
+            const label = document.getElementById('order-visibility-label');
+            const icon = document.getElementById('order-visibility-icon');
+
+            if (gameState.isOrderVisible) {
+                if (orderCard) orderCard.classList.remove('hidden');
+                if (floatingBtn) floatingBtn.classList.add('hidden');
+                if (label) label.innerText = "Hide Order";
+                if (icon) icon.className = "fa-solid fa-eye-slash text-amber-700";
+                showToast("Order card revealed!", "info");
+            } else {
+                if (orderCard) orderCard.classList.add('hidden');
+                if (floatingBtn) floatingBtn.classList.remove('hidden');
+                if (label) label.innerText = "Show Order";
+                if (icon) icon.className = "fa-solid fa-eye text-amber-700";
+                showToast("Order hidden for memory practice!", "info");
+            }
+
+            renderOrderUI();
+        }
+
+        function startPatienceTimer() {
+            if (gameState.patienceTimer) clearInterval(gameState.patienceTimer);
+            const patienceBar = document.getElementById('patience-bar');
+
+            gameState.patienceTimer = setInterval(() => {
+                gameState.patience -= 1;
+                patienceBar.style.width = `${gameState.patience}%`;
+
+                if (gameState.patience > 50) patienceBar.className = "bg-emerald-500 h-full transition-all duration-300";
+                else if (gameState.patience > 20) patienceBar.className = "bg-amber-500 h-full transition-all duration-300";
+                else patienceBar.className = "bg-rose-500 h-full transition-all duration-300";
+
+                if (gameState.patience <= 0) {
+                    clearInterval(gameState.patienceTimer);
+                    playSound('wrong');
+                    showToast("Customer got tired of waiting and left!", "error");
+                    generateNewCustomerOrder();
+                }
+            }, 450);
+        }
+
+        function serveCustomer() {
+            if (gameState.trayItems.length === 0) {
+                playSound('wrong');
+                showToast("Your tray is empty! Add 3D food items in Kitchen first.", "error");
+                return;
+            }
+
+            const requiredTerms = gameState.currentOrder.map(o => o.term).sort();
+            const trayTerms = [...gameState.trayItems].sort();
+
+            const isCorrect = requiredTerms.length === trayTerms.length &&
+                requiredTerms.every((val, index) => val === trayTerms[index]);
+
+            if (isCorrect) {
+                clearInterval(gameState.patienceTimer);
+                playSound('success');
+
+                const tip = (12 + (gameState.patience / 10)).toFixed(2);
+                gameState.earnings += parseFloat(tip);
+                gameState.customersServed += 1;
+
+                document.getElementById('score-text').innerText = `$${gameState.earnings.toFixed(2)}`;
+                document.getElementById('customers-served-text').innerText = gameState.customersServed;
+
+                showToast(`Order Correct! Earned +$${tip}`, "success");
+
+                clearTray();
+                generateNewCustomerOrder();
+            } else {
+                playSound('wrong');
+                showToast("Order mismatched! Check customer signs again.", "error");
+            }
+        }
+
+        function animateCameraTo(targetPos, targetLookAt) {
+            if (!camera || !controls) return;
+            const startPos = camera.position.clone();
+            const startTarget = controls.target.clone();
+            const startTime = performance.now();
+            const duration = 600;
+
+            function step(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+
+                camera.position.lerpVectors(startPos, targetPos, ease);
+                controls.target.lerpVectors(startTarget, targetLookAt, ease);
+                controls.update();
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        function setCameraView(mode) {
+            gameState.cameraMode = mode;
+            playSound('click');
+
+            const kitchenPanel = document.getElementById('kitchen-panel');
+            const counterBtn = document.getElementById('btn-view-counter');
+            const kitchenBtn = document.getElementById('btn-view-kitchen');
+
+            if (mode === 'kitchen') {
+                if (kitchenPanel) kitchenPanel.classList.remove('translate-y-full');
+                if (counterBtn) counterBtn.className = "glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-slate-200 hover:border-amber-400 hover:bg-amber-400/20 transition flex items-center space-x-2";
+                if (kitchenBtn) kitchenBtn.className = "glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-amber-400 bg-amber-400/20 transition flex items-center space-x-2";
+                animateCameraTo(new THREE.Vector3(-1.8, 2.2, 3.2), new THREE.Vector3(0, 1.18, 0.6));
+            } else {
+                if (kitchenPanel) kitchenPanel.classList.add('translate-y-full');
+                if (counterBtn) counterBtn.className = "glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-amber-400 bg-amber-400/20 transition flex items-center space-x-2";
+                if (kitchenBtn) kitchenBtn.className = "glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-slate-200 hover:border-amber-400 hover:bg-amber-400/20 transition flex items-center space-x-2";
+                animateCameraTo(new THREE.Vector3(0, 3.2, 5.5), new THREE.Vector3(0, 1.2, 0));
+            }
+        }
+
+        function openAslModalForItem(itemName) {
+            let foundQ = null;
+            for (let cat in VOCAB_DATA) {
+                if (VOCAB_DATA[cat] && VOCAB_DATA[cat].questions) {
+                    const q = VOCAB_DATA[cat].questions.find(item => item.options[item.correct] === itemName);
+                    if (q) {
+                        foundQ = q;
+                        break;
+                    }
+                }
+            }
+
+            if (foundQ) {
+                openAslModal({ term: itemName, questionObj: foundQ });
+            } else {
+                openAslModal({
+                    term: itemName,
+                    questionObj: {
+                        question: "What is being signed?",
+                        image: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655907/oxwivlgmpln9p8lt1bgg.gif",
+                        options: [itemName, "OPTION B", "OPTION C", "OPTION D"],
+                        correct: 0
+                    }
+                });
+            }
+        }
+
+        function openAslModal(orderObj, itemNumber = null) {
+            playSound('click');
+            const modal = document.getElementById('asl-modal');
+            document.getElementById('modal-term-name').innerText = itemNumber ? `Item #${itemNumber} Sign` : "ASL Sign Quiz";
+            document.getElementById('modal-asl-gif').src = orderObj.questionObj.image;
+
+            const optionsContainer = document.getElementById('modal-quiz-options');
+            optionsContainer.innerHTML = '';
+
+            orderObj.questionObj.options.forEach((optionText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-100 hover:bg-amber-500 hover:text-white font-bold py-2.5 px-3 rounded-xl text-xs text-slate-700 transition border border-slate-200 active:scale-95";
+                btn.innerText = optionText;
+                btn.onclick = () => {
+                    if (idx === orderObj.questionObj.correct) {
+                        playSound('success');
+                        showToast(`Correct! That sign is ${optionText}`, "success");
+                        btn.className = "bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition border border-emerald-600";
+                    } else {
+                        playSound('wrong');
+                        showToast("Try again!", "error");
+                        btn.className = "bg-rose-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition border border-rose-600";
+                    }
+                };
+                optionsContainer.appendChild(btn);
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function openTopicConfigModal() {
+            playSound('click');
+            enforceTopicRules();
+            const modal = document.getElementById('topic-modal');
+            const container = document.getElementById('topic-category-toggles');
+            container.innerHTML = '';
+
+            Object.keys(VOCAB_DATA).forEach(catKey => {
+                const isEnabled = VOCAB_DATA[catKey].enabled !== false;
+                const isDrinks = catKey.toLowerCase().includes('drink');
+                
+                const card = document.createElement('div');
+                card.className = `flex items-center justify-between p-3 rounded-2xl border transition ${
+                    isEnabled ? 'bg-indigo-50/80 border-indigo-200' : 'bg-slate-50 border-slate-200'
+                }`;
+
+                if (isDrinks) {
+                    card.innerHTML = `
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-xs md:text-sm text-slate-800">${VOCAB_DATA[catKey].title}</span>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full flex items-center">
+                                <i class="fa-solid fa-lock text-[9px] mr-1"></i>Always Active
+                            </span>
+                        </div>
+                        <button disabled class="bg-emerald-500/90 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center space-x-1 cursor-not-allowed opacity-90">
+                            <i class="fa-solid fa-check text-xs"></i>
+                            <span>Required</span>
+                        </button>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <span class="font-bold text-xs md:text-sm text-slate-800">${VOCAB_DATA[catKey].title}</span>
+                        <button type="button" class="btn-toggle-topic px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition active:scale-95 shadow-sm ${
+                            isEnabled 
+                            ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
+                            : 'bg-slate-200 hover:bg-slate-300 text-slate-600'
+                        }" data-cat="${catKey}">
+                            <i class="fa-solid ${isEnabled ? 'fa-minus text-amber-200' : 'fa-plus text-indigo-600'} text-xs"></i>
+                            <span>${isEnabled ? 'Active (-)' : 'Enable (+)'}</span>
+                        </button>
+                    `;
+                }
+
+                container.appendChild(card);
+            });
+
+            container.querySelectorAll('.btn-toggle-topic').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const catKey = btn.getAttribute('data-cat');
+                    toggleTopicState(catKey);
+                };
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function toggleTopicState(catKey) {
+            const isDrinks = catKey.toLowerCase().includes('drink');
+            if (isDrinks) {
+                playSound('wrong');
+                showToast("Drinks topic must always remain active!", "error");
+                return;
+            }
+
+            const isCurrentlyEnabled = VOCAB_DATA[catKey].enabled !== false;
+
+            if (isCurrentlyEnabled) {
+                const activeFoodCount = Object.keys(VOCAB_DATA).filter(k => 
+                    !k.toLowerCase().includes('drink') && 
+                    k !== catKey && 
+                    VOCAB_DATA[k].enabled !== false
+                ).length;
+
+                if (activeFoodCount === 0) {
+                    playSound('wrong');
+                    showToast("At least 1 food topic must remain active!", "error");
+                    return;
+                }
+            }
+
+            VOCAB_DATA[catKey].enabled = !isCurrentlyEnabled;
+            localStorage.setItem('asl_bistro_vocab_topics', JSON.stringify(VOCAB_DATA));
+            
+            if (VOCAB_DATA[catKey].enabled) {
+                playSound('grab');
+                showToast(`Enabled ${VOCAB_DATA[catKey].title} (+)`, "success");
+            } else {
+                playSound('drop');
+                showToast(`Disabled ${VOCAB_DATA[catKey].title} (-)`, "info");
+            }
+
+            openTopicConfigModal();
+            buildKitchenUI();
+            generateNewCustomerOrder();
+        }
+
+        function saveTopicConfig() {
+            playSound('click');
+            enforceTopicRules();
+            buildKitchenUI();
+            generateNewCustomerOrder();
+            document.getElementById('topic-modal').classList.add('hidden');
+            showToast("Topic configuration saved!", "success");
+        }
+
+        function addCustomWord() {
+            const wordInput = document.getElementById('input-new-word-name');
+            const catInput = document.getElementById('input-new-word-category');
+            const gifInput = document.getElementById('input-new-word-gif');
+
+            const word = wordInput.value.trim().toUpperCase();
+            const cat = catInput.value.trim() || "Custom Items";
+            const gif = gifInput.value.trim() || "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655907/oxwivlgmpln9p8lt1bgg.gif";
+
+            if (!word) {
+                showToast("Please enter a word name!", "error");
+                return;
+            }
+
+            if (!VOCAB_DATA[cat]) {
+                VOCAB_DATA[cat] = {
+                    title: `✨ ${cat}`,
+                    enabled: true,
+                    questions: []
+                };
+            }
+
+            VOCAB_DATA[cat].questions.push({
+                question: "What is being signed?",
+                image: gif,
+                options: [word, "OPTION B", "OPTION C", "OPTION D"],
+                correct: 0
+            });
+
+            if (!customGlbPaths[word]) customGlbPaths[word] = "";
+
+            wordInput.value = '';
+            gifInput.value = '';
+
+            localStorage.setItem('asl_bistro_vocab_topics', JSON.stringify(VOCAB_DATA));
+
+            openTopicConfigModal();
+            showToast(`Added '${word}' to topic '${cat}'!`, "success");
+        }
+
+        window.addEventListener('load', () => {
+            initThreeScene();
+            buildKitchenUI();
+            generateNewCustomerOrder();
+
+            document.getElementById('btn-view-counter').onclick = () => setCameraView('counter');
+            document.getElementById('btn-view-kitchen').onclick = () => setCameraView('kitchen');
+            document.getElementById('btn-close-kitchen').onclick = () => setCameraView('counter');
+            
+            document.getElementById('btn-clear-tray').onclick = clearTray;
+            document.getElementById('btn-serve-customer').onclick = serveCustomer;
+
+            document.getElementById('btn-toggle-order-visibility').onclick = toggleOrderVisibility;
+            document.getElementById('btn-floating-show-order').onclick = toggleOrderVisibility;
+
+            document.getElementById('btn-close-asl-modal').onclick = () => {
+                document.getElementById('asl-modal').classList.add('hidden');
+            };
+
+            document.getElementById('btn-open-topic-config').onclick = openTopicConfigModal;
+            document.getElementById('btn-close-topic-modal').onclick = () => {
+                document.getElementById('topic-modal').classList.add('hidden');
+            };
+            document.getElementById('btn-save-topic-config').onclick = saveTopicConfig;
+            document.getElementById('btn-add-custom-word').onclick = addCustomWord;
+        });
+
+        function onWindowResize() {
+            if (!camera || !renderer) return;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+
+            const time = now || performance.now();
+
+            if (trayGroup) {
+                trayGroup.position.y = 1.18 + Math.sin(time * 0.003) * 0.005;
+            }
+
+            if (controls) controls.update();
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
