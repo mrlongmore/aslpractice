@@ -179,6 +179,11 @@
                     </div>
                 </div>
 
+                <button id="btn-end-game" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold px-3.5 rounded-2xl shadow-lg transition active:scale-95 cursor-pointer items-center justify-center space-x-2" title="End game">
+                    <i class="fa-solid fa-flag-checkered"></i>
+                    <span class="hidden sm:inline">End Game</span>
+                </button>
+
                 <!-- Topics & Vocab Manager Button -->
                 <button id="btn-open-topic-config" class="glass-panel hover:bg-white text-slate-700 hover:text-amber-600 px-3.5 rounded-2xl shadow-lg transition active:scale-95 cursor-pointer flex items-center justify-center" title="Manage Dynamic ASL Topics">
                     <i class="fa-solid fa-book-bookmark text-lg md:text-xl text-indigo-600"></i>
@@ -379,6 +384,47 @@
         </div>
     </div>
 
+    <div id="game-setup-screen" class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-amber-400 w-full max-w-md text-center">
+            <div class="bg-amber-500 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                <i class="fa-solid fa-utensils text-3xl"></i>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mt-4">Welcome to ASL Bistro!</h2>
+            <p class="text-sm text-slate-600 mt-2">Choose how many customers you want to serve.</p>
+            <label for="customer-goal" class="block text-left text-xs font-bold uppercase tracking-wider text-slate-600 mt-6 mb-2">Customer Goal</label>
+            <select id="customer-goal" class="w-full bg-white border-2 border-slate-300 rounded-xl px-4 py-3 text-base font-bold text-slate-800 focus:outline-none focus:border-amber-500">
+                <option value="10">10 customers</option>
+                <option value="20">20 customers</option>
+                <option value="30">30 customers</option>
+                <option value="40">40 customers</option>
+                <option value="50">50 customers</option>
+                <option value="60">60 customers</option>
+                <option value="70">70 customers</option>
+                <option value="80">80 customers</option>
+                <option value="90">90 customers</option>
+                <option value="100">100 customers</option>
+                <option value="endless">Endless</option>
+            </select>
+            <button id="btn-start-game" class="mt-5 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
+                <i class="fa-solid fa-play mr-2"></i>Start Game
+            </button>
+        </div>
+    </div>
+
+    <div id="game-end-screen" class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-emerald-400 w-full max-w-md text-center">
+            <div class="bg-emerald-500 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                <i class="fa-solid fa-trophy text-3xl"></i>
+            </div>
+            <h2 id="game-end-title" class="text-2xl md:text-3xl font-bold text-slate-900 mt-4">You Win!</h2>
+            <p class="text-sm text-slate-600 mt-2">Customers served</p>
+            <p id="game-end-served-count" class="text-5xl font-bold text-emerald-700 mt-2">0</p>
+            <button id="btn-play-again" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
+                <i class="fa-solid fa-rotate-right mr-2"></i>Play Again
+            </button>
+        </div>
+    </div>
+
     <script>
         const DEFAULT_VOCAB_DATA = {
             "Drinks": {
@@ -420,22 +466,78 @@
             }
         };
 
-        let VOCAB_DATA = JSON.parse(localStorage.getItem('asl_bistro_vocab_topics')) || DEFAULT_VOCAB_DATA;
+        let VOCAB_DATA = DEFAULT_VOCAB_DATA;
+
+        const EXCLUDED_FOOD_TERMS = new Set(["BREAKFAST", "LUNCH", "DINNER", "DRINK", "FOOD", "EAT"]);
+        const FOOD_CATEGORY_PATTERN = /drink|breakfast|lunch|dinner|meal|food|meat|seafood|dessert|sweet|fruit|vegetable/i;
+
+        function isExcludedFoodQuestion(question) {
+            const answer = question.options[question.correct].trim().toUpperCase();
+            return EXCLUDED_FOOD_TERMS.has(answer);
+        }
+
+        function isValidQuestion(question) {
+            return question &&
+                typeof question.question === 'string' &&
+                typeof question.image === 'string' &&
+                Array.isArray(question.options) &&
+                question.options.length > 0 &&
+                question.options.every(option => typeof option === 'string') &&
+                Number.isInteger(question.correct) &&
+                question.correct >= 0 &&
+                question.correct < question.options.length;
+        }
+
+        async function loadVocabularyData() {
+            try {
+                const response = await fetch('../vocab.json');
+                if (!response.ok) {
+                    throw new Error(`vocab.json request failed with status ${response.status}`);
+                }
+
+                const source = await response.json();
+                const foodCategories = {};
+                Object.entries(source).forEach(([category, data]) => {
+                    if (!FOOD_CATEGORY_PATTERN.test(category) || !data || !Array.isArray(data.questions)) return;
+
+                    const questions = data.questions.filter(question =>
+                        isValidQuestion(question) && !isExcludedFoodQuestion(question)
+                    );
+                    if (questions.length > 0) {
+                        foodCategories[category] = {
+                            title: typeof data.title === 'string' ? data.title : category,
+                            enabled: true,
+                            questions
+                        };
+                    }
+                });
+
+                if (Object.keys(foodCategories).length === 0) {
+                    throw new Error('vocab.json contains no usable food or drink questions');
+                }
+                VOCAB_DATA = foodCategories;
+            } catch (error) {
+                console.warn('Could not load food vocabulary from vocab.json; using built-in vocabulary.', error);
+                VOCAB_DATA = Object.fromEntries(Object.entries(DEFAULT_VOCAB_DATA).map(([category, data]) => [
+                    category,
+                    { ...data, questions: data.questions.filter(question => !isExcludedFoodQuestion(question)) }
+                ]));
+            }
+        }
 
         function enforceTopicRules() {
-            if (!VOCAB_DATA["Drinks"]) {
-                VOCAB_DATA["Drinks"] = DEFAULT_VOCAB_DATA["Drinks"];
-            }
-            VOCAB_DATA["Drinks"].enabled = true;
+            const drinkCategory = Object.keys(VOCAB_DATA).find(k => k.toLowerCase().includes('drink'));
+            if (drinkCategory) VOCAB_DATA[drinkCategory].enabled = true;
 
             const activeFood = Object.keys(VOCAB_DATA).filter(k => !k.toLowerCase().includes('drink') && VOCAB_DATA[k].enabled !== false);
             if (activeFood.length === 0) {
                 const firstFood = Object.keys(VOCAB_DATA).find(k => !k.toLowerCase().includes('drink'));
                 if (firstFood && VOCAB_DATA[firstFood]) {
                     VOCAB_DATA[firstFood].enabled = true;
+                } else if (Object.keys(VOCAB_DATA).length > 0) {
+                    VOCAB_DATA[Object.keys(VOCAB_DATA)[0]].enabled = true;
                 }
             }
-            localStorage.setItem('asl_bistro_vocab_topics', JSON.stringify(VOCAB_DATA));
         }
 
         enforceTopicRules();
@@ -461,6 +563,39 @@
             "SALAD": "./assets/salad.glb",
             "CEREAL": "./assets/bowl-cereal.glb",
             "EGG": "./assets/egg.glb",
+            "APPLE": "./assets/apple.glb",
+            "AVOCADO": "./assets/avocado.glb",
+            "BACON": "./assets/bacon.glb",
+            "BANANA": "./assets/banana.glb",
+            "BREAD": "./assets/bread.glb",
+            "BROCCOLI": "./assets/broccoli.glb",
+            "CAKE": "./assets/cake.glb",
+            "CARROT": "./assets/carrot.glb",
+            "CHEESE": "./assets/cheese.glb",
+            "CHERRY": "./assets/cherries.glb",
+            "CHOCOLATE": "./assets/chocolate.glb",
+            "COOKIE": "./assets/cookie.glb",
+            "CORN": "./assets/corn.glb",
+            "CROISSANT": "./assets/croissant.glb",
+            "FISH": "./assets/fish.glb",
+            "FRIES": "./assets/fries.glb",
+            "GRAPES": "./assets/grapes.glb",
+            "ICECREAM": "./assets/ice-cream.glb",
+            "LEMON": "./assets/lemon.glb",
+            "MEAT": "./assets/meat-raw.glb",
+            "MELON": "./assets/watermelon.glb",
+            "ONION": "./assets/onion.glb",
+            "ORANGE": "./assets/orange.glb",
+            "PEAR": "./assets/pear.glb",
+            "PIE": "./assets/pie.glb",
+            "PUMPKIN": "./assets/pumpkin.glb",
+            "STRAWBERRY": "./assets/strawberry.glb",
+            "SUSHI": "./assets/sushi-salmon.glb",
+            "TOMATO": "./assets/tomato.glb",
+            "TURKEY": "./assets/turkey.glb",
+            "SAUSAGE": "./assets/sausage.glb",
+            "SOUP": "./assets/bowl-soup.glb",
+            "WAFFLE": "./assets/waffle.glb",
         };
 
         function showToast(message, type = 'info') {
@@ -523,6 +658,9 @@
             customersServed: 0,
             currentOrder: [], 
             trayItems: [],    
+            customerGoal: 10,
+            gameStarted: false,
+            gameEnded: false,
             patience: 100,
             patienceTimer: null,
             activeCategory: "Drinks",
@@ -805,7 +943,7 @@
         }
 
         function loadItemMesh(itemName, callback) {
-            const path = customGlbPaths[itemName];
+            const path = customGlbPaths[String(itemName).trim().toUpperCase()];
             
             if (loadedMeshCache[itemName]) {
                 callback(loadedMeshCache[itemName].clone(true));
@@ -1127,7 +1265,43 @@
             requestAnimationFrame(animateEntry);
         }
 
+        function startGame() {
+            const selectedGoal = document.getElementById('customer-goal').value;
+            gameState.customerGoal = selectedGoal === 'endless' ? null : Number(selectedGoal);
+            gameState.gameStarted = true;
+            gameState.gameEnded = false;
+            gameState.earnings = 0;
+            gameState.customersServed = 0;
+            gameState.trayItems = [];
+            document.getElementById('score-text').innerText = '$0.00';
+            document.getElementById('customers-served-text').innerText = '0';
+            document.getElementById('game-setup-screen').classList.add('hidden');
+            const endGameButton = document.getElementById('btn-end-game');
+            endGameButton.classList.remove('hidden');
+            endGameButton.classList.add('flex');
+            updateTray3D();
+            generateNewCustomerOrder();
+        }
+
+        function endGame(won = false) {
+            if (!gameState.gameStarted || gameState.gameEnded) return;
+
+            gameState.gameStarted = false;
+            gameState.gameEnded = true;
+            if (gameState.patienceTimer) clearInterval(gameState.patienceTimer);
+            gameState.currentOrder = [];
+            const endGameButton = document.getElementById('btn-end-game');
+            endGameButton.classList.add('hidden');
+            endGameButton.classList.remove('flex');
+            document.getElementById('game-end-title').innerText = won ? 'You Win!' : 'Game Complete!';
+            document.getElementById('game-end-served-count').innerText = gameState.customersServed;
+            const endScreen = document.getElementById('game-end-screen');
+            endScreen.classList.remove('hidden');
+            endScreen.classList.add('flex');
+        }
+
         function generateNewCustomerOrder() {
+            if (!gameState.gameStarted || gameState.gameEnded) return;
             spawnCustomer();
 
             const enabledQuestions = [];
@@ -1247,6 +1421,11 @@
             const patienceBar = document.getElementById('patience-bar');
 
             gameState.patienceTimer = setInterval(() => {
+                if (!gameState.gameStarted || gameState.gameEnded) {
+                    clearInterval(gameState.patienceTimer);
+                    return;
+                }
+
                 gameState.patience -= 1;
                 patienceBar.style.width = `${gameState.patience}%`;
 
@@ -1264,6 +1443,7 @@
         }
 
         function serveCustomer() {
+            if (!gameState.gameStarted || gameState.gameEnded) return;
             if (gameState.trayItems.length === 0) {
                 playSound('wrong');
                 showToast("Your tray is empty! Add 3D food items in Kitchen first.", "error");
@@ -1290,7 +1470,11 @@
                 showToast(`Order Correct! Earned +$${tip}`, "success");
 
                 clearTray();
-                generateNewCustomerOrder();
+                if (gameState.customerGoal !== null && gameState.customersServed >= gameState.customerGoal) {
+                    endGame(true);
+                } else {
+                    generateNewCustomerOrder();
+                }
             } else {
                 playSound('wrong');
                 showToast("Order mismatched! Check customer signs again.", "error");
@@ -1480,8 +1664,6 @@
             }
 
             VOCAB_DATA[catKey].enabled = !isCurrentlyEnabled;
-            localStorage.setItem('asl_bistro_vocab_topics', JSON.stringify(VOCAB_DATA));
-            
             if (VOCAB_DATA[catKey].enabled) {
                 playSound('grab');
                 showToast(`Enabled ${VOCAB_DATA[catKey].title} (+)`, "success");
@@ -1517,6 +1699,10 @@
                 showToast("Please enter a word name!", "error");
                 return;
             }
+            if (EXCLUDED_FOOD_TERMS.has(word)) {
+                showToast(`'${word}' is excluded from the menu.`, "error");
+                return;
+            }
 
             if (!VOCAB_DATA[cat]) {
                 VOCAB_DATA[cat] = {
@@ -1538,16 +1724,15 @@
             wordInput.value = '';
             gifInput.value = '';
 
-            localStorage.setItem('asl_bistro_vocab_topics', JSON.stringify(VOCAB_DATA));
-
             openTopicConfigModal();
             showToast(`Added '${word}' to topic '${cat}'!`, "success");
         }
 
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
+            await loadVocabularyData();
+            enforceTopicRules();
             initThreeScene();
             buildKitchenUI();
-            generateNewCustomerOrder();
 
             document.getElementById('btn-view-counter').onclick = () => setCameraView('counter');
             document.getElementById('btn-view-kitchen').onclick = () => setCameraView('kitchen');
@@ -1555,6 +1740,13 @@
             
             document.getElementById('btn-clear-tray').onclick = clearTray;
             document.getElementById('btn-serve-customer').onclick = serveCustomer;
+            document.getElementById('btn-start-game').onclick = startGame;
+            document.getElementById('btn-end-game').onclick = () => endGame(false);
+            document.getElementById('btn-play-again').onclick = () => {
+                document.getElementById('game-end-screen').classList.add('hidden');
+                document.getElementById('game-end-screen').classList.remove('flex');
+                document.getElementById('game-setup-screen').classList.remove('hidden');
+            };
 
             document.getElementById('btn-toggle-order-visibility').onclick = toggleOrderVisibility;
             document.getElementById('btn-floating-show-order').onclick = toggleOrderVisibility;
