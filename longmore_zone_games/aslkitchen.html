@@ -1,3 +1,4 @@
+<!--Spaghetti Bowl by Jarlan Perez [CC-BY] via Poly Pizza-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -352,30 +353,6 @@
         <img id="enlarged-order-gif" class="max-w-[94vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl" src="" alt="Enlarged ASL sign animation">
     </div>
 
-    <div id="asl-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="glass-panel rounded-3xl p-5 md:p-6 max-w-md w-full shadow-2xl border-2 border-amber-400 relative">
-            <button id="btn-close-asl-modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl p-2 active:scale-90">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            
-            <div class="text-center">
-                <span id="modal-category" class="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100 px-3 py-1 rounded-full">ASL Flashcard</span>
-                <h3 id="modal-term-name" class="text-xl md:text-2xl font-bold text-slate-800 mt-2">Sign Practice</h3>
-            </div>
-
-            <div class="my-4 asl-gif-mask h-[200px] md:h-[220px] shadow-inner flex justify-center items-center">
-                <img id="modal-asl-gif" src="" alt="ASL Sign Animation">
-            </div>
-
-            <div class="space-y-2">
-                <p id="modal-question" class="text-xs md:text-sm font-medium text-slate-600 text-center">Select the correct food term signed above:</p>
-                <div id="modal-quiz-options" class="grid grid-cols-2 gap-2 mt-2.5">
-                    <!-- Quiz buttons dynamically injected -->
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="topic-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-panel rounded-3xl p-5 md:p-6 max-w-2xl w-full shadow-2xl border-2 border-indigo-300 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center pb-3 border-b border-slate-200">
@@ -597,6 +574,10 @@
             "PIZZA": "./assets/pizza.glb",
             "TACO": "./assets/taco.glb",
             "DONUT": "./assets/donut.glb",
+            "VANILLA": "./assets/whipped-cream.glb",
+            "PASTA": "./assets/Spaghetti%20Bowl%20by%20Jarlan%20Perez%20-%2000zv9o-Gjo2.glb",
+            "SPAGHETTI": "./assets/Spaghetti%20Bowl%20by%20Jarlan%20Perez%20-%2000zv9o-Gjo2.glb",
+            "SPAGHETTI BOWL": "./assets/Spaghetti%20Bowl%20by%20Jarlan%20Perez%20-%2000zv9o-Gjo2.glb",
             "BAGEL": "",
             "PANCAKE": "./assets/pancakes.glb",
             "WAFFLES": "./assets/waffle.glb",
@@ -610,7 +591,7 @@
             "BURRITO": "",
             "SALAD": "./assets/salad.glb",
             "CEREAL": "./assets/bowl-cereal.glb",
-            "EGG": "./assets/egg.glb",
+            "EGG": "./assets/egg-cooked.glb",
             "APPLE": "./assets/apple.glb",
             "AVOCADO": "./assets/avocado.glb",
             "BACON": "./assets/bacon.glb",
@@ -1140,12 +1121,6 @@
                 card.innerHTML = `
                     <div class="w-full h-24 sm:h-28 bg-slate-900 rounded-xl overflow-hidden relative flex items-center justify-center">
                         <canvas id="glb-preview-${termName.replace(/\s+/g, '-')}" class="w-full h-full"></canvas>
-                        <span class="absolute top-1.5 left-1.5 bg-indigo-600/90 backdrop-blur-sm text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
-                            <i class="fa-solid fa-cube mr-0.5"></i> 3D
-                        </span>
-                        <button class="btn-card-flashcard absolute top-1.5 right-1.5 bg-amber-500 hover:bg-amber-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow transition border border-white/40" title="Check sign flashcard">
-                            <i class="fa-solid fa-hands-asl-interpreting"></i>
-                        </button>
                     </div>
 
                     <div class="mt-2 text-center">
@@ -1159,14 +1134,6 @@
                         </button>
                     </div>
                 `;
-
-                const flashcardBtn = card.querySelector('.btn-card-flashcard');
-                if (flashcardBtn) {
-                    flashcardBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        openAslModalForItem(termName);
-                    };
-                }
 
                 const addBtn = card.querySelector('.btn-card-add-tray');
                 if (addBtn) {
@@ -1745,63 +1712,6 @@
             }
         }
 
-        function openAslModalForItem(itemName) {
-            let foundQ = null;
-            for (let cat in VOCAB_DATA) {
-                if (VOCAB_DATA[cat] && VOCAB_DATA[cat].questions) {
-                    const q = VOCAB_DATA[cat].questions.find(item => item.options[item.correct] === itemName);
-                    if (q) {
-                        foundQ = q;
-                        break;
-                    }
-                }
-            }
-
-            if (foundQ) {
-                openAslModal({ term: itemName, questionObj: foundQ });
-            } else {
-                openAslModal({
-                    term: itemName,
-                    questionObj: {
-                        question: "What is being signed?",
-                        image: "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655907/oxwivlgmpln9p8lt1bgg.gif",
-                        options: [itemName, "OPTION B", "OPTION C", "OPTION D"],
-                        correct: 0
-                    }
-                });
-            }
-        }
-
-        function openAslModal(orderObj, itemNumber = null) {
-            playSound('click');
-            const modal = document.getElementById('asl-modal');
-            document.getElementById('modal-term-name').innerText = itemNumber ? `Item #${itemNumber} Sign` : "ASL Sign Quiz";
-            document.getElementById('modal-asl-gif').src = orderObj.questionObj.image;
-
-            const optionsContainer = document.getElementById('modal-quiz-options');
-            optionsContainer.innerHTML = '';
-
-            orderObj.questionObj.options.forEach((optionText, idx) => {
-                const btn = document.createElement('button');
-                btn.className = "bg-slate-100 hover:bg-amber-500 hover:text-white font-bold py-2.5 px-3 rounded-xl text-xs text-slate-700 transition border border-slate-200 active:scale-95";
-                btn.innerText = optionText;
-                btn.onclick = () => {
-                    if (idx === orderObj.questionObj.correct) {
-                        playSound('success');
-                        showToast(`Correct! That sign is ${optionText}`, "success");
-                        btn.className = "bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition border border-emerald-600";
-                    } else {
-                        playSound('wrong');
-                        showToast("Try again!", "error");
-                        btn.className = "bg-rose-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs transition border border-rose-600";
-                    }
-                };
-                optionsContainer.appendChild(btn);
-            });
-
-            modal.classList.remove('hidden');
-        }
-
         function openTopicConfigModal() {
             playSound('click');
             enforceTopicRules();
@@ -1978,9 +1888,6 @@
             document.getElementById('btn-toggle-order-visibility').onclick = toggleOrderVisibility;
             document.getElementById('btn-floating-show-order').onclick = toggleOrderVisibility;
 
-            document.getElementById('btn-close-asl-modal').onclick = () => {
-                document.getElementById('asl-modal').classList.add('hidden');
-            };
             document.getElementById('btn-close-order-gif').onclick = closeOrderGif;
             document.getElementById('order-gif-modal').onclick = event => {
                 if (event.target.id === 'order-gif-modal') closeOrderGif();
