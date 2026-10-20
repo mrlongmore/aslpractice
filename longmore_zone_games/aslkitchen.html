@@ -75,7 +75,7 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
         }
-        /* Masking container to hide embedded text/captions inside ASL GIFs */
+        /* Sign GIF display */
         .asl-gif-mask {
             position: relative;
             overflow: hidden;
@@ -85,21 +85,48 @@
         .asl-gif-mask img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            transform: scale(1.18);
+            object-fit: contain;
         }
-        .asl-gif-mask::before, .asl-gif-mask::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 15%;
-            background: #0f172a;
-            z-index: 5;
+        .order-sign-gif {
+            aspect-ratio: 4 / 3;
+        }
+        #customer-order-container {
+            position: fixed;
+            z-index: 30;
+            top: clamp(92px, 13vh, 130px);
+            left: clamp(12px, 2vw, 24px);
+            width: min(42vw, 440px);
+            max-height: calc(100vh - 230px);
+            margin: 0;
+            align-items: stretch;
+            overflow-y: auto;
+        }
+        #kitchen-panel {
+            position: fixed;
+            z-index: 20;
+            top: 50%;
+            right: 16px;
+            left: auto;
+            bottom: auto;
+            width: min(52vw, 720px);
+            max-height: 85vh;
+            transform: translate(110%, -50%);
+            transition: transform 300ms ease-in-out;
             pointer-events: none;
         }
-        .asl-gif-mask::before { top: 0; }
-        .asl-gif-mask::after { bottom: 0; }
+        #kitchen-panel.is-open {
+            transform: translate(0, -50%);
+            pointer-events: auto;
+        }
+        @media (max-width: 640px) {
+            #customer-order-container {
+                width: min(46vw, 340px);
+            }
+            #kitchen-panel {
+                right: 8px;
+                width: min(48vw, 440px);
+            }
+        }
 
         .touch-scroll {
             -webkit-overflow-scrolling: touch;
@@ -173,9 +200,15 @@
                     <div class="text-rose-500 bg-rose-100 p-2 rounded-xl">
                         <i class="fa-solid fa-heart text-base md:text-lg"></i>
                     </div>
-                    <div>
-                        <div class="text-[9px] md:text-[10px] uppercase tracking-wider text-slate-500 font-bold">Served</div>
-                        <div id="customers-served-text" class="text-base md:text-xl font-bold text-slate-800">0</div>
+                    <div class="flex items-center gap-3">
+                        <div>
+                            <div class="text-[9px] md:text-[10px] uppercase tracking-wider text-slate-500 font-bold">Served</div>
+                            <div id="customers-served-text" class="text-base md:text-xl font-bold text-slate-800">0</div>
+                        </div>
+                        <div class="border-l border-slate-300 pl-3">
+                            <div class="text-[9px] md:text-[10px] uppercase tracking-wider text-slate-500 font-bold">Remaining</div>
+                            <div id="customers-remaining-text" class="text-base md:text-xl font-bold text-slate-800">10</div>
+                        </div>
                     </div>
                 </div>
 
@@ -190,53 +223,6 @@
                 </button>
             </div>
         </header>
-
-        <!-- Center Customer Order Speech Bubble -->
-        <div id="customer-order-container" class="pointer-events-auto w-full max-w-xl mx-auto my-auto flex flex-col items-center transition-all duration-300 transform">
-            <div id="customer-order-card" class="glass-panel rounded-3xl p-4 md:p-5 shadow-2xl border-4 border-amber-400 w-full relative bounce-gentle transition-all duration-300">
-                <!-- Speech Triangle -->
-                <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-t-[16px] border-t-amber-400"></div>
-
-                <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
-                    <div class="flex items-center space-x-2">
-                        <span class="inline-flex items-center justify-center bg-amber-500 text-white w-8 h-8 rounded-full font-bold text-sm shadow">
-                            <i class="fa-solid fa-user"></i>
-                        </span>
-                        <div>
-                            <h2 class="font-bold text-slate-800 text-base md:text-lg leading-tight">Customer Order</h2>
-                            <p class="text-[11px] text-slate-500 font-medium hidden sm:block">Tap cards for flashcards • Collect matching 3D GLBs from Kitchen!</p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center space-x-2">
-                        <!-- Hide / Show Order Toggle Button -->
-                        <button id="btn-toggle-order-visibility" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1.5 active:scale-95">
-                            <i id="order-visibility-icon" class="fa-solid fa-eye-slash text-amber-700"></i>
-                            <span id="order-visibility-label">Hide Order</span>
-                        </button>
-
-                        <!-- Patience Bar -->
-                        <div class="flex items-center space-x-1.5 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
-                            <i class="fa-solid fa-clock text-amber-500 text-xs"></i>
-                            <div class="w-16 md:w-20 bg-slate-200 h-2.5 rounded-full overflow-hidden">
-                                <div id="patience-bar" class="bg-emerald-500 h-full w-full transition-all duration-300"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Content -->
-                <div id="order-cards-visible" class="grid grid-cols-2 md:grid-cols-3 gap-2.5">
-                    <!-- Order Cards populated dynamically -->
-                </div>
-            </div>
-
-            <!-- Floating Show Order Button when speech bubble is hidden -->
-            <button id="btn-floating-show-order" class="hidden glass-panel hover:bg-white text-slate-800 font-bold px-5 py-2.5 rounded-2xl shadow-2xl border-2 border-amber-400 active:scale-95 transition flex items-center space-x-2 bounce-gentle">
-                <i class="fa-solid fa-eye text-amber-600 text-lg"></i>
-                <span>Show Customer Order</span>
-            </button>
-        </div>
 
         <footer class="w-full max-w-5xl mx-auto pointer-events-auto flex flex-col space-y-2.5">
             
@@ -268,10 +254,14 @@
                 </div>
 
                 <!-- Tray Controls -->
-                <div class="flex items-center space-x-2.5 w-full sm:w-auto justify-end">
+                <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
                     <button id="btn-clear-tray" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3.5 py-2.5 rounded-xl transition text-xs md:text-sm flex items-center space-x-1.5 active:scale-95">
                         <i class="fa-solid fa-trash-can text-slate-500"></i>
                         <span>Clear</span>
+                    </button>
+                    <button id="btn-buy-time" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-2.5 rounded-xl shadow transition text-xs md:text-sm flex items-center space-x-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <span><i class="fa-solid fa-clock mr-1"></i>Buy More Time <span class="whitespace-nowrap">(+10s)</span></span>
+                        <span id="buy-time-price" class="bg-white/20 rounded-lg px-2 py-1 whitespace-nowrap">$11.00</span>
                     </button>
                     <button id="btn-serve-customer" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-5 md:px-6 py-2.5 rounded-xl shadow-lg transition transform active:scale-95 text-xs md:text-sm flex items-center space-x-2 pulse-glow">
                         <i class="fa-solid fa-bell text-base md:text-lg"></i>
@@ -283,8 +273,49 @@
         </footer>
     </div>
 
-    <div id="kitchen-panel" class="fixed inset-x-0 bottom-0 z-20 transform translate-y-full transition-transform duration-300 ease-in-out pointer-events-auto">
-        <div class="max-w-5xl mx-auto glass-panel rounded-t-3xl shadow-2xl border-t-4 border-amber-400 p-4 md:p-5 max-h-[75vh] flex flex-col">
+    <!-- Customer Order Panel -->
+    <div id="customer-order-container" class="pointer-events-auto flex flex-col transition-all duration-300 transform touch-scroll">
+        <div id="customer-order-card" class="glass-panel rounded-3xl p-4 md:p-5 shadow-2xl border-4 border-amber-400 w-full relative bounce-gentle transition-all duration-300">
+            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-t-[16px] border-t-amber-400"></div>
+
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center justify-center bg-amber-500 text-white w-8 h-8 rounded-full font-bold text-sm shadow">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-base md:text-lg leading-tight">Customer Order</h2>
+                        <p class="text-[11px] text-slate-500 font-medium hidden sm:block">Match the signs using food from the Kitchen Shelf.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button id="btn-toggle-order-visibility" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center space-x-1.5 active:scale-95">
+                        <i id="order-visibility-icon" class="fa-solid fa-eye-slash text-amber-700"></i>
+                        <span id="order-visibility-label">Hide Order</span>
+                    </button>
+                    <div class="flex items-center space-x-1.5 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+                        <i class="fa-solid fa-clock text-amber-500 text-xs"></i>
+                        <div class="w-16 md:w-20 bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                            <div id="patience-bar" class="bg-emerald-500 h-full w-full transition-all duration-300"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="order-cards-visible" class="grid grid-cols-2 gap-2.5">
+                <!-- Sign GIFs populated dynamically -->
+            </div>
+        </div>
+
+        <button id="btn-floating-show-order" class="hidden glass-panel hover:bg-white text-slate-800 font-bold px-5 py-2.5 rounded-2xl shadow-2xl border-2 border-amber-400 active:scale-95 transition flex items-center space-x-2 bounce-gentle">
+            <i class="fa-solid fa-eye text-amber-600 text-lg"></i>
+            <span>Show Customer Order</span>
+        </button>
+    </div>
+
+    <div id="kitchen-panel" class="pointer-events-auto">
+        <div class="glass-panel rounded-3xl shadow-2xl border-4 border-amber-400 p-3 md:p-5 max-h-[85vh] flex flex-col">
             
             <!-- Kitchen Header -->
             <div class="flex justify-between items-center mb-3">
@@ -312,6 +343,13 @@
                 <!-- Item Cards with 2D Canvas thumbnails populated dynamically -->
             </div>
         </div>
+    </div>
+
+    <div id="order-gif-modal" class="fixed inset-0 z-[70] bg-slate-950/90 backdrop-blur-sm hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Enlarged ASL sign">
+        <button id="btn-close-order-gif" class="absolute top-4 right-4 z-10 glass-panel text-slate-800 rounded-full w-12 h-12 shadow-lg text-xl" aria-label="Close enlarged sign">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img id="enlarged-order-gif" class="max-w-[94vw] max-h-[88vh] object-contain rounded-2xl shadow-2xl" src="" alt="Enlarged ASL sign animation">
     </div>
 
     <div id="asl-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
@@ -405,6 +443,13 @@
                 <option value="100">100 customers</option>
                 <option value="endless">Endless</option>
             </select>
+            <label for="difficulty" class="block text-left text-xs font-bold uppercase tracking-wider text-slate-600 mt-4 mb-2">Difficulty · Time per Order</label>
+            <select id="difficulty" class="w-full bg-white border-2 border-slate-300 rounded-xl px-4 py-3 text-base font-bold text-slate-800 focus:outline-none focus:border-amber-500">
+                <option value="easy">Easy · 60 seconds</option>
+                <option value="medium" selected>Normal · 40 seconds</option>
+                <option value="hard">Hard · 30 seconds</option>
+                <option value="insane">Insane · 25 seconds · 4 items, changes mind</option>
+            </select>
             <button id="btn-start-game" class="mt-5 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
                 <i class="fa-solid fa-play mr-2"></i>Start Game
             </button>
@@ -468,7 +513,10 @@
 
         let VOCAB_DATA = DEFAULT_VOCAB_DATA;
 
-        const EXCLUDED_FOOD_TERMS = new Set(["BREAKFAST", "LUNCH", "DINNER", "DRINK", "FOOD", "EAT"]);
+        const EXCLUDED_FOOD_TERMS = new Set([
+            "BREAKFAST", "LUNCH", "DINNER", "DRINK", "FOOD", "EAT",
+            "FRUIT", "VEGETABLE", "MEAT"
+        ]);
         const FOOD_CATEGORY_PATTERN = /drink|breakfast|lunch|dinner|meal|food|meat|seafood|dessert|sweet|fruit|vegetable/i;
 
         function isExcludedFoodQuestion(question) {
@@ -653,16 +701,31 @@
             } catch(e) {}
         }
 
+        const DIFFICULTY_TIME_LIMITS_SECONDS = {
+            easy: 60,
+            medium: 40,
+            hard: 30,
+            insane: 25
+        };
+        const TIME_EXTENSION_SECONDS = 10;
+        const TIME_PURCHASE_BASE_PRICE = 6;
+
         const gameState = {
             earnings: 0,
             customersServed: 0,
             currentOrder: [], 
             trayItems: [],    
             customerGoal: 10,
+            difficulty: "medium",
+            orderTimeLimit: DIFFICULTY_TIME_LIMITS_SECONDS.medium,
             gameStarted: false,
             gameEnded: false,
             patience: 100,
             patienceTimer: null,
+            mindChangeTimer: null,
+            currentOrderDeadline: null,
+            currentOrderStartedAt: null,
+            currentOrderBaseTimePrice: 0,
             activeCategory: "Drinks",
             showTextHints: false,
             isOrderVisible: true,
@@ -1268,6 +1331,8 @@
         function startGame() {
             const selectedGoal = document.getElementById('customer-goal').value;
             gameState.customerGoal = selectedGoal === 'endless' ? null : Number(selectedGoal);
+            gameState.difficulty = document.getElementById('difficulty').value;
+            gameState.orderTimeLimit = DIFFICULTY_TIME_LIMITS_SECONDS[gameState.difficulty];
             gameState.gameStarted = true;
             gameState.gameEnded = false;
             gameState.earnings = 0;
@@ -1275,6 +1340,7 @@
             gameState.trayItems = [];
             document.getElementById('score-text').innerText = '$0.00';
             document.getElementById('customers-served-text').innerText = '0';
+            updateRemainingCustomers();
             document.getElementById('game-setup-screen').classList.add('hidden');
             const endGameButton = document.getElementById('btn-end-game');
             endGameButton.classList.remove('hidden');
@@ -1283,12 +1349,23 @@
             generateNewCustomerOrder();
         }
 
+        function updateRemainingCustomers() {
+            const remaining = gameState.customerGoal === null
+                ? '∞'
+                : Math.max(0, gameState.customerGoal - gameState.customersServed);
+            document.getElementById('customers-remaining-text').innerText = remaining;
+        }
+
         function endGame(won = false) {
             if (!gameState.gameStarted || gameState.gameEnded) return;
 
             gameState.gameStarted = false;
             gameState.gameEnded = true;
             if (gameState.patienceTimer) clearInterval(gameState.patienceTimer);
+            if (gameState.mindChangeTimer) clearTimeout(gameState.mindChangeTimer);
+            gameState.currentOrderDeadline = null;
+            gameState.currentOrderStartedAt = null;
+            updateTimePurchaseUI();
             gameState.currentOrder = [];
             const endGameButton = document.getElementById('btn-end-game');
             endGameButton.classList.add('hidden');
@@ -1302,6 +1379,8 @@
 
         function generateNewCustomerOrder() {
             if (!gameState.gameStarted || gameState.gameEnded) return;
+            if (gameState.mindChangeTimer) clearTimeout(gameState.mindChangeTimer);
+            gameState.mindChangeTimer = null;
             spawnCustomer();
 
             const enabledQuestions = [];
@@ -1330,10 +1409,25 @@
                 }
             }
 
-            const numItems = Math.min(Math.random() > 0.4 ? 3 : 2, enabledQuestions.length);
+            const numItems = gameState.difficulty === 'insane'
+                ? 4
+                : Math.min(Math.random() > 0.4 ? 3 : 2, enabledQuestions.length);
             const order = [];
 
-            if (drinkQuestions.length > 0 && foodQuestions.length > 0) {
+            if (gameState.difficulty === 'insane') {
+                const uniqueQuestions = [...new Map(
+                    enabledQuestions.map(question => [question.options[question.correct], question])
+                ).values()].sort(() => Math.random() - 0.5);
+                const selectedQuestions = uniqueQuestions.slice(0, numItems);
+
+                while (selectedQuestions.length < numItems && enabledQuestions.length > 0) {
+                    selectedQuestions.push(enabledQuestions[Math.floor(Math.random() * enabledQuestions.length)]);
+                }
+
+                selectedQuestions.forEach(question => {
+                    order.push({ term: question.options[question.correct], questionObj: question });
+                });
+            } else if (drinkQuestions.length > 0 && foodQuestions.length > 0) {
                 const randDrink = drinkQuestions[Math.floor(Math.random() * drinkQuestions.length)];
                 order.push({ term: randDrink.options[randDrink.correct], questionObj: randDrink });
 
@@ -1371,23 +1465,43 @@
 
             gameState.currentOrder.forEach((orderObj, idx) => {
                 const card = document.createElement('div');
-                card.className = "bg-white/95 rounded-2xl p-2 border border-amber-200 shadow hover:shadow-md transition cursor-pointer flex flex-col items-center group active:scale-95";
-                
-                card.onclick = () => openAslModal(orderObj, idx + 1);
+                card.className = "bg-white/95 rounded-2xl p-2 border border-amber-200 shadow flex flex-col items-center";
 
-                card.innerHTML = `
-                    <div class="asl-gif-mask w-full h-20 md:h-24">
-                        <img src="${orderObj.questionObj.image}" alt="ASL Sign Animation">
-                    </div>
-                    <span class="text-[11px] font-bold text-amber-700 mt-1 flex items-center">
-                        <i class="fa-solid fa-hands-asl-interpreting mr-1 text-[10px]"></i>
-                        Item #${idx + 1}
-                    </span>
-                    <span class="text-[9px] text-slate-400 font-medium">Tap to Test Sign</span>
-                `;
+                const enlargeButton = document.createElement('button');
+                enlargeButton.className = "asl-gif-mask order-sign-gif w-full cursor-zoom-in";
+                enlargeButton.type = "button";
+                enlargeButton.setAttribute('aria-label', `Enlarge sign for item ${idx + 1}`);
+                enlargeButton.onclick = () => openOrderGif(orderObj.questionObj.image, idx + 1);
+
+                const image = document.createElement('img');
+                image.src = orderObj.questionObj.image;
+                image.alt = `ASL sign for order item ${idx + 1}`;
+                enlargeButton.appendChild(image);
+                card.appendChild(enlargeButton);
+
+                const caption = document.createElement('span');
+                caption.className = "text-[11px] font-bold text-amber-700 mt-1 flex items-center";
+                caption.innerHTML = `<i class="fa-solid fa-hands-asl-interpreting mr-1 text-[10px]"></i>Item #${idx + 1}`;
+                card.appendChild(caption);
 
                 visibleContainer.appendChild(card);
             });
+        }
+
+        function openOrderGif(imageUrl, itemNumber) {
+            const modal = document.getElementById('order-gif-modal');
+            const image = document.getElementById('enlarged-order-gif');
+            image.src = imageUrl;
+            image.alt = `Enlarged ASL sign for order item ${itemNumber}`;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeOrderGif() {
+            const modal = document.getElementById('order-gif-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('enlarged-order-gif').src = '';
         }
 
         function toggleOrderVisibility() {
@@ -1418,7 +1532,18 @@
 
         function startPatienceTimer() {
             if (gameState.patienceTimer) clearInterval(gameState.patienceTimer);
+            if (gameState.mindChangeTimer) clearTimeout(gameState.mindChangeTimer);
             const patienceBar = document.getElementById('patience-bar');
+            patienceBar.style.width = '100%';
+            patienceBar.className = "bg-emerald-500 h-full transition-all duration-300";
+            gameState.currentOrderStartedAt = Date.now();
+            gameState.currentOrderDeadline = gameState.currentOrderStartedAt + gameState.orderTimeLimit * 1000;
+            gameState.currentOrderBaseTimePrice = TIME_PURCHASE_BASE_PRICE;
+            updateTimePurchaseUI();
+
+            if (gameState.difficulty === 'insane') {
+                gameState.mindChangeTimer = setTimeout(changeCustomerMind, 5000);
+            }
 
             gameState.patienceTimer = setInterval(() => {
                 if (!gameState.gameStarted || gameState.gameEnded) {
@@ -1426,8 +1551,7 @@
                     return;
                 }
 
-                gameState.patience -= 1;
-                patienceBar.style.width = `${gameState.patience}%`;
+                updateOrderPatience();
 
                 if (gameState.patience > 50) patienceBar.className = "bg-emerald-500 h-full transition-all duration-300";
                 else if (gameState.patience > 20) patienceBar.className = "bg-amber-500 h-full transition-all duration-300";
@@ -1439,7 +1563,102 @@
                     showToast("Customer got tired of waiting and left!", "error");
                     generateNewCustomerOrder();
                 }
-            }, 450);
+            }, 100);
+        }
+
+        function getCurrentOrderReward(patience = gameState.patience) {
+            return 12 + (patience / 10);
+        }
+
+        function getTimePurchasePrice() {
+            if (gameState.currentOrderStartedAt === null) return 0;
+
+            const elapsedMs = Math.max(0, Date.now() - gameState.currentOrderStartedAt);
+            const priceIncrease = gameState.currentOrderBaseTimePrice *
+                elapsedMs / (gameState.orderTimeLimit * 1000);
+            return Number((gameState.currentOrderBaseTimePrice + priceIncrease).toFixed(2));
+        }
+
+        function updateTimePurchaseUI() {
+            const button = document.getElementById('btn-buy-time');
+            const priceLabel = document.getElementById('buy-time-price');
+            if (!button || !priceLabel) return;
+
+            const price = getTimePurchasePrice();
+            priceLabel.innerText = `$${price.toFixed(2)}`;
+            button.disabled = !gameState.gameStarted ||
+                gameState.gameEnded ||
+                gameState.currentOrderDeadline === null ||
+                Date.now() >= gameState.currentOrderDeadline ||
+                gameState.earnings < price;
+        }
+
+        function updateOrderPatience(now = Date.now()) {
+            if (gameState.currentOrderDeadline === null) return;
+
+            const orderTimeLimitMs = gameState.orderTimeLimit * 1000;
+            const remainingMs = Math.max(0, gameState.currentOrderDeadline - now);
+            gameState.patience = Math.min(100, 100 * remainingMs / orderTimeLimitMs);
+            const patienceBar = document.getElementById('patience-bar');
+            patienceBar.style.width = `${gameState.patience}%`;
+            updateTimePurchaseUI();
+        }
+
+        function buyMoreTime() {
+            const now = Date.now();
+            if (!gameState.gameStarted || gameState.gameEnded ||
+                gameState.currentOrderDeadline === null ||
+                now >= gameState.currentOrderDeadline) {
+                updateTimePurchaseUI();
+                return;
+            }
+
+            updateOrderPatience(now);
+            const price = getTimePurchasePrice();
+            if (gameState.earnings < price) {
+                playSound('wrong');
+                showToast(`You need $${price.toFixed(2)} to buy more time.`, "error");
+                updateTimePurchaseUI();
+                return;
+            }
+
+            gameState.earnings = Number((gameState.earnings - price).toFixed(2));
+            gameState.currentOrderDeadline += TIME_EXTENSION_SECONDS * 1000;
+            document.getElementById('score-text').innerText = `$${gameState.earnings.toFixed(2)}`;
+            updateOrderPatience(now);
+            playSound('success');
+            showToast(`Bought ${TIME_EXTENSION_SECONDS} more seconds for $${price.toFixed(2)}.`, "success");
+        }
+
+        function changeCustomerMind() {
+            if (!gameState.gameStarted || gameState.gameEnded || gameState.difficulty !== 'insane') return;
+
+            const availableQuestions = Object.keys(VOCAB_DATA)
+                .filter(category => VOCAB_DATA[category]?.enabled !== false)
+                .flatMap(category => VOCAB_DATA[category].questions || []);
+            if (gameState.currentOrder.length === 0 || availableQuestions.length === 0) return;
+
+            const itemIndex = Math.floor(Math.random() * gameState.currentOrder.length);
+            const previousItem = gameState.currentOrder[itemIndex];
+            const alternatives = availableQuestions.filter(
+                question => question.options[question.correct] !== previousItem.term
+            );
+            if (alternatives.length === 0) return;
+
+            const replacement = alternatives[Math.floor(Math.random() * alternatives.length)];
+            gameState.currentOrder[itemIndex] = {
+                term: replacement.options[replacement.correct],
+                questionObj: replacement
+            };
+
+            const trayItemIndex = gameState.trayItems.indexOf(previousItem.term);
+            if (trayItemIndex !== -1) {
+                gameState.trayItems.splice(trayItemIndex, 1);
+                updateTray3D();
+            }
+
+            renderOrderUI();
+            showToast(`Customer changed their mind! Check the updated sign for item #${itemIndex + 1}.`, "info");
         }
 
         function serveCustomer() {
@@ -1460,12 +1679,13 @@
                 clearInterval(gameState.patienceTimer);
                 playSound('success');
 
-                const tip = (12 + (gameState.patience / 10)).toFixed(2);
+                const tip = getCurrentOrderReward().toFixed(2);
                 gameState.earnings += parseFloat(tip);
                 gameState.customersServed += 1;
 
                 document.getElementById('score-text').innerText = `$${gameState.earnings.toFixed(2)}`;
                 document.getElementById('customers-served-text').innerText = gameState.customersServed;
+                updateRemainingCustomers();
 
                 showToast(`Order Correct! Earned +$${tip}`, "success");
 
@@ -1513,12 +1733,12 @@
             const kitchenBtn = document.getElementById('btn-view-kitchen');
 
             if (mode === 'kitchen') {
-                if (kitchenPanel) kitchenPanel.classList.remove('translate-y-full');
+                if (kitchenPanel) kitchenPanel.classList.add('is-open');
                 if (counterBtn) counterBtn.className = "glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-slate-200 hover:border-amber-400 hover:bg-amber-400/20 transition flex items-center space-x-2";
                 if (kitchenBtn) kitchenBtn.className = "glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-amber-400 bg-amber-400/20 transition flex items-center space-x-2";
                 animateCameraTo(new THREE.Vector3(-1.8, 2.2, 3.2), new THREE.Vector3(0, 1.18, 0.6));
             } else {
-                if (kitchenPanel) kitchenPanel.classList.add('translate-y-full');
+                if (kitchenPanel) kitchenPanel.classList.remove('is-open');
                 if (counterBtn) counterBtn.className = "glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-amber-400 bg-amber-400/20 transition flex items-center space-x-2";
                 if (kitchenBtn) kitchenBtn.className = "glass-panel text-slate-800 font-bold px-5 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg border-2 border-slate-200 hover:border-amber-400 hover:bg-amber-400/20 transition flex items-center space-x-2";
                 animateCameraTo(new THREE.Vector3(0, 3.2, 5.5), new THREE.Vector3(0, 1.2, 0));
@@ -1739,8 +1959,15 @@
             document.getElementById('btn-close-kitchen').onclick = () => setCameraView('counter');
             
             document.getElementById('btn-clear-tray').onclick = clearTray;
+            document.getElementById('btn-buy-time').onclick = buyMoreTime;
             document.getElementById('btn-serve-customer').onclick = serveCustomer;
             document.getElementById('btn-start-game').onclick = startGame;
+            document.getElementById('customer-goal').onchange = event => {
+                if (gameState.gameStarted) return;
+                const selectedGoal = event.target.value;
+                gameState.customerGoal = selectedGoal === 'endless' ? null : Number(selectedGoal);
+                updateRemainingCustomers();
+            };
             document.getElementById('btn-end-game').onclick = () => endGame(false);
             document.getElementById('btn-play-again').onclick = () => {
                 document.getElementById('game-end-screen').classList.add('hidden');
@@ -1754,6 +1981,16 @@
             document.getElementById('btn-close-asl-modal').onclick = () => {
                 document.getElementById('asl-modal').classList.add('hidden');
             };
+            document.getElementById('btn-close-order-gif').onclick = closeOrderGif;
+            document.getElementById('order-gif-modal').onclick = event => {
+                if (event.target.id === 'order-gif-modal') closeOrderGif();
+            };
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && !document.getElementById('order-gif-modal').classList.contains('hidden')) {
+                    closeOrderGif();
+                }
+            });
+            updateRemainingCustomers();
 
             document.getElementById('btn-open-topic-config').onclick = openTopicConfigModal;
             document.getElementById('btn-close-topic-modal').onclick = () => {
