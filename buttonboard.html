@@ -19,6 +19,21 @@
             word-break: break-word;
             hyphens: auto;
         }
+        .term-button {
+            min-height: 7rem;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+        .term-emoji {
+            display: block;
+            flex: 0 0 auto;
+            font-size: 2rem;
+            line-height: 1;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans select-none">
@@ -144,7 +159,8 @@
                     if (q.options && typeof q.correct !== 'undefined' && q.options[q.correct] !== undefined) {
                         terms.push({
                             term: q.options[q.correct],
-                            image: q.image || q.gif || q.gifUrl || ''
+                            image: q.image || q.gif || q.gifUrl || '',
+                            emoji: q.emoji || ''
                         });
                     }
                 });
@@ -192,12 +208,22 @@
                 const btn = document.createElement('button');
                 
                 // Optimized button styling to prevent text overflowing bounds
-                btn.className = `${colorClass} border-b-4 h-24 sm:h-28 p-2 sm:p-3 rounded-xl shadow-md flex items-center justify-center transition-all transform active:scale-95 text-center overflow-hidden`;
+                btn.className = `${colorClass} border-b-4 p-2 sm:p-3 rounded-xl shadow-md transition-all transform active:scale-95 text-center term-button`;
                 btn.onclick = () => showGifModal(item.term, item.image);
 
-                btn.innerHTML = `
-                    <span class="btn-text font-bold text-sm sm:text-base md:text-lg text-white leading-tight">${item.term}</span>
-                `;
+                const term = document.createElement('span');
+                term.className = 'btn-text font-bold text-sm sm:text-base md:text-lg text-white leading-tight';
+                term.textContent = item.term;
+                btn.appendChild(term);
+
+                if (item.emoji) {
+                    const emoji = document.createElement('span');
+                    emoji.className = 'term-emoji';
+                    emoji.setAttribute('aria-hidden', 'true');
+                    emoji.textContent = item.emoji;
+                    btn.appendChild(emoji);
+                }
+
                 termsContainer.appendChild(btn);
             });
         }

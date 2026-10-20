@@ -492,7 +492,8 @@
                     "NICE",
                     "MEET"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "👋"
             },
             {
                 "question": "What sign is being shown?",
@@ -503,7 +504,8 @@
                     "HE/SHE/IT",
                     "WE"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🧑"
             },
             {
                 "question": "What sign is being shown?",
@@ -514,7 +516,8 @@
                     "HIS/HER/ITS",
                     "OUR"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🧑"
             },
             {
                 "question": "What sign is being shown?",
@@ -525,7 +528,8 @@
                     "HE",
                     "SHE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🙋"
             },
             {
                 "question": "What sign is being shown?",
@@ -536,7 +540,8 @@
                     "HELLO",
                     "GOODBYE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🤝"
             },
             {
                 "question": "What sign is being shown?",
@@ -547,7 +552,8 @@
                     "HIS",
                     "OUR"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🙋"
             },
             {
                 "question": "What sign is being shown?",
@@ -558,7 +564,8 @@
                     "GREAT",
                     "FINE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🧑"
             },
             {
                 "question": "What sign is being shown?",
@@ -569,7 +576,8 @@
                     "OUR",
                     "THEIR"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "👨‍👩‍👧"
             },
             {
                 "question": "What sign is being shown?",
@@ -580,7 +588,8 @@
                     "YOU",
                     "THEY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "👥"
             },
             {
                 "question": "What sign is being shown?",
@@ -591,7 +600,8 @@
                     "YOU",
                     "THEY"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "👥"
             },
             {
                 "question": "What sign is being shown?",
@@ -602,7 +612,8 @@
                     "HE",
                     "SHE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "👉"
             },
             {
                 "question": "What sign is being shown?",
@@ -613,7 +624,8 @@
                     "WE",
                     "THEY"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "👥"
             },
             {
                 "question": "What sign is being shown?",
@@ -624,7 +636,8 @@
                     "HIS",
                     "HER"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "👉"
             },
             {
                 "question": "What sign is being shown?",
@@ -635,7 +648,8 @@
                     "OUR",
                     "THEIR"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "👥"
             },
             {
                 "question": "What sign is being shown?",
@@ -646,7 +660,8 @@
                     "CALL",
                     "TITLE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🏷️"
             },
             {
                 "question": "What sign is being shown?",
@@ -657,7 +672,8 @@
                     "FLORIDA",
                     "NEW YORK"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🌴"
             },
             {
                 "question": "What sign is being shown?",
@@ -668,7 +684,8 @@
                     "DON'T-LIKE",
                     "DON'T-HAVE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🤷"
             },
             {
                 "question": "What sign is being shown?",
@@ -679,7 +696,8 @@
                     "TEXAS",
                     "FLORIDA"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🗽"
             },
             {
                 "question": "What sign is being shown?",
@@ -690,7 +708,8 @@
                     "MAYBE",
                     "SURE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "❌"
             },
             {
                 "question": "What sign is being shown?",
@@ -701,7 +720,8 @@
                     "NEVER",
                     "NONE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🚫"
             },
             {
                 "question": "What sign is being shown?",
@@ -712,7 +732,8 @@
                     "SCHOOL",
                     "LEARN"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🎓"
             },
             {
                 "question": "What sign is being shown?",
@@ -723,7 +744,8 @@
                     "SCHOOL",
                     "LEARN"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🧑‍🏫"
             },
             {
                 "question": "What sign is being shown?",
@@ -734,7 +756,8 @@
                     "WHEN",
                     "WHO"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📍"
             },
             {
                 "question": "What sign is being shown?",
@@ -745,7 +768,8 @@
                     "MAYBE",
                     "SURE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "✅"
             },
             {
                 "question": "What sign is being shown?",
@@ -756,7 +780,8 @@
                     "WHEN",
                     "WHO"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🧑"
             },
             {
                 "question": "What sign is being shown?",
@@ -767,7 +792,8 @@
                     "UNCLE",
                     "BROTHER"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "👴"
             },
             {
                 "question": "What sign is being shown?",
@@ -778,7 +804,8 @@
                     "COUSIN",
                     "FRIEND"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "👦"
             },
             {
                 "question": "What sign is being shown?",
@@ -789,7 +816,8 @@
                     "SISTER",
                     "AUNT"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "👩"
             },
             {
                 "question": "What sign is being shown?",
@@ -800,7 +828,8 @@
                     "UNCLE",
                     "GRANDFATHER"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "👨"
             },
             {
                 "question": "What sign is being shown?",
@@ -811,7 +840,8 @@
                     "CHILD",
                     "BABY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "👦"
             },
             {
                 "question": "What sign is being shown?",
@@ -822,7 +852,8 @@
                     "CHILD",
                     "BABY"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "👧"
             }
         ]
     },
@@ -838,7 +869,8 @@
                     "HARD-OF-HEARING",
                     "SIGN"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🦻"
             },
             {
                 "question": "What sign is being shown?",
@@ -849,7 +881,8 @@
                     "HEARING",
                     "SIGN"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🦻"
             },
             {
                 "question": "What sign is being shown?",
@@ -860,7 +893,8 @@
                     "HEARING",
                     "SIGN"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "👂"
             },
             {
                 "question": "What sign is being shown?",
@@ -871,7 +905,8 @@
                     "COLLEGE",
                     "CLASS"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🏫"
             },
             {
                 "question": "What sign is being shown?",
@@ -882,7 +917,8 @@
                     "COLLEGE",
                     "CLASS"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🏫"
             },
             {
                 "question": "What sign is being shown?",
@@ -893,7 +929,8 @@
                     "MORE",
                     "NEED"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "❓"
             },
             {
                 "question": "What sign is being shown?",
@@ -904,7 +941,8 @@
                     "MORE",
                     "NEED"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🔢"
             },
             {
                 "question": "What sign is being shown?",
@@ -915,7 +953,8 @@
                     "NEED",
                     "UNDERSTAND"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "💡"
             },
             {
                 "question": "What sign is being shown?",
@@ -926,7 +965,8 @@
                     "NEED",
                     "UNDERSTAND"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "➕"
             },
             {
                 "question": "What sign is being shown?",
@@ -937,7 +977,8 @@
                     "UNDERSTAND",
                     "PLEASE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🆘"
             },
             {
                 "question": "What sign is being shown?",
@@ -948,7 +989,8 @@
                     "PLEASE",
                     "NOW"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "💡"
             },
             {
                 "question": "What sign is being shown?",
@@ -959,7 +1001,8 @@
                     "UNDERSTAND",
                     "PLEASE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🤟"
             },
             {
                 "question": "What sign is being shown?",
@@ -970,7 +1013,8 @@
                     "UNDERSTAND",
                     "PLEASE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "❓"
             },
             {
                 "question": "What sign is being shown?",
@@ -981,7 +1025,8 @@
                     "PLEASE",
                     "NOW"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🧠"
             },
             {
                 "question": "What sign is being shown?",
@@ -992,7 +1037,8 @@
                     "NOW",
                     "AGAIN"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🙏"
             },
             {
                 "question": "What sign is being shown?",
@@ -1003,7 +1049,8 @@
                     "AGAIN",
                     "BOOK"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "⏰"
             },
             {
                 "question": "What sign is being shown?",
@@ -1014,7 +1061,8 @@
                     "BOOK",
                     "CLASS"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🔁"
             },
             {
                 "question": "What sign is being shown?",
@@ -1025,7 +1073,8 @@
                     "CLASS",
                     "COLLEGE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📖"
             },
             {
                 "question": "What sign is being shown?",
@@ -1036,7 +1085,8 @@
                     "COLLEGE",
                     "GO-TO/GO"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🏫"
             },
             {
                 "question": "What sign is being shown?",
@@ -1047,7 +1097,8 @@
                     "GO-TO/GO",
                     "HAVE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🎓"
             },
             {
                 "question": "What sign is being shown?",
@@ -1058,7 +1109,8 @@
                     "HAVE",
                     "LEARN"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "➡️"
             },
             {
                 "question": "What sign is being shown?",
@@ -1069,7 +1121,8 @@
                     "LEARN",
                     "PAGE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🤲"
             },
             {
                 "question": "What sign is being shown?",
@@ -1080,7 +1133,8 @@
                     "PAGE",
                     "PAPER"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🧠"
             },
             {
                 "question": "What sign is being shown?",
@@ -1091,7 +1145,8 @@
                     "PAPER",
                     "PENCIL"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📄"
             },
             {
                 "question": "What sign is being shown?",
@@ -1102,7 +1157,8 @@
                     "PENCIL",
                     "SCHOOL"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📄"
             },
             {
                 "question": "What sign is being shown?",
@@ -1113,7 +1169,8 @@
                     "SCHOOL",
                     "TAKE-UP"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "✏️"
             },
             {
                 "question": "What sign is being shown?",
@@ -1124,7 +1181,8 @@
                     "TAKE-UP",
                     "DEAF"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🏫"
             },
             {
                 "question": "What sign is being shown?",
@@ -1135,7 +1193,8 @@
                     "DEAF",
                     "HEARING"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📚"
             }
         ]
     },
@@ -1146,43 +1205,50 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655481/uevolhc2tg6yl6aptfkk.gif",
       "options": ["APPLE-JUICE", "ORANGE", "JUICE", "ORANGE JUICE"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🧃"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655443/kau9hhbktahcfobxsjvi.gif",
       "options": ["MILK", "WATER", "WHITE-DRINK", "COW"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🥛"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655418/j0vr3q9czs7rbyx5jj4s.gif",
       "options": ["COFFEE", "TEA", "HOT-DRINK", "CUP"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍵"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655400/kz85cfgkv3skuzpce1pi.gif",
       "options": ["POP", "COKE", "SODA", "FIZZY-DRINK"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🥤"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655375/bo0ndjsbn2g4zwwin8of.gif",
       "options": ["TEA", "BLACK-DRINK", "HOT", "COFFEE"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "☕"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655356/czc7ejlcjukv0bre6qrc.gif",
       "options": ["WATER", "DRINK", "CLEAR", "LIQUID"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "💧"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655560/l73cywxzglyqk0kzal0q.gif",
       "options": ["WATER", "DRINK", "THIRSTY", "GULP"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🥤"
     }
   ]
 },
@@ -1193,49 +1259,57 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656892/zseebsikytql5olj4txc.gif",
       "options": ["BREAKFAST", "MORNING-EAT", "SUNRISE-FOOD", "EARLY-MEAL"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🍳"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655855/bvdtrcqlgot5dv93ln9c.gif",
       "options": ["BAGEL", "DONUT", "COOKIE", "CIRCLE-BREAD"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍩"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655788/tcv4rbuleuqd9pzjqgww.gif",
       "options": ["CEREAL", "SOUP", "OATS", "BOWL-FOOD"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🥣"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655820/eyhakpebq8mzm0htvgyd.gif",
       "options": ["PANCAKE", "WAFFLES", "BREAD", "GRID-CAKE"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🧇"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655890/la96vn34fmofpxkoua0z.gif",
       "options": ["DONUT", "BREAD", "BAGEL", "ROUND-TOAST"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🥯"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655803/yg9stwmvhsqkn3wd0txg.gif",
       "options": ["WAFFLE", "COOKIE", "FLAPJACK", "PANCAKE"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🥞"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655720/pbqjkj3uuk27jackkkdc.gif",
       "options": ["FRENCH TOAST", "BREAD-EGG", "SYRUP-BREAD", "TOAST"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🍞"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655604/kfspy75ze1v2ky90lpqb.gif",
       "options": ["CHICKEN", "BIRD", "EGG", "OVAL"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🥚"
     }
   ]
 },
@@ -1246,79 +1320,92 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655324/pe6w3helaieokmbxwxdx.gif",
       "options": ["DINNER", "BREAKFAST", "SNACK", "LUNCH"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🍱"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655907/oxwivlgmpln9p8lt1bgg.gif",
       "options": ["SANDWICH", "BURGER", "BREAD", "LUNCH"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🥪"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655967/c0qbizqwgicdc8yc1shr.gif",
       "options": ["FRIES", "FRENCH-FRIES", "POTATO-STICKS", "CHIPS"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍟"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655983/v38mf3jhr5juvlwz1tsi.gif",
       "options": ["SANDWICH", "BUN", "HAMBURGER", "MEAT-PATTY"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🍔"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655999/c084vuouxaprlz8gu69c.gif",
       "options": ["SALAD", "VEGETABLES", "GREENS", "TOSS-FOOD"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🥗"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655772/y2yyivagjjhwrzcbnoiv.gif",
       "options": ["TACO", "WRAP", "BURRITO", "ROLL"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🌯"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656138/xx4nuglf977giozpgaw9.gif",
       "options": ["BURRITO", "SANDWICH", "WRAP", "TACO"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🌮"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655305/n15fo6v2q7szkqsar62h.gif",
       "options": ["DINNER", "NIGHT-EAT", "SUPPER", "EVENING-MEAL"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🍽️"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656016/vrytjkzltegtgegvt6g2.gif",
       "options": ["PEPPERONI", "CHEESE-BREAD", "PIE", "PIZZA"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🍕"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656124/tmnk8d5ja0xp57odinf4.gif",
       "options": ["SUSHI", "FISH-RICE", "ROLL", "SEAWEED"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🍣"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656227/sqqy69ybextqddjbclac.gif",
       "options": ["NOODLES", "PASTA/SPAGHETTI", "ITALIAN-FOOD", "WORM-EAT"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍝"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656241/h4vsewdifb7re3wo0w4j.gif",
       "options": ["CEREAL", "SOUP", "BOWL", "HOT-LIQUID"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍲"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522620/mxwmynjm7sfbglcvxpyr.gif",
       "options": ["BACON", "LASAGNA", "HASHBROWN", "POTATO"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍝"
     }
   ]
 },
@@ -1329,49 +1416,57 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656191/plnuvjxenksbfut2c7e0.gif",
       "options": ["FOOD", "ANIMAL", "MEAT", "BEEF"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🥩"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655661/vmmom751icgwjjlv8jta.gif",
       "options": ["HAM", "BACON", "PORK", "MEAT-STRIP"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🥓"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655677/fkdorxlpm6wedigge0uc.gif",
       "options": ["HOTDOG", "MEAT-TUBE", "LINK", "SAUSAGE"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🌭"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656873/jcp8l67mjlcmb50skl5z.gif",
       "options": ["CRAB", "SHRIMP", "SEAFOOD", "LOBSTER"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🦞"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656849/mjjyszgifi2fpfyzur59.gif",
       "options": ["CRAB", "LOBSTER", "PINCH", "SEAFOOD"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🦀"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656208/pchx6qtdffmse9z4qpeq.gif",
       "options": ["TURKEY", "CHICKEN", "BIRD", "ROOSTER"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🐔"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656103/wp7fo3knqcceid3sqeun.gif",
       "options": ["CHICKEN", "BIRD", "TURKEY", "GOBBLE"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🦃"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656153/wwdvzlcllfmvz9exvmqm.gif",
       "options": ["SWIM", "WATER-ANIMAL", "SEAFOOD", "FISH"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🐟"
     }
   ]
 },
@@ -1382,43 +1477,50 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656327/nyhu61rmytzoogsfjweb.gif",
       "options": ["FROZEN-YOGURT", "DESSERT", "ICECREAM", "COLD-TREAT"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🍦"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656365/yhqzluk2t6oysnb1u8wh.gif",
       "options": ["COOKIE", "BISCUIT", "DESSERT", "ROUND-TREAT"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🍪"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656424/whwpujqrizbxpklkxmpc.gif",
       "options": ["PIE", "CAKE", "DESSERT", "BIRTHDAY"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍰"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656710/xiqv48jeqigceyq761dt.gif",
       "options": ["CANDY", "BROWN", "CHOCOLATE", "SWEET"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🍫"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656726/nzni2y1waa4jdjqzy7vt.gif",
       "options": ["WHITE", "ICECREAM", "SWEET", "VANILLA"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🍦"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656441/ftve9hrdowanzn4zdnip.gif",
       "options": ["CAKE", "PIE", "DESSERT", "SLICE"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🥧"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656741/ezzcn76z2ht8ejczvjc6.gif",
       "options": ["CANDY", "SWEET", "SUGAR", "DESSERT"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🍬"
     }
   ]
 },
@@ -1429,67 +1531,78 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522489/rey0ivuagi0ky1zhmb5d.gif",
       "options": ["APPLE", "CHERRY", "BERRY", "PEAR"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🫐"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/v1759522384/bdw0emx4ctgocuzgt7my.gif",
       "options": ["FRUIT", "STRAWBERRY", "CHERRY", "BERRY"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🍎"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522306/cirsdn1himfbecuus0qf.gif",
       "options": ["PEAR", "BANANA", "BERRY", "MANGO"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍌"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522245/qukqgg2ef4yoi7i4jbsg.gif",
       "options": ["WHO", "LIME", "LEMON", "CANDY"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🍋"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522229/n9p6vid4v94gzaifhs9o.gif",
       "options": ["BEET", "CHERRY", "POTATO", "TOMATO"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🍅"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522163/bly0zbdjtjehql02dczu.gif",
       "options": ["BERRY", "CHERRY", "TOMATO", "POTATO"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍒"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522144/kc2or90y8ey4o8pbnnml.gif",
       "options": ["BERRY", "CHERRY", "STRAWBERRY", "FRUIT"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🍓"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522055/nyrttcxrtgip9bxjdwkd.gif",
       "options": ["BEET", "BREAD", "POTATO", "GRAPES"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🍇"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522034/gqtenzo7knkpqtq508kd.gif",
       "options": ["BERRY", "MELON", "CHERRY", "GRAPES"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍈"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522021/ykfwo9jjenvwgyd2kxuy.gif",
       "options": ["PEAR", "PEACH", "STRAWBERRY", "APPLE"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍑"
     },
     {
     "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759521931/v7hb4ie3bwtwd1oeiunk.gif",
       "options": ["PEAR", "CHERRY", "PEACH", "APPLE"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🍐"
     }
   ]
 },
@@ -1500,43 +1613,50 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522279/tmw6ztsbd0dljgtk9etz.gif",
       "options": ["LEMON", "MELON", "BEANS", "BERRY"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🫘"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522214/e42mpmk5r9gvywlft1qt.gif",
       "options": ["CORN", "CEREAL", "BERRY", "CHERRY"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🌽"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522200/lx5yqigsyf6snfzx6fp3.gif",
       "options": ["APPLE", "ONION", "BERRY", "MANGO"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🧅"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522179/dtj1qx3buigtnhhlait0.gif",
       "options": ["RADDISH", "LIME", "CARROT", "LEMON"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🥕"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522127/ww6h7rezhefjtlihgmqv.gif",
       "options": ["BEET", "ARTICHOKE", "POTATO", "LETTUCE"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🥬"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522034/gqtenzo7knkpqtq508kd.gif",
       "options": ["BEET", "PUMPKIN", "TOMATO", "POTATO"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🎃"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759521916/wli191zceppcq0w32z5g.gif",
       "options": ["BERRY", "CHERRY", "VEGETABLE", "FRUIT"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🥦"
     }
   ]
 },
@@ -1547,49 +1667,57 @@
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655519/rvqnqxqr5ddpf2n9mxec.gif",
       "options": ["HUNGRY", "ENOUGH", "FULL", "SATISFIED"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "😋"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655501/xlplmfpejjeb5fij7n6c.gif",
       "options": ["DRINK", "WATER", "WANT", "THIRSTY"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🥤"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655582/qbcmgnwswgszf2js5srn.gif",
       "options": ["ORDER", "CHOOSE", "WANT", "TELL"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "📝"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656833/pfcwregpllznfcskubla.gif",
       "options": ["FOOD-PLACE", "RESTAURANT", "EAT-OUT", "FANCY-MEAL"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🍽️"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656815/zedjsmgffnyibtusfzzt.gif",
       "options": ["NO-WANT", "WANT-NOT", "DON’T-WANT", "REJECT"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🙅"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656798/rk3pjidjg8xn62obgm3o.gif",
       "options": ["NEED", "LIKE", "DESIRE", "WANT"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🙋"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656773/iag8fuy4qteaxhxsnwri.gif",
       "options": ["FAVORITE", "BEST", "LIKE-MOST", "PREFER"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "❤️"
     },
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656758/neqlcjmkmuphqehotil8.gif",
       "options": ["FAVORITE", "PREFER", "CHOOSE", "RATHER"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🤔"
     }
   ]
 },
@@ -1605,7 +1733,8 @@
                     "FAMILY",
                     "TEAM"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🏫"
             },
             {
                 "question": "What is being signed?",
@@ -1616,7 +1745,8 @@
                     "MAJOR",
                     "DECIDE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📚"
             },
             {
                 "question": "What is being signed?",
@@ -1627,7 +1757,8 @@
                     "AGRICULTURE",
                     "GARDEN"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🌾"
             },
             {
                 "question": "What is being signed?",
@@ -1638,7 +1769,8 @@
                     "CALCULUS",
                     "ALGEBRA"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "➗"
             },
             {
                 "question": "What is being signed?",
@@ -1649,7 +1781,8 @@
                     "BODY",
                     "SCIENCE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🫀"
             },
             {
                 "question": "What is being signed?",
@@ -1660,7 +1793,8 @@
                     "PAINT",
                     "CREATE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🎨"
             },
             {
                 "question": "What is being signed?",
@@ -1671,7 +1805,8 @@
                     "AUTO SHOP",
                     "ENGINE"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🔧"
             },
             {
                 "question": "What is being signed?",
@@ -1682,7 +1817,8 @@
                     "LIFE",
                     "BIOLOGY"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🧬"
             },
             {
                 "question": "What is being signed?",
@@ -1693,7 +1829,8 @@
                     "MIX",
                     "BIOLOGY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "⚗️"
             },
             {
                 "question": "What is being signed?",
@@ -1704,7 +1841,8 @@
                     "TYPING",
                     "PROGRAMMING"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "💻"
             },
             {
                 "question": "What is being signed?",
@@ -1715,7 +1853,8 @@
                     "COOK/COOKING",
                     "KITCHEN"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "👨‍🍳"
             },
             {
                 "question": "What is being signed?",
@@ -1726,7 +1865,8 @@
                     "CREATE",
                     "DESIGN"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "✏️"
             },
             {
                 "question": "What is being signed?",
@@ -1737,7 +1877,8 @@
                     "GEARS",
                     "MACHINE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "⚙️"
             },
             {
                 "question": "What is being signed?",
@@ -1748,7 +1889,8 @@
                     "LANGUAGE",
                     "BOOK"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📚"
             },
             {
                 "question": "What is being signed?",
@@ -1759,7 +1901,8 @@
                     "GEOMETRY",
                     "ALGEBRA"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "📐"
             },
             {
                 "question": "What is being signed?",
@@ -1770,7 +1913,8 @@
                     "STORY",
                     "HISTORY"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "📜"
             },
             {
                 "question": "What is being signed?",
@@ -1781,7 +1925,8 @@
                     "ALGEBRA",
                     "GEOMETRY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "➗"
             },
             {
                 "question": "What is being signed?",
@@ -1792,7 +1937,8 @@
                     "NUMBERS",
                     "ALGEBRA"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "➗"
             },
             {
                 "question": "What is being signed?",
@@ -1803,7 +1949,8 @@
                     "METAL SHOP",
                     "BUILD"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🔩"
             },
             {
                 "question": "What is being signed?",
@@ -1814,7 +1961,8 @@
                     "PLAY",
                     "MUSIC/BAND"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🎵"
             },
             {
                 "question": "What is being signed?",
@@ -1825,7 +1973,8 @@
                     "EXERCISE",
                     "GYM"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🏃"
             },
             {
                 "question": "What is being signed?",
@@ -1836,7 +1985,8 @@
                     "CHEMISTRY",
                     "BIOLOGY"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🧲"
             },
             {
                 "question": "What is being signed?",
@@ -1847,7 +1997,8 @@
                     "SCIENCE",
                     "PHYSICS"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🔬"
             },
             {
                 "question": "What is being signed?",
@@ -1858,7 +2009,8 @@
                     "DATA",
                     "STATISTICS"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "📊"
             },
             {
                 "question": "What is being signed?",
@@ -1869,7 +2021,8 @@
                     "LEARN",
                     "BOOK"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "📚"
             },
             {
                 "question": "What is being signed?",
@@ -1880,7 +2033,8 @@
                     "BUILD",
                     "HAMMER"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🪵"
             }
         ]
     },
@@ -1896,7 +2050,8 @@
                     "RACE",
                     "TRACK"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🏃"
             },
             {
                 "question": "What is being signed?",
@@ -1907,7 +2062,8 @@
                     "JUMP",
                     "SUPPORT"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📣"
             },
             {
                 "question": "What is being signed?",
@@ -1918,7 +2074,8 @@
                     "HORSE RIDE COMPETITION",
                     "ANIMAL-RACE"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🏇"
             },
             {
                 "question": "What is being signed?",
@@ -1929,7 +2086,8 @@
                     "WRESTLING",
                     "RUGBY"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🏉"
             },
             {
                 "question": "What is being signed?",
@@ -1940,7 +2098,8 @@
                     "SPORTS-DAY",
                     "RACE-EVENT"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🏃"
             },
             {
                 "question": "What is being signed?",
@@ -1951,7 +2110,8 @@
                     "BALLET",
                     "MOVE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "💃"
             },
             {
                 "question": "What is being signed?",
@@ -1962,7 +2122,8 @@
                     "SWIM",
                     "POOL"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🏊"
             },
             {
                 "question": "What is being signed?",
@@ -1973,7 +2134,8 @@
                     "BASKETBALL",
                     "WATER POLO"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🤽"
             },
             {
                 "question": "What is being signed?",
@@ -1984,7 +2146,8 @@
                     "BOXING",
                     "RUGBY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🤼"
             },
             {
                 "question": "What is being signed?",
@@ -1995,7 +2158,8 @@
                     "BASEBALL",
                     "SWING"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🏌️"
             },
             {
                 "question": "What is being signed?",
@@ -2006,7 +2170,8 @@
                     "TENNIS",
                     "RACQUET"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🎾"
             },
             {
                 "question": "What is being signed?",
@@ -2017,7 +2182,8 @@
                     "NETBALL",
                     "VOLLEYBALL"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🏐"
             },
             {
                 "question": "What is being signed?",
@@ -2028,7 +2194,8 @@
                     "KICKBALL",
                     "BALL"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "⚽"
             },
             {
                 "question": "What is being signed?",
@@ -2039,7 +2206,8 @@
                     "HOOPS",
                     "THROW"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🏀"
             },
             {
                 "question": "What is being signed?",
@@ -2050,7 +2218,8 @@
                     "FOOTBALL",
                     "Blitz"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🏈"
             },
             {
                 "question": "What is being signed?",
@@ -2061,7 +2230,8 @@
                     "BAT-BALL",
                     "BASEBALL"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "⚾"
             },
             {
                 "question": "What is being signed?",
@@ -2072,7 +2242,8 @@
                     "BIG-BALL",
                     "THROW"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🥎"
             },
             {
                 "question": "What is being signed?",
@@ -2083,7 +2254,8 @@
                     "ICE-SKATING",
                     "STICK-SPORT"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🏒"
             },
             {
                 "question": "What is being signed?",
@@ -2094,7 +2266,8 @@
                     "LACROSSE",
                     "NET-STICK"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🥍"
             }
         ]
     },
@@ -2110,7 +2283,8 @@
                     "HERE",
                     "LOCATION"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "📍"
             },
             {
                 "question": "What is being signed?",
@@ -2121,7 +2295,8 @@
                     "ROOM",
                     "BUILDING"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🏢"
             },
             {
                 "question": "What is being signed?",
@@ -2132,7 +2307,8 @@
                     "#BANK",
                     "BUILDING"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🏦"
             },
             {
                 "question": "What is being signed?",
@@ -2143,7 +2319,8 @@
                     "TOILET",
                     "RESTROOM"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🚻"
             },
             {
                 "question": "What is being signed?",
@@ -2154,7 +2331,8 @@
                     "HISTORY-PLACE",
                     "EXHIBIT"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🏛️"
             },
             {
                 "question": "What is being signed?",
@@ -2165,7 +2343,8 @@
                     "SCHOOL",
                     "READING-ROOM"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📚"
             },
             {
                 "question": "What is being signed?",
@@ -2176,7 +2355,8 @@
                     "BUY-BOOKS",
                     "BOOK STORE"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "📚"
             },
             {
                 "question": "What is being signed?",
@@ -2187,7 +2367,8 @@
                     "FOOD-COURT",
                     "LUNCH-ROOM"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🍽️"
             },
             {
                 "question": "What is being signed?",
@@ -2198,7 +2379,8 @@
                     "LOCKER",
                     "CLOSET"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🔒"
             },
             {
                 "question": "What is being signed?",
@@ -2209,7 +2391,8 @@
                     "MALL",
                     "STORE"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🏬"
             }
         ]
     },  
@@ -2225,7 +2408,8 @@
                     "STREET",
                     "DRIVE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "➡️"
             },
             {
                 "question": "What word is being signed?",
@@ -2236,7 +2420,8 @@
                     "CLOSE",
                     "NEAR"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "⬅️"
             },
             {
                 "question": "What word is being signed?",
@@ -2247,7 +2432,8 @@
                     "NEXT-TO",
                     "STREET"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "↔️"
             },
             {
                 "question": "What word is being signed?",
@@ -2258,7 +2444,8 @@
                     "STRAIGHT",
                     "AVENUE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "↔️"
             },
             {
                 "question": "What word is being signed?",
@@ -2269,7 +2456,8 @@
                     "ADDRESS",
                     "ARRIVE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "⬅️"
             },
             {
                 "question": "What word is being signed?",
@@ -2280,7 +2468,8 @@
                     "STREET",
                     "ARRIVE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🏠"
             },
             {
                 "question": "What word is being signed?",
@@ -2291,7 +2480,8 @@
                     "TURN LEFT",
                     "INTERSECTION"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📍"
             },
             {
                 "question": "What word is being signed?",
@@ -2302,7 +2492,8 @@
                     "BEHIND",
                     "CIRCLE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🤏"
             },
             {
                 "question": "What word is being signed?",
@@ -2313,7 +2504,8 @@
                     "INTERSECTION",
                     "ADDRESS"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🛣️"
             },
             {
                 "question": "What word is being signed?",
@@ -2324,7 +2516,8 @@
                     "TURN RIGHT",
                     "DRIVE"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "↪️"
             },
             {
                 "question": "What word is being signed?",
@@ -2335,7 +2528,8 @@
                     "STREET",
                     "ACROSS"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🛣️"
             },
             {
                 "question": "What word is being signed?",
@@ -2346,7 +2540,8 @@
                     "NEXT-TO",
                     "ARRIVE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "✚"
             },
             {
                 "question": "What word is being signed?",
@@ -2357,7 +2552,8 @@
                     "STREET",
                     "CLOSE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "⬆️"
             },
             {
                 "question": "What word is being signed?",
@@ -2368,7 +2564,8 @@
                     "ACROSS",
                     "ADDRESS"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "⭕"
             },
             {
                 "question": "What word is being signed?",
@@ -2379,7 +2576,8 @@
                     "STRAIGHT",
                     "BEHIND"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "↩️"
             },
             {
                 "question": "What word is being signed?",
@@ -2390,7 +2588,8 @@
                     "STREET",
                     "AVENUE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🚗"
             },
             {
                 "question": "What word is being signed?",
@@ -2401,7 +2600,8 @@
                     "NEAR",
                     "ACROSS"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "📍"
             }
         ]
     },
@@ -2412,97 +2612,113 @@
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704383947/wz4rpzlcshxnnzarvhkk.gif",
             "options": ["RED", "ORANGE", "YELLOW", "PINK"],
-            "correct": 0
+            "correct": 0,
+            "emoji": "🔴"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384511/zbg2lottb0pcy1yzjvad.gif",
             "options": ["WHITE", "SILVER", "GRAY", "BLACK"],
-            "correct": 2
+            "correct": 2,
+            "emoji": "⚪"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384201/i94paaqbhnyhrsaexpbt.gif",
             "options": ["GOLD", "YELLOW", "ORANGE", "TAN"],
-            "correct": 1
+            "correct": 1,
+            "emoji": "🟡"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384269/h4wcaptzofsrdr9pxokx.gif",
             "options": ["PURPLE", "GREEN", "BLUE", "GRAY"],
-            "correct": 2
+            "correct": 2,
+            "emoji": "🔵"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384391/laixapvjrlo4rkjpy7nq.gif",
             "options": ["BLACK", "BROWN", "TAN", "ORANGE"],
-            "correct": 1
+            "correct": 1,
+            "emoji": "🟤"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1713301236/agkpyxby2s2limwyqyb6.gif",
             "options": ["SILVER", "GOLD", "GRAY", "WHITE"],
-            "correct": 0
+            "correct": 0,
+            "emoji": "🥈"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384169/gck55tmir7x1ljletcpf.gif",
             "options": ["RED", "ORANGE", "YELLOW", "BROWN"],
-            "correct": 1
+            "correct": 1,
+            "emoji": "🟠"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1713300979/ubffxzlzctq3ofkrzhoe.gif",
             "options": ["SILVER", "WHITE", "YELLOW", "GOLD"],
-            "correct": 3
+            "correct": 3,
+            "emoji": "🥇"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384239/vwcnjhrymtiybnpgbyiv.gif",
             "options": ["BLUE", "GREEN", "PURPLE", "YELLOW"],
-            "correct": 1
+            "correct": 1,
+            "emoji": "🟢"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384482/z383cjhwcmmoixtoyetz.gif",
             "options": ["WHITE", "GRAY", "SILVER", "TAN"],
-            "correct": 0
+            "correct": 0,
+            "emoji": "⚪"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384358/evmrghf6znqisbjahsin.gif",
             "options": ["RED", "PURPLE", "PINK", "ORANGE"],
-            "correct": 2
+            "correct": 2,
+            "emoji": "🩷"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384294/fnnrnb3qszif2houinuy.gif",
             "options": ["BLUE", "GREEN", "PURPLE", "PINK"],
-            "correct": 2
+            "correct": 2,
+            "emoji": "🟣"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384589/eof4r7aumfr9rxgjrwei.gif",
             "options": ["BROWN", "BLACK", "GRAY", "DARK"],
-            "correct": 1
+            "correct": 1,
+            "emoji": "⚫"
         },
         {
             "question": "What color is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384430/lh7zs2ywvjvpjps4m5sn.gif",
             "options": ["BROWN", "YELLOW", "ORANGE", "TAN"],
-            "correct": 3
+            "correct": 3,
+            "emoji": "🟫"
         },
         {
             "question": "What concept is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1713301345/jdu30f2oexnyhwjacdl9.gif",
             "options": ["DARK", "BRIGHT", "BLACK", "GRAY"],
-            "correct": 0
+            "correct": 0,
+            "emoji": "🌑"
         },
         {
             "question": "What concept is being signed?",
             "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1713301319/fmdronwvljcthsxeyk4t.gif",
             "options": ["DARK", "WHITE", "BRIGHT", "GOLD"],
-            "correct": 2
+            "correct": 2,
+            "emoji": "☀️"
         }
     ]
 },
@@ -2513,31 +2729,36 @@
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384932/ozcqsitkryhbpgvakgo2.gif",
       "options": ["Pants", "Shirt", "Dress", "Skirt"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "👖"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384667/hd4hcjiafesr6exn2urb.gif",
       "options": ["Pants", "Shirt", "Dress", "Skirt"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "👕"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384862/h991bklzodziovfgchkn.gif",
       "options": ["Pants", "Shirt", "Dress", "Skirt"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "👗"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359446/k39vjrei98c8s3kexncv.gif",
       "options": ["Pants", "Shirt", "Dress", "Skirt"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "👗"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714355261/mkhqx8uf6lxbynfwzacl.gif",
       "options": ["Shorts", "Pants", "Socks", "Belt"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🩳"
     }
   ]
 },
@@ -2548,85 +2769,99 @@
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359222/iopxdtjceqg3gafznkj4.gif",
       "options": ["Shoes", "Sandals", "High-Heels", "Socks"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🩴"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384778/yyzi49jvofoctsjohdf3.gif",
       "options": ["Shoes", "Sandals", "High-Heels", "Socks"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🧦"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704384725/kdu7u6g3r8xt3of8rrmb.gif",
       "options": ["Shoes", "Sandals", "High-Heels", "Socks"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "👟"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359070/vd7bvhfrzx1vqkkf5j80.gif",
       "options": ["Shoes", "Sandals", "High-Heels", "Socks"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "👠"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714358901/czftnqemdmwox47a5rto.gif",
       "options": ["Glasses", "Watch", "Necklace", "Bracelet"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "👓"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714358497/rnpxv5bttdekurixqaci.gif",
       "options": ["Glasses", "Watch", "Necklace", "Bracelet"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "⌚"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/v1714354434/jztnwvaboxhnioouvfvh.gif",
       "options": ["Glasses", "Watch", "Necklace", "Bracelet"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "📿"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/v1714321226/ux9ofkcuufqsreiumuig.gif",
       "options": ["Glasses", "Watch", "Necklace", "Bracelet"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "📿"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902645/kua7trefubxstqendqqe.gif",
       "options": ["Tie", "Bowtie", "Belt", "Scarf"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "👔"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902679/pr4oxz2rnhqr6upbhvsv.gif",
       "options": ["Tie", "Bowtie", "Belt", "Scarf"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "🎀"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714358663/hlbs7jd4si66xbklofxo.gif",
       "options": ["Tie", "Bowtie", "Belt", "Scarf"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🧷"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714354958/srwp1fq2cbozkmt71ft3.gif",
       "options": ["Tie", "Bowtie", "Belt", "Scarf"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🧣"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359001/e4tjs1cue3ucikcnnwj6.gif",
       "options": ["Hat", "Purse", "Socks", "Tie"],
-      "correct": 0
+      "correct": 0,
+      "emoji": "🧢"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714359119/cq3yy2cbvtqm7jjwkr52.gif",
       "options": ["Hat", "Purse", "Socks", "Tie"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "👛"
     }
   ]
 },
@@ -2637,25 +2872,29 @@
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/v1704384606/kl6skympwmaqz5ar9whs.gif",
         "options": ["Clothes", "Wear", "Stripes", "Polka-Dots"],
-        "correct": 0
+        "correct": 0,
+        "emoji": "👚"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/v1714359607/ai9jh7ntn7zxkwqhubiq.gif",
       "options": ["Clothes", "Wear", "Stripes", "Polka-Dots"],
-      "correct": 1
+      "correct": 1,
+      "emoji": "👕"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714355853/femmcpxhigz3fjdjp5s3.gif",
       "options": ["Clothes", "Wear", "Stripes", "Polka-Dots"],
-      "correct": 2
+      "correct": 2,
+      "emoji": "🦓"
     },
     {
       "question": "What is being signed here?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714354890/jyeyi5p6ef2j5iwqm23m.gif",
       "options": ["Clothes", "Wear", "Stripes", "Polka-Dots"],
-      "correct": 3
+      "correct": 3,
+      "emoji": "🔵"
     }
   ]
 },
@@ -2666,97 +2905,113 @@
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714356960/ibddjczztwozhsfh7jfp.gif",
                 "options": ["THIN", "SMALL", "TALL", "CHUBBY"],
-                "correct": 0
+                "correct": 0,
+                "emoji": "📏"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714355790/bfizgqk2t1l8lhdfuh7c.gif",
                 "options": ["MEDIUM", "SMALL", "THIN", "BALD"],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🔹"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714322296/qoeinb5ol3uuvlr7c7iw.gif",
                 "options": ["TALL", "SMALL", "MEDIUM", "THIN"],
-                "correct": 2
+                "correct": 2,
+                "emoji": "📏"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714356751/xb7mbyukelixgqyoioze.gif",
                 "options": ["SMALL", "MEDIUM", "THIN", "TALL"],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🦒"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714321386/fxhn37lxmltcofkhlvuu.gif",
                 "options": ["CHUBBY", "THIN", "HAIR", "BEARD"],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🧸"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714321561/igtopycbyscnb2xs4ufi.gif",
                 "options": ["TALL", "CHUBBY", "SMALL", "BALD"],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🧸"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714354380/f4pziuwonbh9jvbndytq.gif",
                 "options": ["BEARD", "HAIR", "MUSTACHE", "BUN"],
-                "correct": 2
+                "correct": 2,
+                "emoji": "👨🏻"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714322154/vvsymkg0pyhzzctzge2v.gif",
                 "options": ["BALD", "BLONDE", "STRAIGHT-HAIR", "HAIR"],
-                "correct": 3
+                "correct": 3,
+                "emoji": "💇"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714272722/fy2gxwr0auax2agxkzm6.gif",
                 "options": ["BALD", "MUSTACHE", "BEARD", "CHUBBY"],
-                "correct": 0
+                "correct": 0,
+                "emoji": "👨‍🦲"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1714273261/oae2un2femp6wt95hcde.gif",
                 "options": ["MUSTACHE", "BEARD", "HAIR", "BALD"],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🧔"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902028/xkofxpflhi2tnwlujvnd.gif",
                 "options": ["WAVY-HAIR", "STRAIGHT-HAIR", "CURLY-HAIR", "PONY-TAIL"],
-                "correct": 1
+                "correct": 1,
+                "emoji": "💇"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902091/zcbreqgh5ytgfxl8rvp9.gif",
                 "options": ["CURLY-HAIR", "STRAIGHT-HAIR", "WAVY-HAIR", "BUN"],
-                "correct": 2
+                "correct": 2,
+                "emoji": "〰️"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902151/wfwlasy4meyrfeu3vdd8.gif",
                 "options": ["WAVY-HAIR", "STRAIGHT-HAIR", "BUN", "CURLY-HAIR"],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🦱"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902205/fcgh4ddguhzadvtssrve.gif",
                 "options": ["BUN", "PONY-TAIL", "HAIR", "BALD"],
-                "correct": 0
+                "correct": 0,
+                "emoji": "👱"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1704902308/rohq5t36tkphurvf5lfs.gif",
                 "options": ["BUN", "PONY-TAIL", "STRAIGHT-HAIR", "BLONDE"],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🐴"
             },
             {
                 "question": "What is being signed?",
                 "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1765480307/uj5ugd2ipurwzqc9ls8z.gif",
                 "options": ["HAIR", "BUN", "BLONDE", "SMALL"],
-                "correct": 2
+                "correct": 2,
+                "emoji": "👱"
             }
         ]
     },
@@ -2772,7 +3027,8 @@
                     "I-GET-PAID",
                     "MY-MONEY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "💵"
             },
             {
                 "question": "What is being signed?",
@@ -2783,7 +3039,8 @@
                     "GIVE-YOU-MONEY",
                     "YOUR-MONEY"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "💵"
             },
             {
                 "question": "What is being signed?",
@@ -2794,7 +3051,8 @@
                     "GIVE-ME",
                     "GET"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🎁"
             },
             {
                 "question": "What is being signed?",
@@ -2805,7 +3063,8 @@
                     "PRESENT",
                     "GIVE-YOU"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🎁"
             },
             {
                 "question": "What is being signed?",
@@ -2816,7 +3075,8 @@
                     "COME-WITH",
                     "TAKE-HERE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "📦"
             },
             {
                 "question": "What is being signed?",
@@ -2827,7 +3087,8 @@
                     "TAKE-AWAY",
                     "GO-WITH"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📦"
             },
             {
                 "question": "What is being signed?",
@@ -2838,7 +3099,8 @@
                     "BRING-HERE",
                     "GIVE-ME"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "📥"
             },
             {
                 "question": "What is being signed?",
@@ -2849,7 +3111,8 @@
                     "CARRY-THERE",
                     "BRING-THERE"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "📦"
             },
             {
                 "question": "What is being signed?",
@@ -2860,7 +3123,8 @@
                     "SHIFT-THIS-WAY",
                     "ARRIVE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "📍"
             },
             {
                 "question": "What is being signed?",
@@ -2871,7 +3135,8 @@
                     "LEAVE",
                     "SHIFT-THAT-WAY"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "➡️"
             },
             {
                 "question": "What is being signed?",
@@ -2882,7 +3147,8 @@
                     "HELP-YOU",
                     "ASSIST-YOU"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🤝"
             },
             {
                 "question": "What is being signed?",
@@ -2893,7 +3159,8 @@
                     "GIVE-YOU",
                     "SEND-YOU"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "📤"
             },
             {
                 "question": "What is being signed?",
@@ -2904,7 +3171,8 @@
                     "MAIL-TO-ME",
                     "GIVE-ME"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "📥"
             },
             {
                 "question": "What is being signed?",
@@ -2915,7 +3183,8 @@
                     "INQUIRE-OF-ME",
                     "I-AM-ASKED"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "❓"
             },
             {
                 "question": "What is being signed?",
@@ -2926,7 +3195,8 @@
                     "ASK-YOU",
                     "YOU-ARE-ASKED"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "❓"
             },
             {
                 "question": "What is being signed?",
@@ -2937,7 +3207,8 @@
                     "ASSIST-ME",
                     "HELP-ME"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🆘"
             },
             {
                 "question": "What is being signed?",
@@ -2948,7 +3219,8 @@
                     "I-OWE",
                     "DEBT"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🧾"
             },
             {
                 "question": "What is being signed?",
@@ -2959,7 +3231,8 @@
                     "MY-DEBT",
                     "GIVE-ME"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🧾"
             }
         ]
     },
@@ -2970,103 +3243,120 @@
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620523/zqhlalimzyjir9brmncs.gif",
         "options": ["LIGHT TURN-LIGHT-OFF", "LIGHT TURN-LIGHT-ON", "LIGHT", "OPEN-WINDOW"],
-        "correct": 1
+        "correct": 1,
+        "emoji": "💡"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620480/rt8ucsefqayvvembbslz.gif",
         "options": ["LIGHT TURN-LIGHT-ON", "LIGHT", "LIGHT TURN-LIGHT-OFF", "CLOSE-WINDOW"],
-        "correct": 2
+        "correct": 2,
+        "emoji": "💡"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620407/jdey8ztibmucvutspfb0.gif",
         "options": ["LIGHT", "LIGHT TURN-LIGHT-ON", "LIGHT TURN-LIGHT-OFF", "CHAIR"],
-        "correct": 0
+        "correct": 0,
+        "emoji": "💡"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620383/aelzfcds7bll2hxalwc6.gif",
         "options": ["OPEN-WINDOW", "WINDOW", "CLOSE-WINDOW", "DOOR"],
-        "correct": 1
+        "correct": 1,
+        "emoji": "🪟"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620368/siadtrz37vjyvdtxgfue.gif",
         "options": ["OPEN-WINDOW", "CLOSE-WINDOW", "WINDOW", "OPEN-DOOR"],
-        "correct": 0
+        "correct": 0,
+        "emoji": "🪟"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620298/q4buswmoh0bbtvg2uqbr.gif",
         "options": ["OPEN-DOOR", "CLOSE-DOOR", "DOOR", "WINDOW"],
-        "correct": 2
+        "correct": 2,
+        "emoji": "🚪"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620270/jcd7un2ssa7m9ancmgrb.gif",
         "options": ["CLOSE-DOOR", "DOOR", "OPEN-DRAWER", "OPEN-DOOR"],
-        "correct": 3
+        "correct": 3,
+        "emoji": "🚪"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778619961/gyiqer0tbcj5yrtrzz54.gif",
         "options": ["OPEN-DOOR", "CLOSE-DOOR", "DOOR", "CLOSE-WINDOW"],
-        "correct": 1
+        "correct": 1,
+        "emoji": "🚪"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620214/csqwc42virfbtrz3dyzd.gif",
         "options": ["DRAWER", "OPEN-DRAWER", "CLOSE-DRAWER", "CHAIR"],
-        "correct": 0
+        "correct": 0,
+        "emoji": "🗄️"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620191/uktrisg90jr5jk55tpmt.gif",
         "options": ["CLOSE-DRAWER", "DRAWER", "OPEN-DRAWER", "OPEN-BOOK"],
-        "correct": 2
+        "correct": 2,
+        "emoji": "🗄️"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620143/wxbplbnckztnvh2merma.gif",
         "options": ["CLOSE-BOOK", "BOOK", "OPEN-WINDOW", "OPEN-BOOK"],
-        "correct": 3
+        "correct": 3,
+        "emoji": "📖"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778619886/rbgymrl0d0amzxegolnk.gif",
         "options": ["BOOK", "OPEN-BOOK", "CLOSE-BOOK", "DRAWER"],
-        "correct": 0
+        "correct": 0,
+        "emoji": "📖"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620121/u8fyml1lufzldxrotc1p.gif",
         "options": ["CHAIR", "SIT", "BOOK", "DOOR"],
-        "correct": 1
+        "correct": 1,
+        "emoji": "🪑"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620073/dxxogzpd0urz5nqurtik.gif",
         "options": ["OPEN-WINDOW", "WINDOW", "CLOSE-WINDOW", "CLOSE-DOOR"],
-        "correct": 2
+        "correct": 2,
+        "emoji": "🪟"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778620015/iper2mfrg1kkecfmeo98.gif",
         "options": ["OPEN-DRAWER", "CLOSE-DRAWER", "DRAWER", "CLOSE-BOOK"],
-        "correct": 1
+        "correct": 1,
+        "emoji": "🗄️"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778619939/lqd8c7ygle8ajitjx9ff.gif",
         "options": ["OPEN-BOOK", "BOOK", "CLOSE-DRAWER", "CLOSE-BOOK"],
-        "correct": 3
+        "correct": 3,
+        "emoji": "📕"
       },
       {
         "question": "What is being signed here?",
         "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1778619915/nhb1qrtd31o2xmowjsim.gif",
         "options": ["CHAIR", "SIT", "DRAWER", "LIGHT"],
-        "correct": 0
+        "correct": 0,
+        "emoji": "🪑"
       }
     ]
   },
@@ -3082,7 +3372,8 @@
                     "GRAY",
                     "OVERCAST"
                     ],
-                    "correct": 0
+                    "correct": 0,
+                    "emoji": "☁️"
                     },
             {
                 "question": "What is the weather?",
@@ -3093,7 +3384,8 @@
                     "COLD",
                     "WINTER"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🌨️"
             },
             {
                 "question": "What is the weather?",
@@ -3104,7 +3396,8 @@
                     "WINDY",
                     "BLOWING"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🌬️"
             },
             {
                 "question": "What is the weather?",
@@ -3115,7 +3408,8 @@
                     "WATER-FALLING",
                     "RAIN"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🌧️"
             },
             {
                 "question": "What is the weather?",
@@ -3126,7 +3420,8 @@
                     "CLEAR",
                     "DAYLIGHT"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "☀️"
             },
             {
                 "question": "What is the weather?",
@@ -3137,7 +3432,8 @@
                     "NICE",
                     "MILD"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🌡️"
             },
             {
                 "question": "What is the weather?",
@@ -3148,7 +3444,8 @@
                     "COOL",
                     "NICE"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🌡️"
             },
             {
                 "question": "What is the weather?",
@@ -3159,7 +3456,8 @@
                     "WINTER",
                     "COLD"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🥶"
             },
             {
                 "question": "What is the weather?",
@@ -3170,7 +3468,8 @@
                     "SUMMER",
                     "SUNNY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🥵"
             }
         ]
     },
@@ -3186,7 +3485,8 @@
                     "WEDNESDAY",
                     "THURSDAY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "📅"
             },
             {
                 "question": "What day is it?",
@@ -3197,7 +3497,8 @@
                     "WEDNESDAY",
                     "FRIDAY"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📅"
             },
             {
                 "question": "What day is it?",
@@ -3208,7 +3509,8 @@
                     "WEDNESDAY",
                     "SATURDAY"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "📅"
             },
             {
                 "question": "What day is it?",
@@ -3219,7 +3521,8 @@
                     "FRIDAY",
                     "THURSDAY"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "📅"
             },
             {
                 "question": "What day is it?",
@@ -3230,7 +3533,8 @@
                     "SUNDAY",
                     "THURSDAY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "📅"
             },
             {
                 "question": "What day is it?",
@@ -3241,7 +3545,8 @@
                     "SUNDAY",
                     "MONDAY"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📅"
             },
             {
                 "question": "What day is it?",
@@ -3252,7 +3557,8 @@
                     "SUNDAY",
                     "WEEKEND"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "📅"
             }
         ]
     },
@@ -3268,7 +3574,8 @@
                     "NO",
                     "REFUSE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🚫"
             },
             {
                 "question": "What is being signed?",
@@ -3279,7 +3586,8 @@
                     "NOT-ABLE",
                     "IMPOSSIBLE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🙅"
             },
             {
                 "question": "What is being signed?",
@@ -3290,7 +3598,8 @@
                     "CAN",
                     "OK"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "✅"
             },
             {
                 "question": "What is being signed?",
@@ -3301,7 +3610,8 @@
                     "ASK",
                     "ANSWER"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "💬"
             },
             {
                 "question": "What is being signed?",
@@ -3312,7 +3622,8 @@
                     "TOGETHER",
                     "ACCOMPANY"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🤝"
             },
             {
                 "question": "What is being signed?",
@@ -3323,7 +3634,8 @@
                     "CONTINUE",
                     "START"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "➡️"
             },
             {
                 "question": "What is being signed?",
@@ -3334,7 +3646,8 @@
                     "START",
                     "NOW"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "▶️"
             },
             {
                 "question": "What is being signed?",
@@ -3345,7 +3658,8 @@
                     "WHY",
                     "FOR"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "👉"
             },
             {
                 "question": "What is being signed?",
@@ -3356,7 +3670,8 @@
                     "FAST",
                     "NOW"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "⏩"
             },
             {
                 "question": "What is being signed?",
@@ -3367,7 +3682,8 @@
                     "SOME",
                     "BIT"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🤏"
             },
             {
                 "question": "What is being signed?",
@@ -3378,7 +3694,8 @@
                     "EXCUSE-ME",
                     "OOPS"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🙋"
             },
             {
                 "question": "What is being signed?",
@@ -3389,7 +3706,8 @@
                     "REGRET",
                     "SORRY"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🙏"
             },
             {
                 "question": "What is being signed?",
@@ -3400,7 +3718,8 @@
                     "WHAT-FOR",
                     "REASON"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "❓"
             },
             {
                 "question": "What is being signed?",
@@ -3411,7 +3730,8 @@
                     "REAL",
                     "HONEST"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "✅"
             }
         ]
     },
@@ -3751,7 +4071,8 @@
                     "ICL:C”hold cup”",
                     "DCL:CC”large cylinder”"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🥫"
             },
             {
                 "question": "What is being signed?",
@@ -3762,7 +4083,8 @@
                     "ICL:CC”hold large object”",
                     "PCL:CC”large stack”"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🛢️"
             },
             {
                 "question": "What is being signed?",
@@ -3773,7 +4095,8 @@
                     "DCL:CC*”stack”",
                     "BCL:B”flat surface”"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "📚"
             },
             {
                 "question": "What is being signed?",
@@ -3784,7 +4107,8 @@
                     "DCL:9”small round object”",
                     "DCL:F”buttons”"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🔘"
             },
             {
                 "question": "What is being signed?",
@@ -3795,7 +4119,8 @@
                     "DCL:F”buttons”",
                     "DCL:FF”curved cylinder”"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🥫"
             },
             {
                 "question": "What is being signed?",
@@ -3806,7 +4131,8 @@
                     "DCL:CC”large cylinder”",
                     "PCL:FF”row of items”"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🥫"
             },
             {
                 "question": "What is being signed?",
@@ -3828,7 +4154,8 @@
                     "DCL:B”flat surface”",
                     "DCL:OO*”sheet”"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "📄"
             },
             {
                 "question": "What is being signed?",
@@ -3850,7 +4177,8 @@
                     "ICL:B”move flat object”",
                     "ICL:C”move cylinder”"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "📚"
             },
             {
                 "question": "What is being signed?",
@@ -3861,7 +4189,8 @@
                     "ICL:OO*”move sheet”",
                     "ICL:F”move small object”"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "📄"
             },
             {
                 "question": "What is being signed?",
@@ -3894,7 +4223,8 @@
                     "PCL:V”person sitting”",
                     "SCL:2”two people sitting”"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🐾"
             },
             {
                 "question": "What is being signed?",
@@ -3927,7 +4257,8 @@
                     "ICL:A”place object”",
                     "PCL:A”house”"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🗿"
             },
             {
                 "question": "What is being signed?",
@@ -3949,7 +4280,8 @@
                     "BCL:B*”person tapping shoulder”",
                     "BCL:5”tap on head”"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🫳"
             },
             {
                 "question": "What is being signed?",
@@ -3960,7 +4292,8 @@
                     "PCL:B”feet on floor”",
                     "F-E-E-T CL:BB*”put feet up”"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🦶"
             }
         ]
     },
@@ -4075,7 +4408,8 @@
                     "MONEY",
                     "POINT"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "💰"
             },
             {
                 "question": "How much money is this?",
@@ -4218,7 +4552,8 @@
                     "CREDIT/DEBIT",
                     "MONEY"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "💳"
             },
             {
                 "question": "What is being signed?",
@@ -4229,7 +4564,8 @@
                     "GIVE",
                     "SHOPPING"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🛍️"
             },
             {
                 "question": "What is being signed?",
@@ -4240,7 +4576,8 @@
                     "MONEY",
                     "HAVE-NONE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🪙"
             },
             {
                 "question": "What is being signed?",
@@ -4251,7 +4588,8 @@
                     "SAVE",
                     "CHEAP"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🆓"
             }
         ]
     },
@@ -4267,7 +4605,8 @@
                     "APARTMENT",
                     "DORM"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🏠"
             },
             {
                 "question": "What is being signed?",
@@ -4278,7 +4617,8 @@
                     "BUILDING",
                     "ROOF"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🏡"
             },
             {
                 "question": "What is being signed?",
@@ -4289,7 +4629,8 @@
                     "APARTMENT",
                     "ROOM"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🏢"
             },
             {
                 "question": "What is being signed?",
@@ -4300,7 +4641,8 @@
                     "CONDO",
                     "TOWN-HOUSE"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🏘️"
             },
             {
                 "question": "What is being signed?",
@@ -4311,7 +4653,8 @@
                     "IN",
                     "DOOR"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🚪"
             },
             {
                 "question": "What is being signed?",
@@ -4322,7 +4665,8 @@
                     "WALK",
                     "PATH"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🚪"
             },
             {
                 "question": "What is being signed?",
@@ -4333,7 +4677,8 @@
                     "DINING ROOM",
                     "EAT"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🍽️"
             },
             {
                 "question": "What is being signed?",
@@ -4344,7 +4689,8 @@
                     "NIGHT",
                     "BED ROOM"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🛏️"
             },
             {
                 "question": "What is being signed?",
@@ -4355,7 +4701,8 @@
                     "CLOTHES",
                     "MACHINE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🧺"
             },
             {
                 "question": "What is being signed?",
@@ -4366,7 +4713,8 @@
                     "FOOD",
                     "ROOM"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🍳"
             },
             {
                 "question": "What is being signed?",
@@ -4377,7 +4725,8 @@
                     "CLOSET",
                     "CLOTHES"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🚪"
             },
             {
                 "question": "What is being signed?",
@@ -4388,7 +4737,8 @@
                     "DOOR",
                     "GARAGE"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🚗"
             },
             {
                 "question": "What is being signed?",
@@ -4399,7 +4749,8 @@
                     "TOILET",
                     "WASH"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🛁"
             },
             {
                 "question": "What is being signed?",
@@ -4410,7 +4761,8 @@
                     "UP",
                     "DOWN"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🪜"
             }
         ]
     },
@@ -4426,7 +4778,8 @@
                     "FLOOR",
                     "FLAT"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🪵"
             },
             {
                 "question": "What is being signed?",
@@ -4437,7 +4790,8 @@
                     "COUCH",
                     "FURNITURE"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🛋️"
             },
             {
                 "question": "What is being signed?",
@@ -4448,7 +4802,8 @@
                     "SIT",
                     "FURNITURE"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🛋️"
             },
             {
                 "question": "What is being signed?",
@@ -4459,7 +4814,8 @@
                     "SHELF",
                     "SURFACE"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🪑"
             },
             {
                 "question": "What is being signed?",
@@ -4470,7 +4826,8 @@
                     "COFFEE TABLE",
                     "LIVING ROOM"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🪑"
             },
             {
                 "question": "What is being signed?",
@@ -4481,7 +4838,8 @@
                     "WALL",
                     "SHELF"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🗄️"
             },
             {
                 "question": "What is being signed?",
@@ -4492,7 +4850,8 @@
                     "WATER",
                     "BATH"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🚿"
             },
             {
                 "question": "What is being signed?",
@@ -4503,7 +4862,8 @@
                     "WATER",
                     "WASH"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🛁"
             },
             {
                 "question": "What is being signed?",
@@ -4514,7 +4874,8 @@
                     "REFRIGERATOR",
                     "FOOD"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🧊"
             },
             {
                 "question": "What is being signed?",
@@ -4525,7 +4886,8 @@
                     "PILLS",
                     "MEDICINE CABINET"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🩹"
             },
             {
                 "question": "What is being signed?",
@@ -4536,7 +4898,8 @@
                     "COOK",
                     "HEAT"
                 ],
-                "correct": 0
+                "correct": 0,
+                "emoji": "🍲"
             },
             {
                 "question": "What is being signed?",
@@ -4547,7 +4910,8 @@
                     "LOOK",
                     "REFLECTION"
                 ],
-                "correct": 1
+                "correct": 1,
+                "emoji": "🪞"
             },
             {
                 "question": "What is being signed?",
@@ -4558,7 +4922,8 @@
                     "ISLAND",
                     "KITCHEN"
                 ],
-                "correct": 2
+                "correct": 2,
+                "emoji": "🏝️"
             },
             {
                 "question": "What is being signed?",
@@ -4569,7 +4934,8 @@
                     "COOL",
                     "FAN"
                 ],
-                "correct": 3
+                "correct": 3,
+                "emoji": "🪭"
             }
         ]
     }
