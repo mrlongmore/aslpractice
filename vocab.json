@@ -1264,6 +1264,20 @@
     },
     {
       "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655661/vmmom751icgwjjlv8jta.gif",
+      "options": ["HAM", "BACON", "PORK", "MEAT-STRIP"],
+      "correct": 1,
+      "emoji": "🥓"
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655772/y2yyivagjjhwrzcbnoiv.gif",
+      "options": ["TACO", "WRAP", "BURRITO", "ROLL"],
+      "correct": 2,
+      "emoji": "🌯"
+    },
+    {
+      "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655855/bvdtrcqlgot5dv93ln9c.gif",
       "options": ["BAGEL", "DONUT", "COOKIE", "CIRCLE-BREAD"],
       "correct": 1,
@@ -1606,57 +1620,50 @@
     }
   ]
 },
-"Vegetables" :{
-  "title": "🥬 Vegetables",
+"Dairy" :{
+  "title": "🥛 Dairy",
   "questions": [
     {
       "question": "What is being signed?",
-      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522279/tmw6ztsbd0dljgtk9etz.gif",
-      "options": ["LEMON", "MELON", "BEANS", "BERRY"],
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599942/i2nnuqmtnyal0eoby6ay.gif",
+      "options": ["ICECREAM", "GOGURT", "YOGURT", "YOGI"],
       "correct": 2,
-      "emoji": "🫘"
+      "emoji": "🥣"
     },
     {
       "question": "What is being signed?",
-      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522214/e42mpmk5r9gvywlft1qt.gif",
-      "options": ["CORN", "CEREAL", "BERRY", "CHERRY"],
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599910/cev6pig7liwoqdl8ioye.gif",
+      "options": ["SOUR CREAM", "WHIPPED CREAM", "TOMATO", "MILK"],
       "correct": 0,
-      "emoji": "🌽"
+      "emoji": "🥣"
     },
     {
       "question": "What is being signed?",
-      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522200/lx5yqigsyf6snfzx6fp3.gif",
-      "options": ["APPLE", "ONION", "BERRY", "MANGO"],
-      "correct": 1,
-      "emoji": "🧅"
-    },
-    {
-      "question": "What is being signed?",
-      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522179/dtj1qx3buigtnhhlait0.gif",
-      "options": ["RADDISH", "LIME", "CARROT", "LEMON"],
-      "correct": 2,
-      "emoji": "🥕"
-    },
-    {
-      "question": "What is being signed?",
-      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522127/ww6h7rezhefjtlihgmqv.gif",
-      "options": ["BEET", "ARTICHOKE", "POTATO", "LETTUCE"],
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599834/qin3aby71plxvcnv4muy.gif",
+      "options": ["SODA", "SMOOTHIE", "MILK", "MILK SHAKE"],
       "correct": 3,
-      "emoji": "🥬"
+      "emoji": "🥤"
     },
     {
       "question": "What is being signed?",
-      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522034/gqtenzo7knkpqtq508kd.gif",
-      "options": ["BEET", "PUMPKIN", "TOMATO", "POTATO"],
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599746/cj6h16vbga6s5ngmgnl7.gif",
+      "options": ["MILK", "CHEESE", "SOUR CREAM", "WHIPPED CREAM"],
       "correct": 1,
-      "emoji": "🎃"
+      "emoji": "🧀"
     },
     {
       "question": "What is being signed?",
-      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759521916/wli191zceppcq0w32z5g.gif",
-      "options": ["BERRY", "CHERRY", "VEGETABLE", "FRUIT"],
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599732/qxyvnopsksgn5mst9rsd.gif",
+      "options": ["MILK", "CHEESE", "BUTTER", "SOUR CREAM"],
       "correct": 2,
-      "emoji": "🥦"
+      "emoji": "🧈"
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655443/kau9hhbktahcfobxsjvi.gif",
+      "options": ["MILK", "WATER", "WHITE-DRINK", "COW"],
+      "correct": 0,
+      "emoji": "🥛"
     }
   ]
 },

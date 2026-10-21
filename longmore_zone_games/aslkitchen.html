@@ -492,6 +492,18 @@
                     { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656138/xx4nuglf977giozpgaw9.gif", "options": ["BURRITO", "SANDWICH", "WRAP", "TACO"], "correct": 3 },
                     { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656016/vrytjkzltegtgegvt6g2.gif", "options": ["PEPPERONI", "CHEESE-BREAD", "PIE", "PIZZA"], "correct": 3 }
                 ]
+            },
+            "Dairy": {
+                "title": "🥛 Dairy",
+                "enabled": true,
+                "questions": [
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599942/i2nnuqmtnyal0eoby6ay.gif", "options": ["ICECREAM", "GOGURT", "YOGURT", "YOGI"], "correct": 2 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599910/cev6pig7liwoqdl8ioye.gif", "options": ["SOUR CREAM", "WHIPPED CREAM", "TOMATO", "MILK"], "correct": 0 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599834/qin3aby71plxvcnv4muy.gif", "options": ["SODA", "SMOOTHIE", "MILK", "MILK SHAKE"], "correct": 3 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599746/cj6h16vbga6s5ngmgnl7.gif", "options": ["MILK", "CHEESE", "SOUR CREAM", "WHIPPED CREAM"], "correct": 1 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599732/qxyvnopsksgn5mst9rsd.gif", "options": ["MILK", "CHEESE", "BUTTER", "SOUR CREAM"], "correct": 2 },
+                    { "question": "What is being signed?", "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655443/kau9hhbktahcfobxsjvi.gif", "options": ["MILK", "WATER", "WHITE-DRINK", "COW"], "correct": 0 }
+                ]
             }
         };
 
@@ -501,7 +513,7 @@
             "BREAKFAST", "LUNCH", "DINNER", "DRINK", "FOOD", "EAT",
             "FRUIT", "VEGETABLE", "MEAT"
         ]);
-        const FOOD_CATEGORY_PATTERN = /drink|breakfast|lunch|dinner|meal|food|meat|seafood|dessert|sweet|fruit|vegetable/i;
+        const FOOD_CATEGORY_PATTERN = /drink|breakfast|lunch|dinner|meal|food|meat|seafood|dessert|sweet|fruit|vegetable|dairy/i;
 
         function isExcludedFoodQuestion(question) {
             const answer = question.options[question.correct].trim().toUpperCase();
@@ -590,6 +602,7 @@
             "COFFEE": "./assets/cup-coffee.glb",
             "SODA": "./assets/soda-can.glb",
             "MILK": "./assets/carton.glb",
+            "MILK SHAKE": "./assets/frappe.glb",
             "ORANGE JUICE": "",
             "TEA": "./assets/cup-tea.glb",
             "WATER": "",
@@ -606,6 +619,8 @@
             "CAKE": "./assets/cake.glb",
             "CARROT": "./assets/carrot.glb",
             "CHEESE": "./assets/cheese.glb",
+            "SOUR CREAM": "./assets/whipped-cream.glb",
+            "WHIPPED CREAM": "./assets/whipped-cream.glb",
             "CHERRY": "./assets/cherries.glb",
             "CHOCOLATE": "./assets/chocolate.glb",
             "COOKIE": "./assets/cookie.glb",

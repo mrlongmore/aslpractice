@@ -457,7 +457,12 @@ initMenu();
             gameState = 'FINDING_PASSENGER';
             selectNewPassenger();
 
-            window.addEventListener('keydown', (e) => (keys[e.key] = true));
+            window.addEventListener('keydown', (e) => {
+                if (e.key.startsWith('Arrow') && !e.target.matches('input, textarea, select, [contenteditable="true"]')) {
+                    e.preventDefault();
+                }
+                keys[e.key] = true;
+            });
             window.addEventListener('keyup', (e) => (keys[e.key] = false));
             window.addEventListener('resize', onWindowResize, false);
 
