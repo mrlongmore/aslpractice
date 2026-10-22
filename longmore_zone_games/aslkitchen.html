@@ -1664,8 +1664,14 @@
                 return;
             }
 
-            const requiredTerms = gameState.currentOrder.map(o => o.term).sort();
-            const trayTerms = [...gameState.trayItems].sort();
+            const normalizeOrderTerm = term => {
+                const normalizedTerm = term.trim().toUpperCase();
+                return normalizedTerm === 'PUMPKIN' || normalizedTerm === 'MELON'
+                    ? 'PUMPKIN_OR_MELON'
+                    : normalizedTerm;
+            };
+            const requiredTerms = gameState.currentOrder.map(o => normalizeOrderTerm(o.term)).sort();
+            const trayTerms = gameState.trayItems.map(normalizeOrderTerm).sort();
 
             const isCorrect = requiredTerms.length === trayTerms.length &&
                 requiredTerms.every((val, index) => val === trayTerms[index]);
