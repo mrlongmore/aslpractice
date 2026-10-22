@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ASL Table Service</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+        :root {
+            color-scheme: dark;
+            font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+            background: #10201f;
+            color: #f8fafc;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; overflow: hidden; }
+        button { font: inherit; touch-action: manipulation; }
+        #gameScene { position: fixed; inset: 0; z-index: 0; }
+        #gameScene canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+        .topbar {
+            position: fixed; inset: 0 0 auto; z-index: 2; display: flex; align-items: center;
+            justify-content: space-between; gap: 12px; padding: 12px 16px;
+            background: linear-gradient(180deg, rgba(10, 20, 23, .88), rgba(10, 20, 23, .12));
+            pointer-events: none;
+        }
+        .brand, .stats { display: flex; align-items: center; gap: 10px; }
+        .brand strong { font-size: clamp(16px, 2.2vw, 24px); color: #fde68a; }
+        .brand span { font-size: 12px; color: #cbd5e1; }
+        .stat {
+            min-width: 74px; padding: 7px 10px; border: 1px solid #ffffff30; border-radius: 12px;
+            background: #0f172acc; text-align: center; font-weight: 800; font-size: 14px;
+        }
+        .stat small { display: block; color: #cbd5e1; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+        #statusText { position: fixed; z-index: 2; top: 66px; left: 50%; transform: translateX(-50%); color: #fde68a; text-shadow: 0 1px 4px #000; font-size: 13px; text-align: center; }
+        #kitchen {
+            position: fixed; z-index: 3; inset: auto 12px 12px; max-height: min(26vh, 235px);
+            padding: 12px; border: 1px solid #fde68a70; border-radius: 18px;
+            background: #0f172af0; box-shadow: 0 12px 34px #0008; display: flex; flex-direction: column; gap: 8px;
+        }
+        .kitchen-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .kitchen-heading h2 { margin: 0; color: #fde68a; font-size: 16px; }
+        .kitchen-heading p { margin: 0; color: #cbd5e1; font-size: 11px; }
+        #categoryList, #foodList { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: thin; padding: 2px; }
+        #categoryList button, .food-button {
+            border: 1px solid #475569; background: #1e293b; color: #e2e8f0; border-radius: 11px;
+            min-height: 42px; padding: 8px 11px; white-space: nowrap; cursor: pointer;
+        }
+        #categoryList button.active, .food-button.selected { border-color: #fde047; background: #713f12; color: #fff7cc; }
+        #foodList { min-height: 66px; }
+        .food-button { display: flex; flex-direction: row; align-items: center; gap: 8px; min-width: 154px; padding: 6px; }
+        .food-thumbnail { width: 64px; height: 52px; flex: 0 0 64px; border-radius: 8px; background: #020617; }
+        .food-details { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+        .food-button strong { font-size: 12px; }
+        .food-button small { margin-top: 3px; color: #94a3b8; font-size: 10px; }
+        .food-button.selected small { color: #fde68a; }
+        .overlay {
+            position: fixed; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center;
+            padding: 16px; background: #020617d9; backdrop-filter: blur(5px);
+        }
+        .overlay.hidden { display: none; }
+        .dialog {
+            width: min(440px, 100%); max-height: 92vh; overflow: auto; padding: 22px;
+            border: 2px solid #fbbf24; border-radius: 22px; background: #172033; box-shadow: 0 20px 60px #0009;
+        }
+        .dialog h1, .dialog h2 { margin: 0; color: #fde68a; }
+        .dialog p { color: #cbd5e1; line-height: 1.45; }
+        .dialog label { display: block; margin: 16px 0 6px; color: #cbd5e1; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+        .dialog select, .dialog button.action {
+            width: 100%; min-height: 46px; border: 1px solid #64748b; border-radius: 11px; padding: 10px;
+            color: white; background: #0f172a; font-weight: 700;
+        }
+        .dialog button.action { margin-top: 14px; border: 0; background: #059669; cursor: pointer; }
+        .dialog button.secondary { background: #334155; }
+        #orderGif { display: block; width: 100%; max-height: 48vh; object-fit: contain; margin: 14px auto; border-radius: 12px; background: #020617; }
+        #toast { position: fixed; z-index: 7; top: 88px; left: 50%; transform: translateX(-50%); padding: 10px 16px; border-radius: 12px; background: #0f172aee; border: 1px solid #fde68a; box-shadow: 0 5px 18px #0008; text-align: center; }
+        #toast.hidden { display: none; }
+        @media (max-width: 640px) {
+            .topbar { padding: 9px; align-items: flex-start; }
+            .brand { flex-direction: column; align-items: flex-start; gap: 1px; }
+            .brand span { display: none; }
+            .stats { gap: 5px; }
+            .stat { min-width: 55px; padding: 6px 7px; font-size: 12px; }
+            #statusText { top: 58px; width: 92%; font-size: 11px; }
+            #kitchen { inset: auto 6px 6px; padding: 9px; max-height: min(30vh, 235px); }
+            .kitchen-heading { align-items: flex-start; flex-direction: column; gap: 2px; }
+            #foodList { min-height: 58px; }
+            .food-button { min-width: 136px; }
+            .food-thumbnail { width: 54px; height: 46px; flex-basis: 54px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameScene" aria-label="Top-down restaurant game scene"></div>
+    <header class="topbar">
+        <div class="brand"><strong>🍽️ ASL Table Service</strong><span>Read the sign. Find the food. Serve the table.</span></div>
+        <div class="stats">
+            <div class="stat"><small>Served</small><span id="servedStat">0 / 10</span></div>
+            <div class="stat"><small>Hearts</small><span id="heartsStat">❤️❤️❤️</span></div>
+            <div class="stat"><small>Guests</small><span id="guestsStat">0 / 3</span></div>
+        </div>
+    </header>
+    <div id="statusText">Tap a guest to see their ASL food order.</div>
+    <div id="toast" class="hidden" role="status"></div>
+    <section id="kitchen" aria-label="Kitchen food shelf">
+        <div class="kitchen-heading">
+            <h2>Kitchen Shelf</h2>
+            <p id="kitchenHint">Choose a food, then tap the table with that order.</p>
+        </div>
+        <div id="categoryList" aria-label="Food categories"></div>
+        <div id="foodList" aria-label="Food items"></div>
+    </section>
+
+    <div id="setupModal" class="overlay">
+        <section class="dialog">
+            <h1>Welcome to ASL Table Service!</h1>
+            <p>Tap a seated guest to see their food sign. Choose that food from the kitchen shelf, then tap their table before time runs out. Guests arrive together, so keep an eye on every table.</p>
+            <label for="goalSelect">Customers to serve</label>
+            <select id="goalSelect">
+                <option value="10">10 customers</option>
+                <option value="20">20 customers</option>
+                <option value="30">30 customers</option>
+                <option value="endless">Endless</option>
+            </select>
+            <label for="difficultySelect">Difficulty · time per guest</label>
+            <select id="difficultySelect">
+                <option value="easy">Easy · 60 seconds · up to 2 guests</option>
+                <option value="medium" selected>Normal · 40 seconds · up to 3 guests</option>
+                <option value="hard">Hard · 30 seconds · up to 4 guests</option>
+                <option value="insane">Insane · 25 seconds · up to 5 guests</option>
+            </select>
+            <p id="loadError" role="alert"></p>
+            <button id="startButton" class="action" type="button" disabled>Loading food signs…</button>
+        </section>
+    </div>
+
+    <div id="orderModal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
+        <section class="dialog">
+            <h2 id="orderTitle">Table order</h2>
+            <p id="orderInstructions">Watch the sign, choose the food, then serve this table.</p>
+            <img id="orderGif" alt="ASL food sign">
+            <button id="closeOrderButton" class="action secondary" type="button">Back to tables</button>
+        </section>
+    </div>
+
+    <div id="endModal" class="overlay hidden" role="dialog" aria-modal="true">
+        <section class="dialog">
+            <h2 id="endTitle">Shift complete!</h2>
+            <p id="endSummary"></p>
+            <button id="restartButton" class="action" type="button">Play again</button>
+        </section>
+    </div>
+
+    <script>
+        const FOOD_MODELS = {
+            'ORANGE JUICE': 'soda-glass.glb', MILK: 'carton.glb', TEA: 'cup-tea.glb',
+            SODA: 'soda-can.glb', COFFEE: 'cup-coffee.glb', WATER: 'soda-bottle.glb',
+            BACON: 'bacon.glb', BURRITO: 'sub.glb', DONUT: 'donut-sprinkles.glb',
+            CEREAL: 'bowl-cereal.glb', WAFFLES: 'waffle.glb', BAGEL: 'donut.glb',
+            PANCAKE: 'pancakes.glb', 'FRENCH TOAST': 'toast.glb', EGG: 'egg-cooked.glb',
+            SANDWICH: 'sandwich.glb', 'FRENCH-FRIES': 'fries.glb', HAMBURGER: 'burger.glb',
+            SALAD: 'salad.glb', TACO: 'taco.glb', PIZZA: 'pizza.glb', SUSHI: 'sushi-salmon.glb',
+            'PASTA/SPAGHETTI': 'spaghetti.glb', SOUP: 'bowl-soup.glb', LASAGNA: 'spaghetti.glb',
+            SAUSAGE: 'sausage.glb', LOBSTER: 'lobster.glb', CRAB: 'crab.glb',
+            CHICKEN: 'chicken.glb', TURKEY: 'turkey.glb', FISH: 'fish.glb',
+            ICECREAM: 'ice-cream.glb', COOKIE: 'cookie.glb', CAKE: 'cake.glb',
+            CHOCOLATE: 'chocolate.glb', VANILLA: 'whipped-cream.glb', PIE: 'pie.glb',
+            SUGAR: 'honey.glb', BERRY: 'berry.glb', BANANA: 'banana.glb',
+            LEMON: 'lemon.glb', TOMATO: 'tomato.glb', CHERRY: 'cherries.glb',
+            STRAWBERRY: 'strawberry.glb', GRAPES: 'grapes.glb', MELON: 'watermelon.glb',
+            PEACH: 'peach.glb', PEAR: 'pear.glb', BEANS: 'beans.glb',
+            CORN: 'corn.glb', ONION: 'onion.glb', CARROT: 'carrot.glb',
+            LETTUCE: 'lettuce.glb', PUMPKIN: 'pumpkin.glb', YOGURT: 'pudding.glb',
+            'SOUR CREAM': 'whipped-cream.glb', 'MILK SHAKE': 'frappe.glb',
+            CHEESE: 'cheese.glb', BUTTER: 'cheese.glb'
+        };
+        const FOOD_CATEGORIES = /drink|breakfast|lunch|dinner|meal|food|meat|seafood|dessert|sweet|fruit|vegetable|dairy/i;
+        const EXCLUDED_TERMS = new Set(['BREAKFAST', 'LUNCH', 'DINNER', 'DRINK', 'FOOD', 'EAT', 'FRUIT', 'VEGETABLE', 'MEAT']);
+        const DIFFICULTY = {
+            easy: { seconds: 60, maxGuests: 2, arrivalMs: 9000 },
+            medium: { seconds: 40, maxGuests: 3, arrivalMs: 7000 },
+            hard: { seconds: 30, maxGuests: 4, arrivalMs: 5200 },
+            insane: { seconds: 25, maxGuests: 5, arrivalMs: 3800 }
+        };
+        const TABLE_POSITIONS = [
+            [-4.25, -3], [0, -3], [4.25, -3],
+            [-4.25, -0.7], [0, -0.7], [4.25, -0.7]
+        ];
+        let foods = [];
+        let activeCategory = '';
+        let selectedFood = null;
+        let gameRunning = false;
+        let goal = 10;
+        let difficulty = DIFFICULTY.medium;
+        let served = 0;
+        let hearts = 3;
+        let lastSpawnAt = 0;
+        let foodSelectionVersion = 0;
+        let toastTimer = null;
+        let scene, camera, renderer, raycaster, loader;
+        let tables = [];
+        const modelCache = new Map();
+        const modelLoadPromises = new Map();
+        const clock = new THREE.Clock();
+        let thumbnailRenderer = null;
+        let thumbnailScene = null;
+        let thumbnailCamera = null;
+        let thumbnailLights = [];
+
+        function normalizeTerm(term) {
+            return String(term).trim().toUpperCase().replace(/\s+/g, ' ');
+        }
+
+        async function loadFoodVocabulary() {
+            const response = await fetch('../vocab.json');
+            if (!response.ok) throw new Error(`Food vocabulary request failed (${response.status}).`);
+            const data = await response.json();
+            const seen = new Set();
+            Object.entries(data).forEach(([category, categoryData]) => {
+                if (!FOOD_CATEGORIES.test(category) || !Array.isArray(categoryData.questions)) return;
+                categoryData.questions.forEach(question => {
+                    if (!question || !Array.isArray(question.options) || !Number.isInteger(question.correct) ||
+                        !question.options[question.correct] || !question.image) return;
+                    const term = normalizeTerm(question.options[question.correct]);
+                    const modelFile = FOOD_MODELS[term];
+                    if (!modelFile || EXCLUDED_TERMS.has(term) || !/^https?:\/\//i.test(question.image)) return;
+                    const id = `${term}|${question.image}`;
+                    if (seen.has(id)) return;
+                    seen.add(id);
+                    foods.push({
+                        term,
+                        image: question.image,
+                        category,
+                        categoryTitle: categoryData.title || category,
+                        modelPath: `./assets/${modelFile}`
+                    });
+                });
+            });
+            if (foods.length === 0) throw new Error('No food signs with matching 3D models were found in vocab.json.');
+            activeCategory = foods[0].category;
+            renderKitchen();
+        }
+
+        function initScene() {
+            const container = document.getElementById('gameScene');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x18332e);
+            scene.fog = new THREE.Fog(0x18332e, 18, 34);
+            camera = new THREE.OrthographicCamera(-7, 7, 5, -5, 0.1, 60);
+            camera.up.set(0, 0, -1);
+            camera.position.set(0, 18, 0);
+            camera.lookAt(0, 0, 0);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            container.appendChild(renderer.domElement);
+            raycaster = new THREE.Raycaster();
+            loader = new THREE.GLTFLoader();
+
+            scene.add(new THREE.HemisphereLight(0xfff1d5, 0x23443e, 2));
+            const sun = new THREE.DirectionalLight(0xfff2d0, 2.3);
+            sun.position.set(-4, 12, 5);
+            sun.castShadow = true;
+            sun.shadow.mapSize.set(1024, 1024);
+            scene.add(sun);
+
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(30, 30),
+                new THREE.MeshStandardMaterial({ color: 0x466d58, roughness: 1 })
+            );
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+            addFloorTiles();
+            buildKitchenCounter();
+            buildTables();
+            resizeScene();
+            window.addEventListener('resize', resizeScene);
+            renderer.domElement.addEventListener('pointerdown', onSceneTap);
+            animate();
+        }
+
+        function addFloorTiles() {
+            const tileMaterial = new THREE.MeshStandardMaterial({ color: 0x62856b, roughness: 1 });
+            for (let x = -5; x <= 5; x++) {
+                for (let z = -4; z <= 4; z++) {
+                    if ((x + z) % 2 !== 0) continue;
+                    const tile = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), tileMaterial);
+                    tile.rotation.x = -Math.PI / 2;
+                    tile.position.set(x * 1.6, 0.012, z * 1.6);
+                    tile.receiveShadow = true;
+                    scene.add(tile);
+                }
+            }
+        }
+
+        function buildKitchenCounter() {
+            const counter = new THREE.Group();
+            const top = new THREE.Mesh(
+                new THREE.BoxGeometry(13.2, 0.55, 1.15),
+                new THREE.MeshStandardMaterial({ color: 0x9a5b32, roughness: 0.45 })
+            );
+            top.position.y = 0.45;
+            top.castShadow = true;
+            top.receiveShadow = true;
+            counter.add(top);
+            const trim = new THREE.Mesh(
+                new THREE.BoxGeometry(13.25, 0.12, 1.2),
+                new THREE.MeshStandardMaterial({ color: 0xf4c76b, metalness: 0.25, roughness: 0.35 })
+            );
+            trim.position.y = 0.76;
+            counter.add(trim);
+            counter.position.z = 2.3;
+            scene.add(counter);
+        }
+
+        function buildTables() {
+            const tableMaterial = new THREE.MeshStandardMaterial({ color: 0x9b5b38, roughness: 0.5 });
+            const tableTopMaterial = new THREE.MeshStandardMaterial({ color: 0xc48652, roughness: 0.48 });
+            const plateMaterial = new THREE.MeshStandardMaterial({ color: 0xfff8e8, roughness: 0.25 });
+            TABLE_POSITIONS.forEach(([x, z], index) => {
+                const group = new THREE.Group();
+                group.position.set(x, 0, z);
+                scene.add(group);
+                const seat = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.48, 0.48, 0.18, 24),
+                    new THREE.MeshStandardMaterial({ color: index % 2 ? 0x496a82 : 0x7c597c, roughness: 0.7 })
+                );
+                seat.position.set(0, 0.18, 1.9);
+                group.add(seat);
+                const body = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.42, 20, 14),
+                    new THREE.MeshStandardMaterial({ color: [0x2563eb, 0x16a34a, 0xdb2777, 0x9333ea, 0xea580c, 0x0891b2][index] })
+                );
+                body.scale.set(1, 0.27, 1.22);
+                body.position.set(0, 0.29, 1.68);
+                body.castShadow = true;
+                group.add(body);
+                const head = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.36, 24, 18),
+                    new THREE.MeshStandardMaterial({ color: [0xd89d72, 0x8f5e42, 0xf0c7a0, 0xa66c49, 0xd7a27e, 0x774d3b][index] })
+                );
+                head.position.set(0, 0.47, 1.22);
+                head.castShadow = true;
+                head.userData.tableIndex = index;
+                head.visible = false;
+                group.add(head);
+                const hair = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.37, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+                    new THREE.MeshStandardMaterial({ color: [0x3a2618, 0x171717, 0x5b2c20, 0x332016, 0x171717, 0x50321f][index] })
+                );
+                hair.position.set(0, 0.53, 1.22);
+                hair.userData.customerPart = true;
+                hair.visible = false;
+                group.add(hair);
+                const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x201710 });
+                [-0.105, 0.105].forEach(eyeX => {
+                    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), eyeMaterial);
+                    eye.position.set(eyeX, 0.49, 0.97);
+                    eye.userData.customerPart = true;
+                    eye.visible = false;
+                    group.add(eye);
+                });
+                body.userData.customerPart = true;
+                body.visible = false;
+                const tableTop = new THREE.Mesh(new THREE.CylinderGeometry(0.93, 0.97, 0.18, 36), tableTopMaterial);
+                tableTop.position.y = 0.76;
+                tableTop.castShadow = true;
+                tableTop.receiveShadow = true;
+                tableTop.userData.tableIndex = index;
+                group.add(tableTop);
+                const base = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.18, 0.25, 0.66, 20),
+                    new THREE.MeshStandardMaterial({ color: 0x47332c })
+                );
+                base.position.y = 0.36;
+                group.add(base);
+                const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.045, 28), plateMaterial);
+                plate.position.set(0, 0.88, 0.25);
+                group.add(plate);
+                const timerRing = new THREE.Mesh(
+                    new THREE.TorusGeometry(1.08, 0.055, 8, 48),
+                    new THREE.MeshBasicMaterial({ color: 0x334155, transparent: true, opacity: 0.9 })
+                );
+                timerRing.rotation.x = Math.PI / 2;
+                timerRing.position.y = 0.14;
+                group.add(timerRing);
+                const timerCanvas = document.createElement('canvas');
+                timerCanvas.width = 256;
+                timerCanvas.height = 88;
+                const timerContext = timerCanvas.getContext('2d');
+                const timerTexture = new THREE.CanvasTexture(timerCanvas);
+                const timerLabel = new THREE.Sprite(new THREE.SpriteMaterial({
+                    map: timerTexture, transparent: true, depthTest: false
+                }));
+                timerLabel.position.set(0, 1.7, 1.48);
+                timerLabel.scale.set(1.35, 0.46, 1);
+                timerLabel.visible = false;
+                group.add(timerLabel);
+                tables.push({
+                    index, group, tableTop, head, timerRing, timerLabel, timerContext, timerTexture,
+                    lastTimerSecond: -1, order: null, deadline: 0, servedModel: null
+                });
+            });
+        }
+
+        function resizeScene() {
+            if (!renderer || !camera) return;
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const aspect = width / height;
+            const viewWidth = Math.max(13, 10.4 * aspect);
+            const viewHeight = viewWidth / aspect;
+            camera.left = -viewWidth / 2;
+            camera.right = viewWidth / 2;
+            camera.top = viewHeight / 2;
+            camera.bottom = -viewHeight / 2;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        function renderKitchen() {
+            const categories = [...new Set(foods.map(food => food.category))];
+            if (!categories.includes(activeCategory)) activeCategory = categories[0];
+            const categoryList = document.getElementById('categoryList');
+            categoryList.replaceChildren();
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = foods.find(food => food.category === category)?.categoryTitle || category;
+                button.classList.toggle('active', category === activeCategory);
+                button.onclick = () => {
+                    activeCategory = category;
+                    renderKitchen();
+                };
+                categoryList.appendChild(button);
+            });
+            const foodList = document.getElementById('foodList');
+            foodList.replaceChildren();
+            foods.filter(food => food.category === activeCategory).forEach(food => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'food-button';
+                button.classList.toggle('selected', selectedFood === food);
+                button.setAttribute('aria-pressed', String(selectedFood === food));
+                const thumbnail = document.createElement('canvas');
+                thumbnail.className = 'food-thumbnail';
+                thumbnail.setAttribute('aria-hidden', 'true');
+                thumbnail.width = 128;
+                thumbnail.height = 104;
+                thumbnail.dataset.modelPath = food.modelPath;
+                button.appendChild(thumbnail);
+                renderFoodThumbnail(food, thumbnail);
+                const details = document.createElement('span');
+                details.className = 'food-details';
+                const name = document.createElement('strong');
+                name.textContent = food.term;
+                const detail = document.createElement('small');
+                detail.textContent = selectedFood === food ? 'Picked up · tap a table' : 'Select food';
+                details.append(name, detail);
+                button.appendChild(details);
+                button.onclick = () => chooseFood(food);
+                foodList.appendChild(button);
+            });
+        }
+
+        function initializeThumbnailRenderer() {
+            if (thumbnailRenderer) return;
+
+            thumbnailRenderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+                preserveDrawingBuffer: true
+            });
+            thumbnailRenderer.setPixelRatio(1);
+            thumbnailRenderer.setSize(128, 104, false);
+            thumbnailScene = new THREE.Scene();
+            thumbnailCamera = new THREE.PerspectiveCamera(38, 128 / 104, 0.1, 10);
+            thumbnailCamera.position.set(0, 0.62, 1.45);
+            thumbnailCamera.lookAt(0, 0.25, 0);
+            const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+            keyLight.position.set(2, 3, 3);
+            const fillLight = new THREE.HemisphereLight(0xfff1d5, 0x475569, 1.5);
+            thumbnailScene.add(keyLight, fillLight);
+            thumbnailLights = [keyLight, fillLight];
+        }
+
+        async function renderFoodThumbnail(food, canvas) {
+            try {
+                initializeThumbnailRenderer();
+                const model = await loadModel(food);
+                if (!canvas.isConnected || canvas.dataset.modelPath !== food.modelPath) return;
+
+                for (const child of thumbnailScene.children) {
+                    if (!thumbnailLights.includes(child)) thumbnailScene.remove(child);
+                }
+                const preview = model.clone(true);
+                preview.rotation.y = Math.PI / 5;
+                thumbnailScene.add(preview);
+                thumbnailRenderer.render(thumbnailScene, thumbnailCamera);
+                const context = canvas.getContext('2d');
+                if (context) {
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.drawImage(thumbnailRenderer.domElement, 0, 0, canvas.width, canvas.height);
+                }
+                thumbnailScene.remove(preview);
+            } catch (error) {
+                console.warn(`Could not render the ${food.term} thumbnail.`, error);
+            }
+        }
+
+        function loadModel(food) {
+            if (modelCache.has(food.modelPath)) return Promise.resolve(modelCache.get(food.modelPath));
+            if (modelLoadPromises.has(food.modelPath)) return modelLoadPromises.get(food.modelPath);
+
+            const loading = new Promise((resolve, reject) => {
+                loader.load(food.modelPath, gltf => {
+                    const model = new THREE.Group();
+                    const source = gltf.scene;
+                    model.add(source);
+                    const bounds = new THREE.Box3().setFromObject(model);
+                    const size = bounds.getSize(new THREE.Vector3());
+                    const center = bounds.getCenter(new THREE.Vector3());
+                    const maxDimension = Math.max(size.x, size.y, size.z);
+                    if (!Number.isFinite(maxDimension) || maxDimension <= 0) {
+                        reject(new Error(`The 3D model for ${food.term} has no visible size.`));
+                        return;
+                    }
+                    source.position.x -= center.x;
+                    source.position.y -= bounds.min.y;
+                    source.position.z -= center.z;
+                    source.traverse(child => {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+                    model.scale.setScalar(0.82 / maxDimension);
+                    modelCache.set(food.modelPath, model);
+                    resolve(model);
+                }, undefined, error => reject(new Error(`Could not load the 3D ${food.term} model. Check the local food assets.`)));
+            });
+            modelLoadPromises.set(food.modelPath, loading);
+            return loading.catch(error => {
+                modelLoadPromises.delete(food.modelPath);
+                throw error;
+            });
+        }
+
+        async function chooseFood(food) {
+            if (!gameRunning) {
+                showToast('Start a shift before choosing food.');
+                return;
+            }
+            const selectionVersion = ++foodSelectionVersion;
+            setStatus(`Loading ${food.term} from the kitchen…`);
+            try {
+                const model = await loadModel(food);
+                if (!gameRunning || selectionVersion !== foodSelectionVersion) return;
+                selectedFood = food;
+                clearKitchenPreview();
+                const preview = model.clone(true);
+                preview.position.set(0, 0.78, 1.85);
+                preview.scale.multiplyScalar(0.9);
+                preview.userData.isKitchenPreview = true;
+                scene.add(preview);
+                scene.userData.kitchenPreview = preview;
+                renderKitchen();
+                setStatus(`${food.term} is ready. Tap the guest's table to serve it.`);
+            } catch (error) {
+                setStatus(error.message);
+                showToast(error.message, true);
+            }
+        }
+
+        function clearKitchenPreview() {
+            const preview = scene.userData.kitchenPreview;
+            if (preview) {
+                scene.remove(preview);
+                scene.userData.kitchenPreview = null;
+            }
+        }
+
+        function onSceneTap(event) {
+            if (!gameRunning || event.target !== renderer.domElement) return;
+            const bounds = renderer.domElement.getBoundingClientRect();
+            const pointer = new THREE.Vector2(
+                ((event.clientX - bounds.left) / bounds.width) * 2 - 1,
+                -((event.clientY - bounds.top) / bounds.height) * 2 + 1
+            );
+            raycaster.setFromCamera(pointer, camera);
+            const hit = raycaster.intersectObjects(tables.flatMap(table => [table.tableTop, table.head]), false)[0];
+            if (!hit) return;
+            const table = tables[hit.object.userData.tableIndex];
+            if (!table.order) {
+                showToast(`Table ${table.index + 1} is waiting for a guest.`);
+                return;
+            }
+            if (selectedFood) {
+                serveTable(table);
+            } else {
+                showOrder(table);
+            }
+        }
+
+        function showOrder(table) {
+            document.getElementById('orderTitle').textContent = `Table ${table.index + 1} order`;
+            document.getElementById('orderGif').src = table.order.image;
+            document.getElementById('orderGif').alt = `ASL sign for the food requested at table ${table.index + 1}`;
+            document.getElementById('orderModal').classList.remove('hidden');
+        }
+
+        function closeOrder() {
+            document.getElementById('orderModal').classList.add('hidden');
+            document.getElementById('orderGif').src = '';
+        }
+
+        async function serveTable(table) {
+            const food = selectedFood;
+            if (!food || !table.order) return;
+            if (food.modelPath !== table.order.modelPath) {
+                showToast(`Not quite—check the sign for table ${table.index + 1} again.`, true);
+                return;
+            }
+            table.order = null;
+            table.timerRing.material.color.setHex(0x22c55e);
+            setCustomerVisible(table, false);
+            table.timerRing.scale.set(1, 1, 1);
+            try {
+                const model = await loadModel(food);
+                if (!gameRunning && !table.servedModel) return;
+                const servedModel = model.clone(true);
+                servedModel.position.set(0, 0.91, 0.25);
+                servedModel.scale.multiplyScalar(0.62);
+                table.group.add(servedModel);
+                table.servedModel = servedModel;
+                setTimeout(() => {
+                    if (table.servedModel !== servedModel) return;
+                    table.group.remove(servedModel);
+                    table.servedModel = null;
+                    table.timerRing.material.color.setHex(0x334155);
+                    if (gameRunning && !table.order && Date.now() - lastSpawnAt >= difficulty.arrivalMs) spawnGuest();
+                }, 1800);
+            } catch (error) {
+                showToast(error.message, true);
+            }
+            served++;
+            updateStats();
+            selectedFood = null;
+            clearKitchenPreview();
+            renderKitchen();
+            showToast(`Great signing! Table ${table.index + 1} got the right food.`);
+            if (goal !== null && served >= goal) {
+                endGame(true);
+                return;
+            }
+            setStatus('Choose another food and keep serving the other tables.');
+        }
+
+        function spawnGuest() {
+            if (!gameRunning) return false;
+            const activeCount = tables.filter(table => table.order).length;
+            if (activeCount >= difficulty.maxGuests) return false;
+            const table = tables.find(candidate => !candidate.order && !candidate.servedModel);
+            if (!table) return false;
+            const food = foods[Math.floor(Math.random() * foods.length)];
+            table.order = food;
+            table.deadline = Date.now() + difficulty.seconds * 1000;
+            setCustomerVisible(table, true);
+            table.timerRing.material.color.setHex(0xf59e0b);
+            table.timerRing.scale.set(1, 1, 1);
+            table.lastTimerSecond = -1;
+            lastSpawnAt = Date.now();
+            updateStats();
+            return true;
+        }
+
+        function trySpawnInitialGuests() {
+            const initialCount = Math.min(2, difficulty.maxGuests);
+            for (let index = 0; index < initialCount; index++) spawnGuest();
+        }
+
+        function updateTimers() {
+            if (!gameRunning) return;
+            const now = Date.now();
+            tables.forEach(table => {
+                if (!gameRunning) return;
+                if (!table.order) return;
+                const remaining = Math.max(0, table.deadline - now);
+                const progress = remaining / (difficulty.seconds * 1000);
+                table.timerRing.scale.set(progress, progress, 1);
+                const seconds = Math.ceil(remaining / 1000);
+                if (seconds !== table.lastTimerSecond) {
+                    const context = table.timerContext;
+                    context.clearRect(0, 0, 256, 88);
+                    context.fillStyle = progress > 0.55 ? '#92400e' : progress > 0.25 ? '#9a3412' : '#991b1b';
+                    context.fillRect(4, 4, 248, 80);
+                    context.fillStyle = '#ffffff';
+                    context.font = 'bold 50px system-ui';
+                    context.textAlign = 'center';
+                    context.textBaseline = 'middle';
+                    context.fillText(`${seconds}s`, 128, 45);
+                    table.timerTexture.needsUpdate = true;
+                    table.lastTimerSecond = seconds;
+                }
+                if (progress > 0.55) table.timerRing.material.color.setHex(0xf59e0b);
+                else if (progress > 0.25) table.timerRing.material.color.setHex(0xd97706);
+                else table.timerRing.material.color.setHex(0xef4444);
+                if (remaining <= 0) {
+                    table.order = null;
+                    setCustomerVisible(table, false);
+                    table.timerRing.scale.set(1, 1, 1);
+                    table.timerRing.material.color.setHex(0x334155);
+                    hearts--;
+                    updateStats();
+                    showToast(`Table ${table.index + 1} ran out of time.`, true);
+                    if (hearts <= 0) {
+                        endGame(false);
+                    } else {
+                        spawnGuest();
+                    }
+                }
+            });
+            if (now - lastSpawnAt >= difficulty.arrivalMs) spawnGuest();
+        }
+
+        function setCustomerVisible(table, visible) {
+            table.head.visible = visible;
+            table.timerLabel.visible = visible;
+            table.group.children.filter(child => child.userData.customerPart).forEach(child => {
+                child.visible = visible;
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('servedStat').textContent = `${served} / ${goal === null ? '∞' : goal}`;
+            document.getElementById('heartsStat').textContent = `${'❤️'.repeat(hearts)}${'🖤'.repeat(3 - hearts)}`;
+            document.getElementById('guestsStat').textContent = `${tables.filter(table => table.order).length} / ${difficulty.maxGuests}`;
+        }
+
+        function setStatus(text) {
+            document.getElementById('statusText').textContent = text;
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.borderColor = isError ? '#fb7185' : '#fde68a';
+            toast.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.add('hidden'), 2600);
+        }
+
+        function startGame() {
+            foodSelectionVersion++;
+            goal = document.getElementById('goalSelect').value === 'endless'
+                ? null
+                : Number(document.getElementById('goalSelect').value);
+            difficulty = DIFFICULTY[document.getElementById('difficultySelect').value];
+            served = 0;
+            hearts = 3;
+            gameRunning = true;
+            selectedFood = null;
+            tables.forEach(table => {
+                table.order = null;
+                table.deadline = 0;
+                if (table.servedModel) table.group.remove(table.servedModel);
+                table.servedModel = null;
+                setCustomerVisible(table, false);
+                table.timerRing.material.color.setHex(0x334155);
+                table.timerRing.scale.set(1, 1, 1);
+            });
+            clearKitchenPreview();
+            renderKitchen();
+            updateStats();
+            document.getElementById('setupModal').classList.add('hidden');
+            setStatus('Tap any seated guest to see their ASL food order.');
+            trySpawnInitialGuests();
+        }
+
+        function endGame(won) {
+            if (!gameRunning) return;
+            gameRunning = false;
+            foodSelectionVersion++;
+            selectedFood = null;
+            clearKitchenPreview();
+            closeOrder();
+            renderKitchen();
+            document.getElementById('endTitle').textContent = won ? 'Great job, chef!' : 'Shift over!';
+            document.getElementById('endSummary').textContent =
+                `You served ${served} ${served === 1 ? 'customer' : 'customers'}${goal === null ? ' in endless mode' : ` out of ${goal}`} before ${won ? 'completing the shift' : 'running out of hearts'}.`;
+            document.getElementById('endModal').classList.remove('hidden');
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsed = clock.getElapsedTime();
+            tables.forEach(table => {
+                if (table.order) {
+                    table.head.position.y = 0.47 + Math.sin(elapsed * 3 + table.index) * 0.025;
+                    table.timerRing.rotation.z += 0.003;
+                }
+            });
+            updateTimers();
+            renderer.render(scene, camera);
+        }
+
+        async function init() {
+            initScene();
+            document.getElementById('startButton').addEventListener('click', startGame);
+            document.getElementById('restartButton').addEventListener('click', () => {
+                document.getElementById('endModal').classList.add('hidden');
+                document.getElementById('setupModal').classList.remove('hidden');
+            });
+            document.getElementById('closeOrderButton').addEventListener('click', closeOrder);
+            document.getElementById('orderModal').addEventListener('click', event => {
+                if (event.target.id === 'orderModal') closeOrder();
+            });
+            try {
+                await loadFoodVocabulary();
+                document.getElementById('startButton').disabled = false;
+                document.getElementById('startButton').textContent = 'Start Shift';
+            } catch (error) {
+                document.getElementById('loadError').textContent =
+                    `${error.message} Open this game from the project web server so ../vocab.json can load.`;
+                document.getElementById('startButton').textContent = 'Food signs unavailable';
+                setStatus(error.message);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
