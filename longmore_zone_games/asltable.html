@@ -41,6 +41,11 @@
         .kitchen-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .kitchen-heading h2 { margin: 0; color: #fde68a; font-size: 16px; }
         .kitchen-heading p { margin: 0; color: #cbd5e1; font-size: 11px; }
+        #returnFoodButton {
+            border: 1px solid #94a3b8; border-radius: 9px; padding: 7px 10px;
+            color: #e2e8f0; background: #334155; font-size: 11px; font-weight: 700; cursor: pointer;
+        }
+        #returnFoodButton[hidden] { display: none; }
         #categoryList, #foodList { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: thin; padding: 2px; }
         #categoryList button, .food-button {
             border: 1px solid #475569; background: #1e293b; color: #e2e8f0; border-radius: 11px;
@@ -83,7 +88,10 @@
             .stat { min-width: 55px; padding: 6px 7px; font-size: 12px; }
             #statusText { top: 58px; width: 92%; font-size: 11px; }
             #kitchen { inset: auto 6px 6px; padding: 9px; max-height: min(30vh, 235px); }
-            .kitchen-heading { align-items: flex-start; flex-direction: column; gap: 2px; }
+            .kitchen-heading { align-items: center; gap: 6px; }
+            .kitchen-heading h2 { font-size: 14px; }
+            .kitchen-heading p { font-size: 10px; }
+            #returnFoodButton { flex: 0 0 auto; padding: 7px; }
             #foodList { min-height: 58px; }
             .food-button { min-width: 136px; }
             .food-thumbnail { width: 54px; height: 46px; flex-basis: 54px; }
@@ -104,8 +112,11 @@
     <div id="toast" class="hidden" role="status"></div>
     <section id="kitchen" aria-label="Kitchen food shelf">
         <div class="kitchen-heading">
-            <h2>Kitchen Shelf</h2>
-            <p id="kitchenHint">Choose a food, then tap the table with that order.</p>
+            <div>
+                <h2>Kitchen Shelf</h2>
+                <p id="kitchenHint">Choose a food, then tap the table with that order.</p>
+            </div>
+            <button id="returnFoodButton" type="button" aria-label="Put selected food back to review an order" hidden>Put food back</button>
         </div>
         <div id="categoryList" aria-label="Food categories"></div>
         <div id="foodList" aria-label="Food items"></div>
@@ -422,6 +433,7 @@
         }
 
         function renderKitchen() {
+            document.getElementById('returnFoodButton').hidden = !selectedFood;
             const categories = [...new Set(foods.map(food => food.category))];
             if (!categories.includes(activeCategory)) activeCategory = categories[0];
             const categoryList = document.getElementById('categoryList');
@@ -581,6 +593,15 @@
                 scene.remove(preview);
                 scene.userData.kitchenPreview = null;
             }
+        }
+
+        function returnSelectedFood() {
+            if (!selectedFood) return;
+            foodSelectionVersion++;
+            selectedFood = null;
+            clearKitchenPreview();
+            renderKitchen();
+            setStatus('Food returned. Tap a guest to see their order again.');
         }
 
         function onSceneTap(event) {
@@ -815,6 +836,7 @@
                 document.getElementById('setupModal').classList.remove('hidden');
             });
             document.getElementById('closeOrderButton').addEventListener('click', closeOrder);
+            document.getElementById('returnFoodButton').addEventListener('click', returnSelectedFood);
             document.getElementById('orderModal').addEventListener('click', event => {
                 if (event.target.id === 'orderModal') closeOrder();
             });
