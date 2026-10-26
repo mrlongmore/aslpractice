@@ -513,7 +513,7 @@
             "BREAKFAST", "LUNCH", "DINNER", "DRINK", "FOOD", "EAT",
             "FRUIT", "VEGETABLE", "MEAT"
         ]);
-        const FOOD_CATEGORY_PATTERN = /drink|breakfast|lunch|dinner|meal|food|meat|seafood|dessert|sweet|fruit|vegetable|dairy/i;
+        const FOOD_CATEGORY_PATTERN = /drink|breakfast|lunch|dinner|meal|food|meat|seafood|dessert|sweet|fruit|vegetable|dairy|condiment/i;
 
         function isExcludedFoodQuestion(question) {
             const answer = question.options[question.correct].trim().toUpperCase();
@@ -601,6 +601,7 @@
             "SANDWICH": "./assets/sandwich.glb",
             "COFFEE": "./assets/cup-coffee.glb",
             "SODA": "./assets/soda-can.glb",
+            "ENERGY DRINK": "./assets/soda-can.glb",
             "MILK": "./assets/carton.glb",
             "MILK SHAKE": "./assets/frappe.glb",
             "ORANGE JUICE": "",
@@ -632,7 +633,12 @@
             "ICECREAM": "./assets/ice-cream.glb",
             "LEMON": "./assets/lemon.glb",
             "MEAT": "./assets/meat-raw.glb",
+            "HONEY": "./assets/honey.glb",
+            "KETCHUP": "./assets/bottle-ketchup.glb",
+            "MAYONNAISE": "",
+            "MUSTARD": "./assets/bottle-musterd.glb",
             "MELON": "./assets/watermelon.glb",
+            "PEPPER": "./assets/pepper.glb",
             "ONION": "./assets/onion.glb",
             "ORANGE": "./assets/orange.glb",
             "PEAR": "./assets/pear.glb",
@@ -643,6 +649,7 @@
             "TOMATO": "./assets/tomato.glb",
             "TURKEY": "./assets/turkey.glb",
             "SAUSAGE": "./assets/sausage.glb",
+            "SALT": "./assets/shaker-salt.glb",
             "SOUP": "./assets/bowl-soup.glb",
             "WAFFLE": "./assets/waffle.glb",
             "CRAB": "./assets/crab.glb",

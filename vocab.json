@@ -2713,6 +2713,25 @@
           "startingNonDominantPalmOrientation": "",
           "endingNonDominantPalmOrientation": ""
       }
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599760/salu2sognz2wjzuqxfer.gif",
+      "options": ["WATER", "SODA", "ENERGY DRINK", "COFFEE"],
+      "correct": 2,
+      "emoji": "⚡",
+      "signParameters": {
+          "startingDominantHandshape": "",
+          "endingDominantHandshape": "",
+          "startingNonDominantHandshape": "",
+          "endingNonDominantHandshape": "",
+          "location": "",
+          "movement": "",
+          "startingDominantPalmOrientation": "",
+          "endingDominantPalmOrientation": "",
+          "startingNonDominantPalmOrientation": "",
+          "endingNonDominantPalmOrientation": ""
+      }
     }
   ]
 },
@@ -3914,6 +3933,125 @@
       "options": ["MILK", "WATER", "WHITE-DRINK", "COW"],
       "correct": 0,
       "emoji": "🥛",
+      "signParameters": {
+          "startingDominantHandshape": "",
+          "endingDominantHandshape": "",
+          "startingNonDominantHandshape": "",
+          "endingNonDominantHandshape": "",
+          "location": "",
+          "movement": "",
+          "startingDominantPalmOrientation": "",
+          "endingDominantPalmOrientation": "",
+          "startingNonDominantPalmOrientation": "",
+          "endingNonDominantPalmOrientation": ""
+      }
+    }
+  ]
+},
+"Condiments" :{
+  "title": "🧂 Condiments",
+  "questions": [
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599777/pichbyc7gfe33afoxzf2.gif",
+      "options": ["SYRUP", "HONEY", "JAM", "PEANUT BUTTER"],
+      "correct": 1,
+      "emoji": "🍯",
+      "signParameters": {
+          "startingDominantHandshape": "",
+          "endingDominantHandshape": "",
+          "startingNonDominantHandshape": "",
+          "endingNonDominantHandshape": "",
+          "location": "",
+          "movement": "",
+          "startingDominantPalmOrientation": "",
+          "endingDominantPalmOrientation": "",
+          "startingNonDominantPalmOrientation": "",
+          "endingNonDominantPalmOrientation": ""
+      }
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599801/qtxmxagj0spe1qia49r4.gif",
+      "options": ["MUSTARD", "MAYONNAISE", "KETCHUP", "HOT SAUCE"],
+      "correct": 2,
+      "emoji": "🍅",
+      "signParameters": {
+          "startingDominantHandshape": "",
+          "endingDominantHandshape": "",
+          "startingNonDominantHandshape": "",
+          "endingNonDominantHandshape": "",
+          "location": "",
+          "movement": "",
+          "startingDominantPalmOrientation": "",
+          "endingDominantPalmOrientation": "",
+          "startingNonDominantPalmOrientation": "",
+          "endingNonDominantPalmOrientation": ""
+      }
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599815/a3dafqtpwnc2emmxuoza.gif",
+      "options": ["KETCHUP", "MAYONNAISE", "MUSTARD", "HONEY"],
+      "correct": 1,
+      "emoji": "🥪",
+      "signParameters": {
+          "startingDominantHandshape": "",
+          "endingDominantHandshape": "",
+          "startingNonDominantHandshape": "",
+          "endingNonDominantHandshape": "",
+          "location": "",
+          "movement": "",
+          "startingDominantPalmOrientation": "",
+          "endingDominantPalmOrientation": "",
+          "startingNonDominantPalmOrientation": "",
+          "endingNonDominantPalmOrientation": ""
+      }
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599854/aksglbyucn9stqdznfzm.gif",
+      "options": ["MAYONNAISE", "KETCHUP", "HONEY", "MUSTARD"],
+      "correct": 3,
+      "emoji": "🌭",
+      "signParameters": {
+          "startingDominantHandshape": "",
+          "endingDominantHandshape": "",
+          "startingNonDominantHandshape": "",
+          "endingNonDominantHandshape": "",
+          "location": "",
+          "movement": "",
+          "startingDominantPalmOrientation": "",
+          "endingDominantPalmOrientation": "",
+          "startingNonDominantPalmOrientation": "",
+          "endingNonDominantPalmOrientation": ""
+      }
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599869/wnh1azly6ioyn0adfw4t.gif",
+      "options": ["SALT", "PEPPER", "SUGAR", "SPICE"],
+      "correct": 1,
+      "emoji": "🌶️",
+      "signParameters": {
+          "startingDominantHandshape": "",
+          "endingDominantHandshape": "",
+          "startingNonDominantHandshape": "",
+          "endingNonDominantHandshape": "",
+          "location": "",
+          "movement": "",
+          "startingDominantPalmOrientation": "",
+          "endingDominantPalmOrientation": "",
+          "startingNonDominantPalmOrientation": "",
+          "endingNonDominantPalmOrientation": ""
+      }
+    },
+    {
+      "question": "What is being signed?",
+      "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599883/sjxhggryowyuy23xzdh9.gif",
+      "options": ["PEPPER", "SUGAR", "SALT", "SPICE"],
+      "correct": 2,
+      "emoji": "🧂",
       "signParameters": {
           "startingDominantHandshape": "",
           "endingDominantHandshape": "",
