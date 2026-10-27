@@ -11,6 +11,17 @@
             background-color: #000;
             font-family: 'Courier New', Courier, monospace;
             color: white;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+        ::selection {
+            background: transparent;
+        }
+        canvas, button, [role="button"] {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
         canvas {
             display: block;
@@ -355,11 +366,11 @@
     </div>
     <div id="crosshair"></div>
     <div id="instructions">
-        [Arrow Keys] to Move | [F] to Toggle Flashlight | [Q] to Recharge Battery with Quiz
+        [Arrow Keys] or tap arrows to Move | [F] or tap F to Toggle Flashlight | [Q] to Recharge Battery with Quiz
     </div>
 
     <div id="touch-controls" aria-label="Game controls">
-        <button id="touch-flashlight" type="button" data-action="flashlight" aria-label="Toggle flashlight">☀</button>
+        <button id="touch-flashlight" type="button" data-action="flashlight" aria-label="Toggle flashlight with F key" title="Flashlight (F)">F</button>
         <button id="touch-forward" type="button" data-direction="arrowup" aria-label="Move forward">▲</button>
         <button id="touch-quiz" type="button" data-action="quiz" aria-label="Recharge with quiz">Q</button>
         <button id="touch-left" type="button" data-direction="arrowleft" aria-label="Turn left">◀</button>
@@ -816,6 +827,10 @@
         playerObject.position.set(-35, player.height, -35); 
         
         // --- CONTROLS ---
+        // iPad/iPhone can otherwise show callout or selection handles after long taps.
+        document.addEventListener('selectstart', (event) => event.preventDefault());
+        document.addEventListener('contextmenu', (event) => event.preventDefault());
+
         const arrowKeys = new Set(['arrowup', 'arrowdown', 'arrowleft', 'arrowright']);
 
         window.addEventListener('keydown', (event) => {
