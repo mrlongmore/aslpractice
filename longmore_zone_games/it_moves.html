@@ -33,6 +33,20 @@
             border-radius: 5px;
             overflow: hidden;
         }
+        #audio-toggle {
+            position: absolute;
+            top: max(20px, env(safe-area-inset-top));
+            right: max(20px, env(safe-area-inset-right));
+            z-index: 60;
+            min-width: 48px;
+            height: 48px;
+            border: 2px solid #555;
+            border-radius: 14px;
+            background: rgba(0,0,0,.72);
+            color: #fff;
+            font-size: 21px;
+            touch-action: manipulation;
+        }
         #battery-level {
             width: 100%;
             height: 100%;
@@ -55,7 +69,42 @@
             width: 100%;
             text-align: center;
             color: rgba(255, 255, 255, 0.7);
-            font-size: 1.2em;
+            font-size: 1.1em;
+            pointer-events: none;
+        }
+        #touch-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 64px);
+            grid-template-rows: repeat(2, 64px);
+            gap: 8px;
+            position: absolute;
+            right: max(18px, env(safe-area-inset-right));
+            bottom: max(18px, env(safe-area-inset-bottom));
+            z-index: 50;
+            touch-action: none;
+            user-select: none;
+        }
+        #touch-controls button {
+            border: 2px solid rgba(255,255,255,.7);
+            border-radius: 16px;
+            background: rgba(25,25,25,.78);
+            color: white;
+            font: 900 30px/1 system-ui, sans-serif;
+            backdrop-filter: blur(5px);
+            -webkit-tap-highlight-color: transparent;
+        }
+        #touch-controls button:active,
+        #touch-controls button.active { background: rgba(76,175,80,.92); }
+        #touch-flashlight { grid-column: 1; grid-row: 1; font-size: 24px !important; }
+        #touch-forward { grid-column: 2; grid-row: 1; }
+        #touch-quiz { grid-column: 3; grid-row: 1; font-size: 24px !important; }
+        #touch-left { grid-column: 1; grid-row: 2; }
+        #touch-backward { grid-column: 2; grid-row: 2; }
+        #touch-right { grid-column: 3; grid-row: 2; }
+        @media (max-width: 700px), (pointer: coarse) {
+            #instructions { bottom: 154px; padding: 0 12px; font-size: .85em; }
+            #ui-container { top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); }
+            #battery-container { width: 150px; }
         }
         #message-overlay {
             position: absolute;
@@ -297,6 +346,7 @@
     </style>
 </head>
 <body>
+    <button id="audio-toggle" type="button" aria-label="Mute game audio" aria-pressed="true">🔊</button>
     <div id="ui-container">
         <h3>Flashlight Power</h3>
         <div id="battery-container">
@@ -305,7 +355,16 @@
     </div>
     <div id="crosshair"></div>
     <div id="instructions">
-        Click to start | [W,A,S,D] to Move | [Mouse] to Look | [F] to Toggle Flashlight | [Q] to Recharge Battery with Quiz
+        [Arrow Keys] to Move | [F] to Toggle Flashlight | [Q] to Recharge Battery with Quiz
+    </div>
+
+    <div id="touch-controls" aria-label="Game controls">
+        <button id="touch-flashlight" type="button" data-action="flashlight" aria-label="Toggle flashlight">☀</button>
+        <button id="touch-forward" type="button" data-direction="arrowup" aria-label="Move forward">▲</button>
+        <button id="touch-quiz" type="button" data-action="quiz" aria-label="Recharge with quiz">Q</button>
+        <button id="touch-left" type="button" data-direction="arrowleft" aria-label="Turn left">◀</button>
+        <button id="touch-backward" type="button" data-direction="arrowdown" aria-label="Move backward">▼</button>
+        <button id="touch-right" type="button" data-direction="arrowright" aria-label="Turn right">▶</button>
     </div>
     
     <div id="message-overlay">
@@ -434,7 +493,9 @@
             }
             
             gameStarted = true;
-            document.body.requestPointerLock();
+            controlsEnabled = true;
+            ensureAudio();
+            if (audioContext && audioContext.state === 'suspended') audioContext.resume();
         }
 
         // --- RESET GAME STATE ---
@@ -462,6 +523,8 @@
             // Reset Flashlight & Battery
             battery = 100;
             flashlightOn = false;
+            monsterSighted = false;
+            if (audioMusic) audioMusic.gain.setTargetAtTime(0.16, audioContext.currentTime, 0.1);
             updateBatteryDisplay();
 
             // Reset Quiz Variables
@@ -473,6 +536,11 @@
             document.getElementById('instructions').style.display = 'block';
             document.getElementById('quiz-selection-modal').style.display = 'block';
         }
+
+        document.getElementById('audio-toggle').addEventListener('click', () => {
+            ensureAudio();
+            setMuted(!audioMuted);
+        });
 
         window.selectQuizCategory = selectQuizCategory;
         window.startGame = startGame;
@@ -514,6 +582,120 @@
 
         let battery = 100;
         let flashlightOn = false;
+
+        // Procedural open-source ambience and effects; no downloaded audio or third-party licenses.
+        let audioContext = null;
+        let audioMaster = null;
+        let audioMusic = null;
+        let audioMuted = false;
+        let monsterSighted = false;
+        let noiseBuffer = null;
+
+        function ensureAudio() {
+            if (!audioContext) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+
+                audioContext = new AudioContext();
+                audioMaster = audioContext.createGain();
+                audioMusic = audioContext.createGain();
+                audioMaster.gain.value = audioMuted ? 0 : 0.65;
+                audioMusic.gain.value = 0.16;
+                audioMusic.connect(audioMaster);
+                audioMaster.connect(audioContext.destination);
+
+                // Filtered, slowly evolving noise gives the track a low, windy texture.
+                noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 4, audioContext.sampleRate);
+                const noiseData = noiseBuffer.getChannelData(0);
+                let smooth = 0;
+                for (let i = 0; i < noiseData.length; i++) {
+                    smooth = smooth * 0.985 + (Math.random() * 2 - 1) * 0.015;
+                    noiseData[i] = smooth;
+                }
+                const wind = audioContext.createBufferSource();
+                const windFilter = audioContext.createBiquadFilter();
+                const windGain = audioContext.createGain();
+                wind.buffer = noiseBuffer;
+                wind.loop = true;
+                windFilter.type = 'bandpass';
+                windFilter.frequency.value = 180;
+                windFilter.Q.value = 0.7;
+                windGain.gain.value = 0.36;
+                wind.connect(windFilter).connect(windGain).connect(audioMusic);
+                wind.start();
+
+                // Sustained minor intervals and a barely audible pulse create an original atmospheric score.
+                [55, 82.41, 110].forEach((frequency, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    const filter = audioContext.createBiquadFilter();
+                    oscillator.type = index === 0 ? 'sine' : 'triangle';
+                    oscillator.frequency.value = frequency;
+                    oscillator.detune.value = index * 4 - 4;
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 310;
+                    gain.gain.value = index === 0 ? 0.11 : 0.045;
+                    oscillator.connect(filter).connect(gain).connect(audioMusic);
+                    oscillator.start();
+
+                    const lfo = audioContext.createOscillator();
+                    const lfoGain = audioContext.createGain();
+                    lfo.frequency.value = 0.055 + index * 0.017;
+                    lfoGain.gain.value = 0.018;
+                    lfo.connect(lfoGain).connect(gain.gain);
+                    lfo.start();
+                });
+            }
+
+            if (audioContext.state === 'suspended') audioContext.resume();
+        }
+
+        function setMuted(muted) {
+            audioMuted = muted;
+            if (audioContext && audioMaster) {
+                audioMaster.gain.cancelScheduledValues(audioContext.currentTime);
+                audioMaster.gain.setTargetAtTime(muted ? 0 : 0.65, audioContext.currentTime, 0.08);
+            }
+            const button = document.getElementById('audio-toggle');
+            button.textContent = muted ? '🔇' : '🔊';
+            button.setAttribute('aria-label', muted ? 'Unmute game audio' : 'Mute game audio');
+            button.setAttribute('aria-pressed', String(!muted));
+        }
+
+        function playTone(frequency, duration, gainValue = 0.12, type = 'sine', delay = 0) {
+            if (!audioContext || audioMuted) return;
+            const start = audioContext.currentTime + delay;
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, start);
+            gain.gain.setValueAtTime(0.0001, start);
+            gain.gain.exponentialRampToValueAtTime(gainValue, start + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+            oscillator.connect(gain).connect(audioMaster);
+            oscillator.start(start);
+            oscillator.stop(start + duration + 0.03);
+        }
+
+        function playFlashlightSound(on) {
+            ensureAudio();
+            playTone(on ? 920 : 680, 0.055, 0.09, 'square');
+            playTone(on ? 1120 : 510, 0.18, 0.045, 'triangle', 0.035);
+        }
+
+        function playMonsterSightSound() {
+            ensureAudio();
+            [61.74, 73.42, 92.5].forEach((frequency, index) => {
+                playTone(frequency, 1.05, 0.13 - index * 0.025, 'sawtooth', index * 0.025);
+            });
+        }
+
+        function playCaughtSound() {
+            ensureAudio();
+            playTone(92, 1.4, 0.28, 'sawtooth');
+            playTone(46, 1.8, 0.34, 'triangle', 0.04);
+            playTone(38, 1.9, 0.24, 'square', 0.08);
+        }
 
         // --- LABYRINTH DEFINITION ---
         const mazeLayout = [
@@ -634,40 +816,67 @@
         playerObject.position.set(-35, player.height, -35); 
         
         // --- CONTROLS ---
-// Replace your current click listener with this one:
-document.addEventListener('click', (event) => {
-    // Check if the click originated from inside a modal or overlay menu
-    const isClickingMenu = event.target.closest('.quiz-modal') || event.target.closest('#message-overlay');
-    
-    // Only lock the pointer if we are NOT clicking inside a menu
-    if (!controlsEnabled && gameStarted && !isClickingMenu) {
-        document.body.requestPointerLock();
-    }
-});
+        const arrowKeys = new Set(['arrowup', 'arrowdown', 'arrowleft', 'arrowright']);
 
-        document.addEventListener('pointerlockchange', () => {
-            controlsEnabled = document.pointerLockElement === document.body;
+        window.addEventListener('keydown', (event) => {
+            const key = event.key.toLowerCase();
+            if (arrowKeys.has(key) && gameStarted) event.preventDefault();
+            keyboard[key] = true;
+        });
+        window.addEventListener('keyup', (event) => {
+            const key = event.key.toLowerCase();
+            if (arrowKeys.has(key) && gameStarted) event.preventDefault();
+            keyboard[key] = false;
         });
 
-        document.addEventListener('mousemove', (event) => {
-            if (controlsEnabled) {
-                playerObject.rotation.y -= event.movementX * player.turnSpeed;
-                camera.rotation.x -= event.movementY * player.turnSpeed;
-                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
-            }
+        const touchControls = document.getElementById('touch-controls');
+        touchControls.querySelectorAll('[data-direction]').forEach((button) => {
+            const direction = button.dataset.direction;
+            const release = (event) => {
+                if (event) event.preventDefault();
+                keyboard[direction] = false;
+                button.classList.remove('active');
+                if (event?.pointerId && button.hasPointerCapture?.(event.pointerId)) {
+                    button.releasePointerCapture(event.pointerId);
+                }
+            };
+
+            button.addEventListener('pointerdown', (event) => {
+                event.preventDefault();
+                button.setPointerCapture(event.pointerId);
+                keyboard[direction] = true;
+                button.classList.add('active');
+            });
+            button.addEventListener('pointerup', release);
+            button.addEventListener('pointercancel', release);
+        });
+
+        touchControls.querySelectorAll('[data-action]').forEach((button) => {
+            button.addEventListener('pointerdown', (event) => {
+                event.preventDefault();
+                button.classList.add('active');
+                if (!gameStarted) return;
+                if (button.dataset.action === 'flashlight') toggleFlashlight();
+                if (button.dataset.action === 'quiz' && selectedQuizCategory) openQuiz();
+            });
+            button.addEventListener('pointerup', () => button.classList.remove('active'));
+            button.addEventListener('pointercancel', () => button.classList.remove('active'));
         });
         
         window.addEventListener('keydown', (e) => keyboard[e.key.toLowerCase()] = true);
         window.addEventListener('keyup', (e) => keyboard[e.key.toLowerCase()] = false);
 
+        function toggleFlashlight() {
+            if (battery <= 0) {
+                if (flashlightOn) flashlightOn = false;
+                return;
+            }
+            flashlightOn = !flashlightOn;
+            playFlashlightSound(flashlightOn);
+        }
+
         window.addEventListener('keydown', (e) => {
-             if (e.key.toLowerCase() === 'f') {
-                 if (battery > 0) {
-                    flashlightOn = !flashlightOn;
-                 } else {
-                    flashlightOn = false;
-                 }
-             }
+             if (e.key.toLowerCase() === 'f') toggleFlashlight();
              
              if (e.key.toLowerCase() === 'q') {
                  if (gameStarted && selectedQuizCategory) {
@@ -683,12 +892,13 @@ document.addEventListener('click', (event) => {
             if (!controlsEnabled) return;
             
             const moveSpeed = player.speed;
+            const turnSpeed = 0.035;
             const originalPosition = playerObject.position.clone();
 
-            if (keyboard['w']) playerObject.translateZ(-moveSpeed);
-            if (keyboard['s']) playerObject.translateZ(moveSpeed);
-            if (keyboard['a']) playerObject.translateX(-moveSpeed);
-            if (keyboard['d']) playerObject.translateX(moveSpeed);
+            if (keyboard['arrowleft']) playerObject.rotation.y += turnSpeed;
+            if (keyboard['arrowright']) playerObject.rotation.y -= turnSpeed;
+            if (keyboard['arrowup']) playerObject.translateZ(-moveSpeed);
+            if (keyboard['arrowdown']) playerObject.translateZ(moveSpeed);
 
             const playerBoundingBox = new THREE.Box3().setFromCenterAndSize(playerObject.position, new THREE.Vector3(1, player.height, 1));
             
@@ -715,6 +925,7 @@ document.addEventListener('click', (event) => {
                 
                 // 2.5 is a fair catch radius. Increase it if the game is too easy!
                 if (distToCreature < 2.5) {
+                     playCaughtSound();
                      showEndScreen("YOU WERE CAUGHT", "The creature found you in the dark.");
                 }
             }
@@ -744,7 +955,6 @@ document.addEventListener('click', (event) => {
 
         function showEndScreen(title, text) {
              controlsEnabled = false;
-             document.exitPointerLock();
              const overlay = document.getElementById('message-overlay');
              document.getElementById('message-title').textContent = title;
              document.getElementById('message-text').textContent = text;
@@ -817,7 +1027,15 @@ document.addEventListener('click', (event) => {
                 const intersects = raycaster.intersectObject(creatureObj, true);
                 if (intersects.length > 0 && intersects[0].distance < 30) {
                     behavior = "FLEEING";
+                    if (!monsterSighted) {
+                        monsterSighted = true;
+                        playMonsterSightSound();
+                    }
+                } else {
+                    monsterSighted = false;
                 }
+            } else {
+                monsterSighted = false;
             }
 
             // Safety catch: If game resets and creature teleports, clear its pathing memory
@@ -921,7 +1139,6 @@ document.addEventListener('click', (event) => {
         let quizInProgress = false;
 
 function openQuiz() {
-            document.exitPointerLock();
             controlsEnabled = false; 
             
             // Link the selected category data
@@ -957,7 +1174,6 @@ function openQuiz() {
                 quizModal.style.display = 'none';
             }
 
-            document.body.requestPointerLock();
             controlsEnabled = true;
         }
 

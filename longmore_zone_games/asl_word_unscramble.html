@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASL Word Builder</title>
+  <style>
+    :root {
+      --ink: #18243a;
+      --muted: #667085;
+      --panel: rgba(255, 255, 255, .94);
+      --blue: #3568d4;
+      --blue-dark: #234da7;
+      --gold: #f3b43f;
+      --green: #259967;
+      --red: #c84a57;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      overscroll-behavior: none;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      color: var(--ink);
+      font-family: Inter, ui-rounded, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255,255,255,.9) 0 7%, transparent 8%),
+        linear-gradient(145deg, #dff3ff 0%, #eef5ff 42%, #fff1cf 100%);
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; touch-action: manipulation; }
+    input { touch-action: manipulation; }
+    input[type="range"] { min-height: 44px; }
+    .hidden { display: none !important; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(26, 41, 69, .5);
+      backdrop-filter: blur(9px);
+    }
+    .dialog {
+      width: min(470px, 100%);
+      padding: clamp(24px, 5vw, 38px);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 28px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(31, 50, 86, .25);
+      text-align: center;
+    }
+    .logo-mark {
+      display: grid;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 14px;
+      place-items: center;
+      border-radius: 24px;
+      color: white;
+      background: linear-gradient(135deg, #4c7ee8, #244ba8);
+      box-shadow: 0 10px 24px rgba(53,104,212,.28);
+      font-size: 38px;
+    }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 7px; font-size: clamp(30px, 7vw, 44px); }
+    .subhead { color: var(--muted); line-height: 1.55; }
+    .field-label { display: block; margin: 22px 0 8px; text-align: left; font-weight: 800; }
+    .name-input {
+      width: 100%;
+      border: 2px solid #d9e2ef;
+      border-radius: 14px;
+      padding: 14px 16px;
+      outline: none;
+      color: var(--ink);
+      background: white;
+      font-size: 17px;
+    }
+    .name-input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(53,104,212,.12); }
+    .goal-row { display: flex; align-items: center; gap: 14px; }
+    input[type="range"] { accent-color: var(--blue); }
+    .goal-row input { width: 100%; }
+    .goal-value {
+      min-width: 74px;
+      border-radius: 10px;
+      padding: 8px 10px;
+      color: var(--blue-dark);
+      background: #edf3ff;
+      font-weight: 900;
+    }
+    .primary-btn, .secondary-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-weight: 900;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .primary-btn { margin-top: 24px; color: white; background: var(--blue); box-shadow: 0 10px 24px rgba(53,104,212,.25); }
+    .primary-btn:hover { background: var(--blue-dark); transform: translateY(-2px); }
+
+    .game-shell { width: min(940px, 100%); margin: auto; padding: 18px 18px 40px; }
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255,255,255,.75);
+      border-radius: 22px;
+      padding: 14px 18px;
+      background: var(--panel);
+      box-shadow: 0 12px 32px rgba(53,83,120,.12);
+    }
+    .length-control { display: grid; grid-template-columns: 64px minmax(130px, 1fr) 54px; gap: 12px; align-items: center; }
+    .length-control strong { font-size: 14px; }
+    .length-control output { text-align: center; font-size: 26px; font-weight: 900; color: var(--blue); }
+    .progress { min-width: 118px; text-align: right; }
+    .progress strong { display: block; font-size: 22px; }
+    .progress span { color: var(--muted); font-size: 13px; }
+
+    .game-card {
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 30px;
+      padding: clamp(20px, 5vw, 46px);
+      background: var(--panel);
+      box-shadow: 0 18px 55px rgba(53,83,120,.16);
+      text-align: center;
+    }
+    .eyebrow { color: var(--blue); font-size: 13px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+    .clue {
+      min-height: 28px;
+      margin: 10px 0 24px;
+      color: var(--muted);
+      font-size: clamp(16px, 3vw, 20px);
+    }
+    .clue strong { color: var(--ink); }
+    .clue-toggle {
+      min-height: 44px;
+      border: 1px solid #d8e2f3;
+      border-radius: 999px;
+      margin: 0 0 20px;
+      padding: 8px 16px;
+      color: var(--blue-dark);
+      background: #edf3ff;
+      font-weight: 800;
+    }
+    .clue.hidden-clue { visibility: hidden; }
+    .letter-row {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: clamp(5px, 1.4vw, 12px);
+      min-height: 120px;
+      margin: 0 auto 18px;
+      touch-action: none;
+    }
+    .letter-card {
+      position: relative;
+      width: clamp(54px, 10vw, 94px);
+      aspect-ratio: .82;
+      border: 2px solid #dbe4f1;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 7px 16px rgba(42,64,97,.12);
+      user-select: none;
+      transition: transform .16s, border-color .16s, box-shadow .16s, opacity .16s;
+    }
+    .letter-card img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    .letter-card .fallback { display: none; position: absolute; inset: 0; place-items: center; font-size: 34px; font-weight: 900; }
+    .letter-card.selected { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(53,104,212,.18); transform: translateY(-7px); }
+    .letter-card.dragging { z-index: 5; opacity: .55; transform: scale(.94); }
+    .letter-card.drop-target { border-color: var(--gold); transform: translateY(-5px); }
+    .letter-card.correct { animation: pop .5s ease; border-color: #7bcfa8; }
+    .letter-card.wrong { animation: shake .35s ease; border-color: var(--red); }
+    @keyframes pop { 50% { transform: translateY(-12px) scale(1.06); } }
+    @keyframes shake { 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+
+    .instructions { min-height: 24px; margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+    .actions { display: flex; justify-content: center; gap: 10px; }
+    .actions button { width: auto; min-width: 140px; margin: 0; }
+    .secondary-btn { color: var(--blue-dark); background: #edf3ff; }
+    .status { min-height: 28px; margin: 18px 0 0; font-weight: 900; }
+    .status.success { color: var(--green); }
+    .status.error { color: var(--red); }
+
+    .certificate {
+      width: min(760px, 96vw);
+      border: 14px solid #dca72a;
+      outline: 4px solid #fff8d7;
+      outline-offset: -24px;
+      border-radius: 12px;
+      padding: clamp(36px, 8vw, 70px);
+      background: #fffdf4;
+      box-shadow: 0 26px 90px rgba(33,39,50,.32);
+      text-align: center;
+    }
+    .certificate h2 { margin-bottom: 8px; color: #b27a09; font-family: Georgia, serif; font-size: clamp(30px, 7vw, 50px); }
+    .certificate .recipient { margin: 18px 0 10px; color: var(--blue); font-family: Georgia, serif; font-size: clamp(34px, 8vw, 62px); font-style: italic; }
+    .certificate p { line-height: 1.7; }
+    .seal { display: grid; width: 74px; height: 74px; margin: 20px auto 0; place-items: center; border: 3px double #dca72a; border-radius: 50%; color: #a97912; font-size: 32px; }
+    .certificate-actions { display: flex; gap: 12px; justify-content: center; margin-top: 22px; }
+    .certificate-actions button { width: auto; }
+
+    @media (pointer: coarse) {
+      .game-shell { padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+      .primary-btn, .secondary-btn { min-height: 48px; }
+      .letter-card { min-width: 48px; }
+      .dialog { max-height: 92dvh; overflow-y: auto; }
+    }
+    @media (max-width: 620px), (orientation: portrait) and (pointer: coarse) {
+      .topbar { grid-template-columns: 1fr; }
+      .length-control { grid-template-columns: 54px 1fr 42px; }
+      .progress { display: flex; justify-content: space-between; align-items: baseline; text-align: left; }
+      .letter-card { border-radius: 10px; }
+      .actions { flex-direction: column; }
+      .actions button { width: 100%; }
+      .certificate-actions { flex-direction: column; }
+    }
+    @media print {
+      body * { visibility: hidden; }
+      #certificate-modal, #certificate-modal * { visibility: visible; }
+      #certificate-modal { position: absolute; inset: 0; background: white; backdrop-filter: none; }
+      .certificate-actions { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="start-modal" class="modal">
+    <div class="dialog">
+      <div class="logo-mark" aria-hidden="true">A</div>
+      <h1>ASL Word Builder</h1>
+      <p class="subhead">Put the fingerspelled letters in the right order to build each word.</p>
+      <label class="field-label" for="player-name">Player name</label>
+      <input id="player-name" class="name-input" type="text" maxlength="40" placeholder="Enter your name" autocomplete="name">
+      <label class="field-label" for="goal-slider">Words to complete</label>
+      <div class="goal-row">
+        <input id="goal-slider" type="range" min="5" max="20" value="10">
+        <output id="goal-output" class="goal-value" for="goal-slider">10 words</output>
+      </div>
+      <button id="start-button" class="primary-btn">Start Building</button>
+    </div>
+  </div>
+
+  <main id="game" class="game-shell hidden">
+    <div class="topbar">
+      <label class="length-control" for="length-slider">
+        <strong>Word length</strong>
+        <input id="length-slider" type="range" min="3" max="8" value="5">
+        <output id="length-output" for="length-slider">5</output>
+      </label>
+      <div class="progress" aria-live="polite">
+        <strong id="progress-count">0 / 10</strong>
+        <span>words complete</span>
+      </div>
+    </div>
+
+    <section class="game-card">
+      <div class="eyebrow">Unscramble the signs</div>
+      <p id="clue" class="clue"></p>
+      <button id="clue-toggle" class="clue-toggle" type="button" aria-pressed="true">Show clue</button>
+      <div id="letter-row" class="letter-row" aria-label="Scrambled letters"></div>
+      <p class="instructions">Drag letters to reorder them, or tap two letters to swap.</p>
+      <div class="actions">
+        <button id="shuffle-button" class="secondary-btn">Shuffle</button>
+        <button id="check-button" class="primary-btn">Check word</button>
+      </div>
+      <p id="status" class="status" role="status"></p>
+    </section>
+  </main>
+
+  <div id="certificate-modal" class="modal hidden">
+    <div class="certificate">
+      <h2>Certificate of Achievement</h2>
+      <p>This certifies that</p>
+      <div id="certificate-name" class="recipient"></div>
+      <p>has successfully built <strong id="certificate-count"></strong> ASL words.</p>
+      <p>Excellent work recognizing and spelling each sign!</p>
+      <div class="seal" aria-hidden="true">✦</div>
+      <div class="certificate-actions">
+        <button class="secondary-btn" onclick="window.print()">Print certificate</button>
+        <button id="play-again-button" class="primary-btn">Play again</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WORDS = {
+      3: [
+        ['ANT', 'A tiny insect'],         ['BAT', 'An animal that flies at night'],
+        ['BED', 'Where you sleep'], ['BEE', 'An insect that makes honey'], ['CAR', 'A vehicle with wheels'],
+        ['CAT', 'A small pet that purrs'], ['DOG', 'A pet known as a loyal friend'], ['EGG', 'A breakfast food with a shell'],
+        ['FUN', 'Enjoyment or a good time'], ['HAM', 'A meat from a pig'], ['HAT', 'Something worn on the head'],
+        ['KEY', 'Opens a lock'], ['MAP', 'Shows places and roads'], ['OWL', 'A bird that is awake at night'],
+        ['SEA', 'The salty water between continents'], ['SUN', 'The bright star in our sky']
+      ],
+      4: [
+        ['BALL', 'Something used in many sports'], ['BIRD', 'An animal with feathers'], ['BOOK', 'A collection of pages to read'],
+        ['CAKE', 'A sweet baked dessert'], ['COLD', 'Low temperature'], ['FISH', 'An animal that swims'],
+        ['FOOD', 'Something we eat'], ['GIRL', 'A female child'], ['HOME', 'A place where you live'],
+        ['MILK', 'A drink that comes from a cow'], ['MOON', 'Earth’s natural night light'], ['RAIN', 'Water falling from clouds'],
+        ['SHIP', 'A boat for a long journey'], ['STAR', 'A shining point in the night sky'], ['TIME', 'Measured with a clock'],
+        ['WARM', 'Comfortably hot'], ['WIND', 'Moving air']
+      ],
+      5: [
+        ['APPLE', 'A crunchy fruit'], ['BEACH', 'Sandy land beside the sea'], ['BRAVE', 'Ready to face danger'],
+        ['CLASS', 'A group learning together'], ['CLOUD', 'A white or gray shape in the sky'], ['DANCE', 'Move to music'],
+        ['GREEN', 'The color of grass'], ['HAPPY', 'Feeling joy'], ['HELLO', 'A friendly greeting'],
+        ['HOUSE', 'A building where people live'], ['LEARN', 'Gain knowledge'], ['LIGHT', 'Makes things visible'],
+        ['MUSIC', 'Organized sound'], ['NIGHT', 'When the sun is down'], ['PIZZA', 'A round cheesy baked food'],
+        ['SMILE', 'A happy expression'], ['SNAKE', 'A legless reptile'], ['WATER', 'A drink and the ocean']
+      ],
+      6: [
+        ['ANIMAL', 'A living creature that is not a plant'], ['BANANA', 'A curved yellow fruit'], ['BASKET', 'A container made from woven material'],
+        ['CANDLE', 'A wax stick that gives light'], ['FLOWER', 'A colorful plant bloom'],
+        ['FRIEND', 'Someone you care about'], ['KITTEN', 'A young cat'], ['ORANGE', 'A citrus fruit'],
+        ['PENCIL', 'Used for writing'], ['PURPLE', 'A mix of red and blue'], ['RABBIT', 'A long-eared jumping animal'],
+        ['SCHOOL', 'A place for learning'], ['SLEEPY', 'Ready to rest'],
+        ['SUMMER', 'The warmest season'], ['YELLOW', 'The color of sunshine']
+      ],
+      7: [
+        ['AMAZING', 'Very surprising or impressive'], ['BICYCLE', 'A vehicle powered by pedals'],
+        ['CAPTAIN', 'A leader of a team or ship'], ['COMPUTE', 'Using a computer'], ['COUNTRY', 'A nation with borders'],
+        ['DREAMER', 'A person who imagines new things'], ['GIRAFFE', 'A very tall animal'],
+        ['KITCHEN', 'A room for cooking'], ['LIBRARY', 'A place for borrowing books'], ['OUTSIDE', 'The area beyond a building'],
+        ['PENGUIN', 'A black and white bird that cannot fly'], ['RAINBOW', 'A colorful arc after rain'], ['SUNRISE', 'When the sun appears'],
+        ['THUNDER', 'The loud sound after lightning'], ['WORKING', 'Doing a job or task']
+      ],
+      8: [
+        ['BASEBALL', 'A sport with a bat and ball'], ['BIRTHDAY', 'A yearly celebration'],
+        ['COMPUTER', 'An electronic device for work'], ['ELEPHANT', 'The largest land animal'], ['KANGAROO', 'An animal that carries a joey'],
+        ['LANGUAGE', 'A system of words and signs'], ['MOUNTAIN', 'A very tall natural landform'], ['NOTEBOOK', 'Pages used for writing'],
+        ['RAINCOAT', 'A coat that keeps you dry'], ['SANDWICH', 'A meal between pieces of bread'], ['SATURDAY', 'The sixth day of the week'],
+        ['TREASURE', 'Something precious or valuable'], ['UMBRELLA', 'Keeps you dry in rain'], ['VACATION', 'Time away for rest or travel']
+      ]
+    };
+
+    const elements = {
+      startModal: document.querySelector('#start-modal'), playerName: document.querySelector('#player-name'),
+      goalSlider: document.querySelector('#goal-slider'), goalOutput: document.querySelector('#goal-output'),
+      startButton: document.querySelector('#start-button'), game: document.querySelector('#game'),
+      lengthSlider: document.querySelector('#length-slider'), lengthOutput: document.querySelector('#length-output'),
+      progressCount: document.querySelector('#progress-count'), clue: document.querySelector('#clue'), clueToggle: document.querySelector('#clue-toggle'),
+      letterRow: document.querySelector('#letter-row'), status: document.querySelector('#status'),
+      shuffleButton: document.querySelector('#shuffle-button'), checkButton: document.querySelector('#check-button'),
+      certificateModal: document.querySelector('#certificate-modal'), certificateName: document.querySelector('#certificate-name'),
+      certificateCount: document.querySelector('#certificate-count'), playAgain: document.querySelector('#play-again-button')
+    };
+
+    const state = { name: '', goal: 10, length: 5, completed: 0, word: '', clue: '', clueVisible: false, letters: [], used: new Set(), selectedIndex: null, dragging: false };
+
+    elements.goalSlider.addEventListener('input', () => {
+      elements.goalOutput.textContent = `${elements.goalSlider.value} words`;
+    });
+    elements.lengthSlider.addEventListener('input', () => {
+      state.length = Number(elements.lengthSlider.value);
+      elements.lengthOutput.textContent = state.length;
+      state.used.clear();
+      startRound();
+    });
+    elements.startButton.addEventListener('click', startGame);
+    elements.playerName.addEventListener('keydown', event => { if (event.key === 'Enter') startGame(); });
+    elements.shuffleButton.addEventListener('click', shuffleRound);
+    elements.checkButton.addEventListener('click', checkAnswer);
+    elements.clueToggle.addEventListener('click', toggleClue);
+    elements.playAgain.addEventListener('click', () => location.reload());
+
+    function startGame() {
+      state.name = elements.playerName.value.trim();
+      if (!state.name) {
+        elements.playerName.style.borderColor = '#c84a57';
+        elements.playerName.focus();
+        return;
+      }
+      state.goal = Number(elements.goalSlider.value);
+      state.length = Number(elements.lengthSlider.value);
+      elements.startModal.classList.add('hidden');
+      elements.game.classList.remove('hidden');
+      updateProgress();
+      startRound();
+    }
+
+    function startRound() {
+      state.selectedIndex = null;
+      state.status = '';
+      let candidates = WORDS[state.length].filter(([word]) => !state.used.has(word));
+      if (!candidates.length) {
+        state.used.clear();
+        candidates = WORDS[state.length];
+      }
+      [state.word, state.clue] = candidates[Math.floor(Math.random() * candidates.length)];
+      state.used.add(state.word);
+      state.letters = state.word.split('');
+      scrambleLetters();
+      renderRound();
+    }
+
+    function scrambledCopies() {
+      let attempt;
+      do {
+        attempt = [...state.letters].sort(() => Math.random() - .5);
+      } while (attempt.join('') === state.word && attempt.length > 1);
+      return attempt;
+    }
+
+    function scrambleLetters() {
+      state.letters = scrambledCopies();
+    }
+
+    function shuffleRound() {
+      state.selectedIndex = null;
+      state.letters = scrambledCopies();
+      setStatus('Letters shuffled.', '');
+      renderLetters();
+    }
+
+    function renderRound() {
+      updateClueDisplay();
+      setStatus(state.clueVisible ? 'Arrange the letters to match the clue.' : 'Arrange the letters to build the hidden word.', '');
+      renderLetters();
+    }
+
+    function toggleClue() {
+      state.clueVisible = !state.clueVisible;
+      updateClueDisplay();
+      setStatus(state.clueVisible ? 'Clue shown.' : 'Clue hidden — arrange from the signs alone.', '');
+    }
+
+    function updateClueDisplay() {
+      elements.clue.innerHTML = `Clue: <strong>${state.clue}</strong>`;
+      elements.clue.classList.toggle('hidden-clue', !state.clueVisible);
+      elements.clueToggle.textContent = state.clueVisible ? 'Hide clue' : 'Show clue';
+      elements.clueToggle.setAttribute('aria-pressed', String(!state.clueVisible));
+    }
+
+    function renderLetters() {
+      elements.letterRow.innerHTML = '';
+      state.letters.forEach((letter, index) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'letter-card';
+        card.dataset.index = index;
+        card.setAttribute('aria-label', `Letter ${letter}, position ${index + 1}`);
+        if (index === state.selectedIndex) card.classList.add('selected');
+        const image = document.createElement('img');
+        image.src = `https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`;
+        image.alt = `ASL letter ${letter}`;
+        image.draggable = false;
+        image.addEventListener('error', () => {
+          image.style.display = 'none';
+          card.querySelector('.fallback').style.display = 'grid';
+        });
+        const fallback = document.createElement('span');
+        fallback.className = 'fallback';
+        fallback.textContent = letter;
+        card.append(image, fallback);
+        card.addEventListener('click', () => handleCardClick(index));
+        card.addEventListener('pointerdown', event => beginDrag(event, index));
+        elements.letterRow.appendChild(card);
+      });
+    }
+
+    function handleCardClick(index) {
+      if (state.dragging) return;
+      if (state.selectedIndex === null) {
+        state.selectedIndex = index;
+      } else if (state.selectedIndex === index) {
+        state.selectedIndex = null;
+      } else {
+        swapLetters(state.selectedIndex, index);
+        state.selectedIndex = null;
+      }
+      renderLetters();
+    }
+
+    function beginDrag(event, index) {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      state.dragging = false;
+      const card = event.currentTarget;
+      card.setPointerCapture(event.pointerId);
+      card.classList.add('dragging');
+      card.addEventListener('pointermove', moveDrag);
+      card.addEventListener('pointerup', finishDrag, { once: true });
+
+      function moveDrag(moveEvent) {
+        state.dragging = true;
+        const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)?.closest('.letter-card');
+        document.querySelectorAll('.letter-card.drop-target').forEach(item => item.classList.remove('drop-target'));
+        if (target && target !== card) target.classList.add('drop-target');
+      }
+
+      function finishDrag(upEvent) {
+        card.removeEventListener('pointermove', moveDrag);
+        card.classList.remove('dragging');
+        document.querySelectorAll('.letter-card.drop-target').forEach(item => item.classList.remove('drop-target'));
+        const target = document.elementFromPoint(upEvent.clientX, upEvent.clientY)?.closest('.letter-card');
+        if (target) {
+          const targetIndex = Number(target.dataset.index);
+          if (targetIndex !== index) {
+            swapLetters(index, targetIndex);
+            state.selectedIndex = null;
+            renderLetters();
+          }
+        }
+        setTimeout(() => { state.dragging = false; }, 0);
+      }
+    }
+
+    function swapLetters(from, to) {
+      [state.letters[from], state.letters[to]] = [state.letters[to], state.letters[from]];
+    }
+
+    function checkAnswer() {
+      const answer = state.letters.join('');
+      if (answer !== state.word) {
+        setStatus(`Not quite — try again!`, 'error');
+        elements.letterRow.querySelectorAll('.letter-card').forEach(card => card.classList.add('wrong'));
+        setTimeout(() => elements.letterRow.querySelectorAll('.letter-card').forEach(card => card.classList.remove('wrong')), 400);
+        return;
+      }
+      setStatus(`Correct — ${state.word}!`, 'success');
+      elements.letterRow.querySelectorAll('.letter-card').forEach(card => card.classList.add('correct'));
+      state.completed++;
+      updateProgress();
+      elements.checkButton.disabled = true;
+      setTimeout(() => {
+        elements.checkButton.disabled = false;
+        if (state.completed >= state.goal) showCertificate();
+        else startRound();
+      }, 850);
+    }
+
+    function updateProgress() {
+      elements.progressCount.textContent = `${state.completed} / ${state.goal}`;
+    }
+
+    function setStatus(message, kind) {
+      elements.status.textContent = message;
+      elements.status.className = `status ${kind}`;
+    }
+
+    function showCertificate() {
+      elements.certificateName.textContent = state.name;
+      elements.certificateCount.textContent = state.goal;
+      elements.certificateModal.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
