@@ -97,6 +97,7 @@ function startQuiz(questions) {
     questions_correct = 0;
     questions_incorrect = 0;
     questions_total = questions.length;
+    const missed_questions = new Set();
     function displayQuestion() {
         const question = questions[current_question];
         const gif_modal = document.getElementById('gif-modal');
@@ -115,11 +116,16 @@ function startQuiz(questions) {
             answer_button.addEventListener('click', () => {
                 if (index === question.correct) {
                     alert('Correct!');
-                    questions_correct++;
+                    if (!missed_questions.has(current_question)) {
+                        questions_correct++;
+                    }
                     current_question++;
                 } else {
                     alert('Incorrect. Try again.');
-                    questions_incorrect++;
+                    if (!missed_questions.has(current_question)) {
+                        questions_incorrect++;
+                        missed_questions.add(current_question);
+                    }
                 }
         if (current_question < questions.length) {
             displayQuestion();
@@ -137,10 +143,10 @@ function startQuiz(questions) {
 
 // Certificate modal population
 function displayCertificate() {
-    percentage_correct = ((questions_total - questions_incorrect)/questions_total) * 100;
-    rounded_percentage = percentage_correct.toFixed(2)
+    percentage_correct = (questions_correct / questions_total) * 100;
+    rounded_percentage = percentage_correct.toFixed(2);
     certificate_header.innerHTML = `<h1>Great work, ${user_name}!</h1>`;
-    results_area.innerHTML = `<h1>You answered all ${questions_total} question(s) correctly with only ${questions_incorrect} question(s) incorrect! Your accuracy percentage is ${rounded_percentage}%</h1>
+    results_area.innerHTML = `<h1>You completed ${questions_total} question(s) with ${questions_incorrect} question(s) incorrect! Your accuracy percentage is ${rounded_percentage}%</h1>
     <p>Take a screenshot of your results and upload them to Google Classroom!</p>`;
 }
 
