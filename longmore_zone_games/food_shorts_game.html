@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f2eee4">
+    <title>Short Order | Food Sign Practice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+        :root {
+            color-scheme: light;
+            --paper: #f2eee4;
+            --ink: #232821;
+            --muted: #777b70;
+            --line: #d7d4ca;
+            --green: #376d4b;
+            --orange: #e58b48;
+            --surface: #fffdf8;
+            --mono: 'DM Mono', monospace;
+            --display: 'Space Grotesk', sans-serif;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; min-height: 100dvh; background: var(--paper); color: var(--ink); font-family: 'DM Sans', sans-serif; }
+        button, input, select { font: inherit; }
+        button { color: inherit; cursor: pointer; }
+        button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #e58b48; outline-offset: 2px; }
+        .app { max-width: 1440px; margin: auto; padding: 22px clamp(14px, 3vw, 42px) 36px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 17px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-mark { width: 40px; height: 40px; display: grid; place-items: center; background: var(--green); color: white; font: 700 17px var(--display); border-radius: 12px 12px 12px 3px; }
+        .brand h1 { margin: 0; font: 700 20px var(--display); letter-spacing: 0; }
+        .brand p { margin: 2px 0 0; font: 11px var(--mono); color: var(--muted); text-transform: uppercase; }
+        .stats { display: flex; align-items: center; gap: 22px; font: 12px var(--mono); color: var(--muted); }
+        .stats strong { color: var(--ink); font: 600 16px var(--display); margin-left: 5px; }
+        .eyebrow { color: var(--green); font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: 0; }
+        .game-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(340px, .85fr); gap: 24px; padding-top: 24px; align-items: start; }
+        .order-column, .build-column { min-width: 0; }
+        .section-heading { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 11px; }
+        .section-heading h2 { margin: 0; font: 600 19px var(--display); }
+        .ticket { border: 1px solid var(--line); background: var(--surface); padding: 15px; border-radius: 10px 10px 3px 3px; }
+        .ticket-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 12px; }
+        .ticket-number { font: 11px var(--mono); color: var(--muted); }
+        .timer { display: flex; align-items: center; gap: 8px; min-width: 130px; }
+        .timer-track { height: 5px; background: #e6e3d9; flex: 1; border-radius: 9px; overflow: hidden; }
+        .timer-fill { height: 100%; width: 100%; background: var(--green); transition: width .2s linear; }
+        .timer-fill.low { background: #c4573c; }
+        .timer-readout { font: 11px var(--mono); min-width: 28px; text-align: right; }
+        .video-frame { position: relative; background: #20251f; border-radius: 5px; overflow: hidden; aspect-ratio: 16 / 9; }
+        .video-frame video { width: 100%; height: 100%; display: block; object-fit: contain; }
+        .video-empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #e9e9df; padding: 20px; font: 13px var(--mono); }
+        .video-empty[hidden] { display: none; }
+        .video-controls { display: flex; align-items: center; gap: 9px; padding-top: 12px; }
+        .control-btn, .speed-select { min-height: 46px; border: 1px solid var(--line); background: #fff; padding: 0 14px; border-radius: 6px; font-size: 13px; }
+        .control-btn:hover, .speed-select:hover { border-color: var(--green); }
+        .video-hint { color: var(--muted); font-size: 11px; margin-left: auto; }
+        .build-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+        .category-label { margin: 0 0 9px; font: 500 10px var(--mono); color: var(--muted); text-transform: uppercase; }
+        .menu-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+        .menu-option, .choice { border: 1px solid var(--line); background: #fff; border-radius: 7px; transition: border-color .15s, background .15s, transform .15s; }
+        .menu-option:hover, .choice:hover { border-color: var(--green); transform: translateY(-1px); }
+        .menu-option.selected, .choice.selected { border-color: var(--green); background: #edf4ed; box-shadow: inset 0 0 0 1px var(--green); }
+        .menu-option { min-width: 0; padding: 5px; text-align: center; }
+        .thumb { width: 100%; height: 66px; display: block; object-fit: contain; background: #f2f0e9; border-radius: 4px; }
+        canvas.thumb { width: 100%; }
+        .thumb-fallback { display: grid; place-items: center; color: var(--green); font: 700 18px var(--display); }
+        .option-name { display: block; padding: 5px 1px 2px; font-size: 10px; font-weight: 700; overflow-wrap: anywhere; }
+        .option-group { margin-top: 18px; }
+        .choice-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+        .choice { min-height: 108px; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-align: center; font-size: 12px; font-weight: 600; }
+        .choice .thumb { width: 76px; height: 76px; flex: 0 0 76px; }
+        .choice .option-name { padding: 0 2px; font-size: 11px; line-height: 1.2; }
+        .choice input { accent-color: var(--green); margin: 0; }
+        .size-options .choice { min-height: 52px; flex-direction: row; font: 500 11px var(--mono); }
+        .quantity-control { display: flex; align-items: center; gap: 12px; }
+        .quantity-control button { width: 48px; height: 48px; border: 1px solid var(--line); background: white; border-radius: 6px; font: 20px var(--display); }
+        .quantity-control output { min-width: 22px; text-align: center; font: 600 16px var(--mono); }
+        .build-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px dashed var(--line); margin-top: 18px; padding-top: 14px; }
+        .selection-summary { color: var(--muted); font-size: 11px; line-height: 1.5; }
+        .serve-btn, .primary-btn { min-height: 44px; border: 0; border-radius: 6px; background: var(--green); color: white; padding: 0 17px; font-weight: 700; }
+        .serve-btn:hover, .primary-btn:hover { background: #285a3b; }
+        .serve-btn:disabled { opacity: .45; cursor: not-allowed; }
+        .status-message { min-height: 22px; margin: 10px 0 0; font-size: 12px; font-weight: 600; }
+        .status-message.good { color: var(--green); }
+        .status-message.bad { color: #aa4937; }
+        .correct-banner, .incorrect-banner { position: fixed; z-index: 8; top: clamp(20px, 12vh, 100px); left: 50%; display: flex; align-items: center; gap: 18px; width: min(calc(100% - 32px), 510px); padding: 22px 26px; transform: translateX(-50%); border: 1px solid #ffffff55; border-radius: 16px; color: white; box-shadow: 0 18px 55px #14271d55; pointer-events: none; animation: correct-pop .28s ease-out both; }
+        .correct-banner { background: linear-gradient(135deg, #376d4b, #234d35); }
+        .incorrect-banner { background: linear-gradient(135deg, #b94f3e, #813326); }
+        .correct-banner.hidden, .incorrect-banner.hidden { display: none; }
+        .correct-icon { display: grid; flex: 0 0 52px; width: 52px; height: 52px; place-items: center; border: 2px solid #ffffff99; border-radius: 50%; font: 700 30px var(--display); }
+        .correct-copy { display: grid; gap: 2px; }
+        .correct-copy .eyebrow { color: #c9e3ce; }
+        .incorrect-banner .eyebrow { color: #ffe0d8; }
+        .correct-copy strong { font: 700 clamp(30px, 7vw, 42px)/1 var(--display); letter-spacing: 0; }
+        .correct-copy span:last-child { color: #e2eee4; font-size: 13px; }
+        @keyframes correct-pop { from { opacity: 0; transform: translate(-50%, -12px) scale(.96); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+        @media (prefers-reduced-motion: reduce) { .correct-banner, .incorrect-banner { animation: none; } }
+        .screen { position: fixed; inset: 0; z-index: 5; display: grid; place-items: center; overflow-y: auto; padding: 20px; background: rgba(32, 37, 31, .76); }
+        .screen.hidden { display: none; }
+        .dialog { width: min(100%, 470px); background: var(--surface); padding: 30px; border-radius: 12px; box-shadow: 0 22px 80px #1115; }
+        .dialog h2 { margin: 8px 0; font: 700 32px var(--display); letter-spacing: 0; }
+        .dialog p { color: var(--muted); font-size: 14px; line-height: 1.55; }
+        .form-field { display: block; margin-top: 18px; font-size: 12px; font-weight: 700; }
+        .form-field input, .form-field select { display: block; width: 100%; min-height: 45px; margin-top: 7px; border: 1px solid var(--line); border-radius: 6px; background: white; padding: 0 12px; }
+        .dialog .primary-btn { width: 100%; margin-top: 22px; }
+        .dialog-error { color: #aa4937 !important; min-height: 18px; font-size: 12px !important; }
+        .certificate { width: min(100%, 720px); position: relative; border: 1px solid #b7ad94; padding: 46px; text-align: center; background: #fffdf8; }
+        .certificate:before { content: ''; position: absolute; inset: 10px; border: 1px solid #d5c9ad; pointer-events: none; }
+        .certificate h2 { font-size: 35px; margin: 13px 0 5px; }
+        .certificate-name { margin: 20px 0 8px; color: var(--green); font: 700 35px var(--display); overflow-wrap: anywhere; }
+        .certificate-score { margin: 10px 0; font: 700 52px var(--display); }
+        .certificate-actions { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
+        .secondary-btn { min-height: 44px; padding: 0 16px; border: 1px solid var(--line); background: white; border-radius: 6px; font-weight: 600; }
+        @media (max-width: 700px) {
+            .game-layout { grid-template-columns: 1fr; }
+            .build-column { grid-row: 2; }
+            .menu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+        @media (min-width: 700px) and (max-width: 1100px) {
+            .app { max-width: none; padding: 14px 18px 24px; }
+            .game-layout { grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: 16px; padding-top: 14px; }
+            .section-heading h2 { font-size: 17px; }
+            .ticket, .build-panel { padding: 12px; }
+            .menu-grid { gap: 6px; }
+            .thumb { height: 60px; }
+            .choice-grid { gap: 6px; }
+            .video-frame { max-height: 42vh; }
+        }
+        @media (max-width: 520px) {
+            .app { padding: 14px 12px 24px; }
+            .topbar { align-items: flex-start; }
+            .brand-mark { width: 34px; height: 34px; }
+            .brand h1 { font-size: 17px; }
+            .brand p { font-size: 9px; }
+            .stats { display: grid; gap: 3px; text-align: right; font-size: 10px; }
+            .stats strong { font-size: 13px; }
+            .game-layout { gap: 17px; padding-top: 16px; }
+            .ticket, .build-panel { padding: 11px; }
+            .menu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+            .thumb { height: 55px; }
+            .option-name { font-size: 9px; }
+            .choice-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+            .choice { min-height: 94px; padding: 5px 3px; font-size: 10px; }
+            .choice .thumb { width: 62px; height: 62px; flex-basis: 62px; }
+            .choice .option-name { font-size: 10px; }
+            .video-hint { display: none; }
+            .dialog { padding: 23px 18px; }
+            .certificate { padding: 34px 20px; }
+            .certificate h2 { font-size: 27px; }
+            .certificate-name { font-size: 29px; }
+            .certificate-score { font-size: 44px; }
+        }
+        @media print {
+            @page { size: landscape; margin: 12mm; }
+            body { background: white; }
+            body * { visibility: hidden !important; }
+            #certificate-screen, #certificate-screen * { visibility: visible !important; }
+            #certificate-screen { position: absolute; inset: 0; display: grid !important; background: white; padding: 0; }
+            .certificate { width: 100%; max-width: none; box-shadow: none; border: 2px solid #b7ad94; }
+            .certificate-actions { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">SO</div>
+                <div><h1>Short Order</h1><p>Watch it. Build it. Get it right.</p></div>
+            </div>
+            <div class="stats" aria-live="polite">
+                <div>PLAYER<strong id="player-label">Guest</strong></div>
+                <div>SERVED<strong id="served-count">0 / 10</strong></div>
+                <div>ACCURACY<strong id="accuracy-label">100%</strong></div>
+            </div>
+        </header>
+
+        <div class="game-layout" aria-label="Food ordering game">
+            <section class="order-column" aria-labelledby="order-title">
+                    <div class="section-heading"><h2 id="order-title">Order video</h2><span class="eyebrow" id="difficulty-label">STANDARD</span></div>
+                <div class="ticket">
+                    <div class="ticket-top">
+                        <span class="ticket-number" id="ticket-number">TICKET 01</span>
+                        <div class="timer" aria-label="Time remaining"><div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div><span class="timer-readout" id="timer-readout">60s</span></div>
+                    </div>
+                    <div class="video-frame">
+                        <video id="order-video" playsinline preload="metadata" aria-label="Customer's food order video"></video>
+                        <div id="video-empty" class="video-empty" hidden></div>
+                    </div>
+                    <div class="video-controls">
+                        <button class="control-btn" id="replay-btn" type="button" title="Replay the order video">&#8635; Replay</button>
+                        <label class="eyebrow" for="video-speed">SPEED</label>
+                        <select class="speed-select" id="video-speed" aria-label="Video playback speed">
+                            <option value="1">1x</option><option value="0.75">0.75x</option><option value="0.5">0.5x</option><option value="0.25">0.25x</option>
+                        </select>
+                        <span class="video-hint">Replay or slow the sign down</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="build-column" aria-labelledby="build-title">
+                <div class="section-heading"><h2 id="build-title">Build the order</h2><span class="eyebrow">MENU + OPTIONS</span></div>
+                <div class="build-panel">
+                    <h3 class="category-label">1 / Menu item</h3>
+                    <div id="menu-options" class="menu-grid" aria-label="Menu item options"></div>
+                    <div id="size-group" class="option-group" hidden>
+                        <h3 class="category-label">2 / Size</h3>
+                        <div id="size-options" class="choice-grid size-options"></div>
+                    </div>
+                    <div class="option-group">
+                        <h3 class="category-label" id="ingredient-label">2 / Ingredients · select all that apply</h3>
+                        <div id="ingredient-options" class="choice-grid" aria-label="Ingredient options"></div>
+                    </div>
+                    <div id="quantity-group" class="option-group" hidden>
+                        <h3 class="category-label">Quantity</h3>
+                        <div class="quantity-control"><button type="button" id="quantity-minus" aria-label="Decrease quantity">−</button><output id="quantity-value">1</output><button type="button" id="quantity-plus" aria-label="Increase quantity">+</button></div>
+                    </div>
+                    <div class="build-footer">
+                        <div class="selection-summary" id="selection-summary">Select a menu item to begin.</div>
+                        <button class="serve-btn" id="serve-btn" type="button" disabled>Serve order</button>
+                    </div>
+                    <p class="status-message" id="status-message" aria-live="polite"></p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <section class="screen" id="start-screen" aria-modal="true" role="dialog" aria-labelledby="start-title">
+        <form class="dialog" id="start-form">
+            <span class="eyebrow">FOOD SHORTS · ORDER PRACTICE</span>
+            <h2 id="start-title">Welcome to the counter.</h2>
+            <p>Watch each customer’s video order, then choose the menu item, ingredients, size, and quantity that match.</p>
+            <label class="form-field" for="player-name">Player name<input id="player-name" name="player-name" maxlength="40" autocomplete="name" placeholder="Your name" required></label>
+            <label class="form-field" for="difficulty-select">Difficulty<select id="difficulty-select"><option value="easy">Easy · 90 seconds · 5 customers</option><option value="standard" selected>Standard · 60 seconds · 10 customers</option><option value="rush">Rush · 45 seconds · 15 customers</option></select></label>
+            <p class="dialog-error" id="start-error" aria-live="polite"></p>
+            <button class="primary-btn" type="submit">Open the counter</button>
+        </form>
+    </section>
+
+    <section class="screen hidden" id="certificate-screen" aria-modal="true" role="dialog" aria-labelledby="certificate-title">
+        <div class="certificate">
+            <span class="eyebrow">SHORT ORDER · FOOD SIGN PRACTICE</span>
+            <h2 id="certificate-title">Certificate of Completion</h2>
+            <p>This certificate is proudly presented to</p>
+            <div class="certificate-name" id="certificate-name"></div>
+            <p>for completing the customer orders with an accuracy of</p>
+            <div class="certificate-score" id="certificate-score"></div>
+            <p id="certificate-detail"></p>
+            <div class="certificate-actions"><button class="primary-btn" id="print-certificate" type="button">Print certificate</button><button class="secondary-btn" id="play-again" type="button">Play again</button></div>
+        </div>
+    </section>
+    <div class="correct-banner hidden" id="correct-banner" role="status" aria-live="polite" aria-atomic="true">
+        <span class="correct-icon" aria-hidden="true">✓</span>
+        <span class="correct-copy"><span class="eyebrow">ORDER COMPLETE</span><strong>Correct!</strong><span id="correct-message">Great job matching the order.</span></span>
+    </div>
+    <div class="incorrect-banner hidden" id="incorrect-banner" role="status" aria-live="polite" aria-atomic="true">
+        <span class="correct-icon" aria-hidden="true">!</span>
+        <span class="correct-copy"><span class="eyebrow">KEEP GOING</span><strong>Not quite</strong><span id="incorrect-message">Review your choices and try again.</span></span>
+    </div>
+
+    <script>
+        const VIDEO_FILES = [
+            'SMOOTHIE-BANANA-STRAWBERRY.mp4', 'COFFEE-LARGE-CHOCOLATE-WHIPPED_CREAM.mp4',
+            'MILKSHAKE-CHOCOLATE.mp4', 'SANDWICH-CHEESE-TURKEY.mp4', 'SOUP-CREAM-CLAM.mp4',
+            'BURRITO-EGG-CHEESE-SOUR_CREAM-ONION.mp4', 'COFFEE-MEDIUM-VANILLA--2.mp4',
+            'BURGER-CHEESE-BACON-LETTUCE.mp4', 'SANDWICH-CHEESE-BACON-EGG.mp4',
+            'BURRITO-SAUSAGE-POTATO-CHEESE-EGG.mp4', 'BURGER-CHEESE-MEAT-BUN.mp4',
+            'SOUP-TOMATO-CHEESE.mp4', 'COFFEE-SMALL-CHOCOLATE.mp4',
+            'BURGER-MEAT-LETTUCE-TOMATO.mp4', 'SMOOTHIE-BLUEBERRY-STRAWBERRY.mp4',
+            'SOUP-NOODLES-CHICKEN_BROTH.mp4', ' BURRITO-FRENCH_FRIES-STEAK-ONION-CHEESE.mp4',
+            'PIZZA-CHEESE-BACON-PINEAPPLE.mp4', 'SANDWICH-SAUSAGE-CHEESE-EGG.mp4',
+            'BURGER-CHEESE-MEAT-BUN-LETTUCE-TOMATO.mp4', 'PIZZA-CHEESE.mp4',
+            'PIZZA-PEPPERONI.mp4', 'SANDWICH-LETTUCE-TOMATO-BACON.mp4',
+            'COFFEE-SMALL.mp4', 'SMOOTHIE-ORANGE_JUICE-BANANA.mp4',
+            'MILKSHAKE-VANILLA.mp4', 'SANDWICH-CHEESE-TURKEY.mp4'
+        ];
+
+        const MODEL_FILES = {
+            BURRITO: 'sub.glb', BURGER: 'burger.glb', COFFEE: 'cup-coffee.glb',
+            MILKSHAKE: 'frappe.glb', PIZZA: 'pizza.glb', SANDWICH: 'sandwich.glb',
+            SMOOTHIE: 'soda-glass.glb', SOUP: 'bowl-soup.glb',
+            BACON: 'bacon.glb', BANANA: 'banana.glb', BEEF: 'meat-cooked.glb',
+            BLUEBERRY: 'berry.glb', BUN: 'bread.glb', CHEESE: 'cheese.glb',
+            CHICKEN_BROTH: 'bowl-soup.glb', CHOCOLATE: 'chocolate.glb', CLAM: 'mussel-open.glb',
+            CREAM: 'whipped-cream.glb', EGG: 'egg-cooked.glb', FRENCH_FRIES: 'fries.glb',
+            LETTUCE: 'lettuce.glb', MEAT: 'meat-patty.glb', NOODLES: 'spaghetti.glb',
+            ONION: 'onion.glb', ORANGE_JUICE: 'soda-glass.glb', PEPPERONI: 'meat-sausage.glb',
+            PINEAPPLE: 'pineapple.glb', POTATO: 'fries.glb', SAUSAGE: 'sausage.glb',
+            SOUR_CREAM: 'whipped-cream.glb', STEAK: 'meat-cooked.glb', STRAWBERRY: 'strawberry.glb',
+            TOMATO: 'tomato-slice.glb', TURKEY: 'turkey.glb', VANILLA: 'ice-cream.glb',
+            WHIPPED_CREAM: 'whipped-cream.glb'
+        };
+        const SIZES = new Set(['SMALL', 'MEDIUM', 'LARGE']);
+        const GAME_MODES = {
+            easy: { seconds: 90, customers: 5, label: 'EASY' },
+            standard: { seconds: 60, customers: 10, label: 'STANDARD' },
+            rush: { seconds: 45, customers: 15, label: 'RUSH' }
+        };
+        const assetRoot = './assets/';
+        const videoRoot = '../food_shorts/';
+        const menu = new Map();
+        const orders = [];
+
+        function parseVideo(filename) {
+            let stem = filename.trim().replace(/\.mp4$/i, '');
+            const quantityMatch = stem.match(/--(\d+)$/);
+            const quantity = quantityMatch ? Number(quantityMatch[1]) : 1;
+            if (quantityMatch) stem = stem.slice(0, quantityMatch.index);
+            const [rawItem, ...parts] = stem.split('-').filter(Boolean);
+            const item = rawItem.toUpperCase();
+            const size = parts.find(part => SIZES.has(part.toUpperCase()))?.toUpperCase() || null;
+            const ingredients = parts.filter(part => !SIZES.has(part.toUpperCase()));
+            if (!menu.has(item)) menu.set(item, { item, ingredients: new Set(), sizes: new Set(), maxQuantity: 1 });
+            const itemInfo = menu.get(item);
+            ingredients.forEach(ingredient => itemInfo.ingredients.add(ingredient.toUpperCase()));
+            if (size) itemInfo.sizes.add(size);
+            itemInfo.maxQuantity = Math.max(itemInfo.maxQuantity, quantity);
+            return { filename, item, ingredients: ingredients.map(value => value.toUpperCase()).sort(), size, quantity };
+        }
+        VIDEO_FILES.forEach(filename => orders.push(parseVideo(filename)));
+
+        const state = {
+            player: '', mode: GAME_MODES.standard, modeKey: 'standard', served: 0,
+            attempts: 0, correct: 0, currentOrder: null, selectedItem: '',
+            selectedIngredients: new Set(), selectedSize: '', quantity: 1,
+            secondsLeft: 0, timer: null, gameActive: false, currentOrderResolved: false,
+            currentOrderWrongCounted: false
+        };
+        let incorrectBannerTimer = null;
+
+        const el = id => document.getElementById(id);
+        const displayName = value => value.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+
+        function iconFor(text) { return text.replaceAll(/[^a-z0-9]/gi, '').slice(0, 2).toUpperCase(); }
+
+        function renderThumb(container, option) {
+            const asset = MODEL_FILES[option];
+            if (!asset || !window.THREE) {
+                container.classList.add('thumb-fallback');
+                container.textContent = iconFor(option);
+                return;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.className = 'thumb';
+            canvas.setAttribute('aria-label', `${displayName(option)} 3D thumbnail`);
+            container.replaceWith(canvas);
+            loadThumb(canvas, asset);
+        }
+
+        let thumbRenderer;
+        let thumbScene;
+        let thumbCamera;
+        let thumbLoader;
+        function loadThumb(canvas, asset) {
+            if (!thumbLoader) {
+                thumbLoader = new THREE.GLTFLoader();
+                thumbRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                thumbRenderer.setPixelRatio(1);
+                thumbRenderer.setSize(150, 100);
+                thumbRenderer.outputEncoding = THREE.sRGBEncoding;
+                thumbScene = new THREE.Scene();
+                thumbScene.add(new THREE.AmbientLight(0xffffff, 1.4));
+                const light = new THREE.DirectionalLight(0xffffff, 1.4);
+                light.position.set(3, 5, 4);
+                thumbScene.add(light);
+                thumbCamera = new THREE.PerspectiveCamera(38, 1.5, 0.01, 100);
+                thumbCamera.position.set(2.2, 1.7, 2.7);
+                thumbCamera.lookAt(0, .35, 0);
+            }
+            thumbLoader.load(`${assetRoot}${asset}`, gltf => {
+                const model = gltf.scene;
+                const bounds = new THREE.Box3().setFromObject(model);
+                const size = bounds.getSize(new THREE.Vector3());
+                const center = bounds.getCenter(new THREE.Vector3());
+                const extent = Math.max(size.x, size.y, size.z) || 1;
+                model.position.set(-center.x, -bounds.min.y, -center.z);
+                model.scale.setScalar(1.25 / extent);
+                const previous = thumbScene.getObjectByName('option-model');
+                if (previous) thumbScene.remove(previous);
+                model.name = 'option-model';
+                thumbScene.add(model);
+                thumbRenderer.render(thumbScene, thumbCamera);
+                canvas.width = 150;
+                canvas.height = 100;
+                const context = canvas.getContext('2d');
+                if (context) context.drawImage(thumbRenderer.domElement, 0, 0, canvas.width, canvas.height);
+            }, undefined, () => {
+                const context = canvas.getContext('2d');
+                if (context) {
+                    canvas.width = 150; canvas.height = 100;
+                    context.fillStyle = '#f2f0e9'; context.fillRect(0, 0, 150, 100);
+                    context.fillStyle = '#376d4b'; context.font = 'bold 22px sans-serif';
+                    context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(iconFor(asset), 75, 50);
+                }
+            });
+        }
+
+        function makeOption(name, selected, isMenuItem = false) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = `${isMenuItem ? 'menu-option' : 'choice'}${selected ? ' selected' : ''}`;
+            button.setAttribute('aria-pressed', String(selected));
+            button.setAttribute('aria-label', displayName(name));
+            if (isMenuItem) {
+                const placeholder = document.createElement('span');
+                placeholder.className = 'thumb thumb-fallback';
+                placeholder.textContent = iconFor(name);
+                button.appendChild(placeholder);
+            } else {
+                const input = document.createElement('input');
+                input.type = 'checkbox'; input.tabIndex = -1; input.checked = selected;
+                input.setAttribute('aria-hidden', 'true');
+                button.appendChild(input);
+                const placeholder = document.createElement('span');
+                placeholder.className = 'thumb thumb-fallback'; placeholder.textContent = iconFor(name);
+                button.appendChild(placeholder);
+            }
+            const label = document.createElement('span');
+            label.className = 'option-name'; label.textContent = displayName(name);
+            button.appendChild(label);
+            renderThumb(button.querySelector('.thumb'), name);
+            return button;
+        }
+
+        function renderMenu() {
+            const root = el('menu-options');
+            root.replaceChildren();
+            menu.forEach((info, item) => {
+                const option = makeOption(item, state.selectedItem === item, true);
+                option.addEventListener('click', () => {
+                    state.selectedItem = item;
+                    state.selectedIngredients.clear();
+                    state.selectedSize = '';
+                    state.quantity = 1;
+                    renderBuilder();
+                });
+                root.appendChild(option);
+            });
+        }
+
+        function renderBuilder() {
+            renderMenu();
+            const info = menu.get(state.selectedItem);
+            const ingredientsRoot = el('ingredient-options');
+            ingredientsRoot.replaceChildren();
+            const hasSize = Boolean(info && info.sizes.size);
+            el('size-group').hidden = !hasSize;
+            el('quantity-group').hidden = !info || info.maxQuantity <= 1;
+            el('ingredient-label').textContent = `${hasSize ? '3' : '2'} / ${displayName(state.selectedItem || 'Ingredients')} · select all that apply`;
+            el('size-options').replaceChildren();
+
+            if (info) {
+                [...info.ingredients].sort().forEach(ingredient => {
+                    const selected = state.selectedIngredients.has(ingredient);
+                    const option = makeOption(ingredient, selected);
+                    option.addEventListener('click', () => {
+                        if (selected) state.selectedIngredients.delete(ingredient);
+                        else state.selectedIngredients.add(ingredient);
+                        renderBuilder();
+                    });
+                    ingredientsRoot.appendChild(option);
+                });
+                [...info.sizes].sort((a, b) => ['SMALL', 'MEDIUM', 'LARGE'].indexOf(a) - ['SMALL', 'MEDIUM', 'LARGE'].indexOf(b)).forEach(size => {
+                    const option = document.createElement('button');
+                    option.type = 'button'; option.className = `choice${state.selectedSize === size ? ' selected' : ''}`;
+                    option.textContent = displayName(size); option.setAttribute('aria-pressed', String(state.selectedSize === size));
+                    option.addEventListener('click', () => { state.selectedSize = size; renderBuilder(); });
+                    el('size-options').appendChild(option);
+                });
+            }
+            el('quantity-value').textContent = state.quantity;
+            const parts = [];
+            if (state.selectedItem) parts.push(displayName(state.selectedItem));
+            if (state.selectedSize) parts.push(displayName(state.selectedSize));
+            if (state.selectedIngredients.size) parts.push([...state.selectedIngredients].map(displayName).join(', '));
+            if (state.quantity > 1) parts.push(`×${state.quantity}`);
+            el('selection-summary').textContent = parts.length ? parts.join(' · ') : 'Select a menu item to begin.';
+            el('serve-btn').disabled = !state.gameActive || !state.selectedItem || (hasSize && !state.selectedSize);
+        }
+
+        function updateAccuracy() {
+            const percent = state.attempts ? Math.round((state.correct / state.attempts) * 100) : 100;
+            el('accuracy-label').textContent = `${percent}%`;
+            return percent;
+        }
+
+        function updateProgress() {
+            el('served-count').textContent = `${state.served} / ${state.mode.customers}`;
+            updateAccuracy();
+        }
+
+        function nextOrder() {
+            if (state.served >= state.mode.customers) {
+                finishGame();
+                return;
+            }
+            clearInterval(state.timer);
+            const candidates = orders.filter(order => menu.has(order.item));
+            let next = candidates[Math.floor(Math.random() * candidates.length)];
+            if (candidates.length > 1 && next === state.currentOrder) next = candidates[(candidates.indexOf(next) + 1) % candidates.length];
+            state.currentOrder = next;
+            state.selectedItem = '';
+            state.selectedIngredients.clear();
+            state.selectedSize = '';
+            state.quantity = 1;
+            state.secondsLeft = state.mode.seconds;
+            state.currentOrderResolved = false;
+            state.currentOrderWrongCounted = false;
+            hideIncorrectBanner();
+            el('correct-banner').classList.add('hidden');
+            el('ticket-number').textContent = `TICKET ${String(state.served + 1).padStart(2, '0')}`;
+            const video = el('order-video');
+            video.pause();
+            video.playbackRate = Number(el('video-speed').value);
+            video.src = videoRoot + encodeURIComponent(next.filename);
+            video.load();
+            el('video-empty').hidden = true;
+            video.play().catch(() => { el('video-empty').hidden = false; });
+            el('status-message').textContent = '';
+            el('status-message').className = 'status-message';
+            renderBuilder();
+            updateTimer();
+            state.timer = setInterval(() => {
+                state.secondsLeft -= 1;
+                updateTimer();
+                if (state.secondsLeft <= 0) recordTimeout();
+            }, 1000);
+        }
+
+        function updateTimer() {
+            const percent = Math.max(0, state.secondsLeft / state.mode.seconds * 100);
+            el('timer-fill').style.width = `${percent}%`;
+            el('timer-fill').classList.toggle('low', percent <= 25);
+            el('timer-readout').textContent = `${state.secondsLeft}s`;
+        }
+
+        function recordTimeout() {
+            if (state.currentOrderResolved) return;
+            state.currentOrderResolved = true;
+            clearInterval(state.timer);
+            if (!state.currentOrderWrongCounted) state.attempts += 1;
+            state.served += 1;
+            el('status-message').textContent = `Time's up. The next customer is ready.`;
+            el('status-message').className = 'status-message bad';
+            updateProgress();
+            setTimeout(nextOrder, 850);
+        }
+
+        function hideIncorrectBanner() {
+            clearTimeout(incorrectBannerTimer);
+            incorrectBannerTimer = null;
+            el('incorrect-banner').classList.add('hidden');
+        }
+
+        function serveOrder() {
+            const order = state.currentOrder;
+            if (!state.gameActive || !order || state.currentOrderResolved || !state.selectedItem) return;
+            const selectedIngredients = [...state.selectedIngredients].sort();
+            const isCorrect = state.selectedItem === order.item &&
+                JSON.stringify(selectedIngredients) === JSON.stringify(order.ingredients) &&
+                state.selectedSize === (order.size || '') && state.quantity === order.quantity;
+            if (isCorrect) {
+                state.attempts += 1;
+                state.currentOrderResolved = true;
+                clearInterval(state.timer);
+                state.served += 1;
+                state.correct += 1;
+                hideIncorrectBanner();
+                el('status-message').textContent = 'Correct! Order matched.';
+                el('status-message').className = 'status-message good';
+                el('correct-message').textContent = `Ticket ${String(state.served).padStart(2, '0')} matched. Great job!`;
+                el('correct-banner').classList.remove('hidden');
+            } else {
+                if (!state.currentOrderWrongCounted) {
+                    state.attempts += 1;
+                    state.currentOrderWrongCounted = true;
+                }
+                el('status-message').textContent = 'Not quite. Adjust your choices and try again before time runs out.';
+                el('status-message').className = 'status-message bad';
+                el('incorrect-message').textContent = 'Review your choices and try again before time runs out.';
+                el('incorrect-banner').classList.remove('hidden');
+                clearTimeout(incorrectBannerTimer);
+                incorrectBannerTimer = setTimeout(hideIncorrectBanner, 1800);
+                updateAccuracy();
+                return;
+            }
+            updateProgress();
+            setTimeout(() => {
+                el('correct-banner').classList.add('hidden');
+                nextOrder();
+            }, 1800);
+        }
+
+        function finishGame() {
+            state.gameActive = false;
+            clearInterval(state.timer);
+            el('serve-btn').disabled = true;
+            const percent = updateAccuracy();
+            el('certificate-name').textContent = state.player;
+            el('certificate-score').textContent = `${percent}%`;
+            el('certificate-detail').textContent = `${state.correct} correct orders out of ${state.attempts} attempts · ${state.served} customers completed`;
+            el('certificate-screen').classList.remove('hidden');
+        }
+
+        function startGame(event) {
+            event.preventDefault();
+            const name = el('player-name').value.trim();
+            if (!name) {
+                el('start-error').textContent = 'Enter your name to start.';
+                return;
+            }
+            state.player = name;
+            state.modeKey = el('difficulty-select').value;
+            state.mode = GAME_MODES[state.modeKey];
+            state.served = 0; state.attempts = 0; state.correct = 0;
+            state.gameActive = true;
+            el('player-label').textContent = name;
+            el('difficulty-label').textContent = state.mode.label;
+            el('start-screen').classList.add('hidden');
+            updateProgress();
+            nextOrder();
+        }
+
+        el('start-form').addEventListener('submit', startGame);
+        el('serve-btn').addEventListener('click', serveOrder);
+        el('quantity-minus').addEventListener('click', () => {
+            state.quantity = Math.max(1, state.quantity - 1);
+            renderBuilder();
+        });
+        el('quantity-plus').addEventListener('click', () => {
+            const maximum = menu.get(state.selectedItem)?.maxQuantity || 1;
+            state.quantity = Math.min(maximum, state.quantity + 1);
+            renderBuilder();
+        });
+        el('replay-btn').addEventListener('click', () => {
+            const video = el('order-video');
+            video.currentTime = 0;
+            video.playbackRate = Number(el('video-speed').value);
+            video.play().catch(() => { el('video-empty').hidden = false; });
+        });
+        el('video-speed').addEventListener('change', event => { el('order-video').playbackRate = Number(event.target.value); });
+        el('order-video').addEventListener('error', () => { el('video-empty').hidden = false; el('video-empty').textContent = 'This order video could not be loaded. You can still build the order from the menu.'; });
+        el('print-certificate').addEventListener('click', () => window.print());
+        el('play-again').addEventListener('click', () => {
+            el('certificate-screen').classList.add('hidden');
+            el('player-name').value = state.player;
+            el('start-screen').classList.remove('hidden');
+        });
+        renderBuilder();
+    </script>
+</body>
+</html>
