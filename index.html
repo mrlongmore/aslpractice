@@ -1,61 +1,88 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name = "keywords" content = "ASL, American Sign Language, Sign Language, Learning, Practice, Quiz">
-        <meta name = "author" content = "Harrison Longmore">
-        <title>ASL Anchor</title>
-        <link rel = "stylesheet" href = "style.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-    </head>
-    <body>
-        <div id = "name-modal" class = "modal">
-            <div class = "modal-header">
-                <h1>What is your name?</h1>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f3ed">
+    <meta name="description" content="Explore ASL games and practice tools from Longmore Zone. Find a game by topic, format, or name.">
+    <title>Longmore Zone | ASL Games &amp; Practice</title>
+    <link rel="stylesheet" href="catalog.css">
+    <script src="catalog.js" defer></script>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to games and tools</a>
+    <header class="site-header" id="home">
+        <a class="brand" href="#home" aria-label="Longmore Zone home">
+            <span>Longmore Zone</span>
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+            <a class="active" href="#home" aria-current="page">Home</a>
+            <a href="asl_anchor.html">Practice</a>
+            <a href="buttonboard.html">Vocabulary</a>
+            <a href="longbot.html">Word Search</a>
+            <a href="updates.html">Updates</a>
+            <a href="roadmap.html">Roadmap</a>
+            <a class="nav-search" href="#game-search" aria-label="Search games">⌕</a>
+        </nav>
+    </header>
+
+    <main id="main">
+        <section class="intro" aria-labelledby="page-title">
+            <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> ASL games &amp; practice</p>
+            <h1 id="page-title">Longmore<br>Zone</h1>
+            <p class="intro-copy">Explore games, challenges, and practice tools. Find a new way to learn, play, and sign.</p>
+            <div class="intro-note">
+                <span class="note-icon" aria-hidden="true">✳</span>
+                <span>Made for curious learners. Ready on your phone, tablet, or computer.</span>
             </div>
-            <div class = "input-area">
-                <input id="name-input" type = "text" placeholder="Your name here">
-                <button id = "name-button">Submit</button>
+            <figure class="hero-sign" aria-live="polite">
+                <img id="hero-sign-image" alt="" hidden>
+                <span class="hero-sign-placeholder" aria-hidden="true">🤟</span>
+                <figcaption id="hero-sign-caption">A sign from the vocabulary collection</figcaption>
+            </figure>
+        </section>
+
+        <section class="directory" aria-labelledby="directory-title">
+            <div class="directory-heading">
+                <div>
+                    <p class="eyebrow">Pick a path</p>
+                    <h2 id="directory-title">Explore the collection</h2>
+                </div>
+                <p class="collection-count" id="collection-count"></p>
             </div>
-        </div>
-        <div id = "topic-modal" class = "modal">
-            <div class = "modal-header">
-                <h1>Which topic(s) would you like to practice?</h1>
+
+            <label class="search-box" for="game-search">
+                <span aria-hidden="true" class="search-icon">⌕</span>
+                <span class="visually-hidden">Search games and tools</span>
+                <input id="game-search" type="search" placeholder="Search games and tools…" autocomplete="off">
+                <kbd aria-hidden="true">Ctrl / ⌘ K</kbd>
+            </label>
+
+            <div class="filter-row">
+                <div class="filter-group" id="type-filters" role="group" aria-label="Filter by collection type"></div>
             </div>
-            <div id = "topic-container">
-                <!--Topics populate here-->
+            <div class="tag-heading">
+                <span class="eyebrow">Browse by topic</span>
+                <span class="tag-hint">Choose a tag to filter</span>
             </div>
-            <button id = "topic-button">Submit</button>
-        </div>
-        <div id = "quiz-modal" class = "modal">
-            <div class = "questions-remaining">
-                <!--Questions remaining populates here-->
+            <div class="tag-filters" id="tag-filters" role="group" aria-label="Filter by topic tag"></div>
+
+            <div class="results-heading">
+                <h3>All the good stuff</h3>
+                <p id="results-count" role="status" aria-live="polite"></p>
             </div>
-            <div class = "modal-header">
-                <h1>Identify the following sign:</h1>
-            </div>
-            <div id = "gif-modal">
-                <!--Gif populates here-->
-            </div>
-            <div id = "answers-area">
-                <!--Answers populate here-->
-            </div>
-        </div>
-        <div id = "certificate-modal" class = "modal">
-            <div id = "certificate-header" class = "modal-header">
-                <!--Certificate header populates here-->
-            </div>
-            <div id = "result-area">
-                <!--Results populate here-->
-            </div>
-            <button id = "certificate-button">Want to practice a different topic?</button>
-        </div>
-        <!-- <div id = "mini-game">
-            <canvas></canvas>
-        </div> -->
-        <script src="script.js?v=2"></script>
-    </body>
+            <div class="card-grid" id="game-list"></div>
+            <p class="empty-state" id="empty-state" hidden>No matches yet. Try another search or clear a filter.</p>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <a class="brand footer-brand" href="#home">
+            <span>Longmore Zone</span>
+        </a>
+        <p>Keep exploring. Keep signing.</p>
+        <a href="asl_anchor.html">Open ASL Anchor quiz <span aria-hidden="true">↗</span></a>
+    </footer>
+</body>
 </html>

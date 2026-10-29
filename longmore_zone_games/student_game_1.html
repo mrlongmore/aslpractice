@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f4e8cf" />
+  <title>ASL Food Runner</title>
+  <style>
+    :root { --cream:#f4e8cf; --ink:#253139; --tomato:#e75e46; --mint:#91c9a6; --yellow:#f2c45e; --white:#fffaf1; --muted:#68777b; --sign-rail:clamp(150px,20vw,230px); }
+    * { box-sizing:border-box; }
+    html, body { margin:0; width:100%; height:100%; overflow:hidden; background:var(--cream); color:var(--ink); font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif; }
+    body { min-height:100dvh; touch-action:pan-x pan-y; }
+    #game { position:fixed; inset:0; }
+    canvas { display:block; width:100%; height:100%; touch-action:none; }
+    .topbar { position:absolute; z-index:3; top:max(12px,env(safe-area-inset-top)); left:9px; transform:none; width:calc(100% - var(--sign-rail) - 18px); display:grid; grid-template-columns:1fr auto 1fr; align-items:start; gap:12px; pointer-events:none; }
+    .brand { font-size:clamp(14px,2vw,19px); font-weight:1000; letter-spacing:.06em; line-height:1; padding:10px 13px; background:var(--ink); color:var(--white); border-radius:14px; box-shadow:0 4px 0 #131d22; width:max-content; }
+    .brand span { color:var(--yellow); }
+    .score { justify-self:end; padding:9px 13px; border-radius:14px; background:var(--white); font-weight:900; box-shadow:0 4px 0 rgba(37,49,57,.15); text-align:right; min-width:90px; }
+    .score small { display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.1em; }
+    #scoreNum { font-size:21px; }
+    .ticket { grid-column:1 / -1; justify-self:center; width:min(100%,500px); margin-top:0; padding:11px 16px 12px; background:var(--white); border:3px solid var(--ink); border-radius:18px; box-shadow:0 5px 0 rgba(37,49,57,.22); text-align:center; transform:rotate(-.5deg); }
+    .ticket .eyebrow { color:var(--tomato); font-weight:1000; font-size:10px; letter-spacing:.16em; text-transform:uppercase; }
+    #orderName { font-size:clamp(17px,3vw,25px); font-weight:1000; margin:1px 0 5px; }
+    .next-label { color:var(--tomato); font-size:10px; font-weight:1000; letter-spacing:.08em; margin:0 0 5px; }
+    #orderItems { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+    .ingredient { padding:4px 8px; background:#f1eadb; border-radius:999px; font-size:11px; font-weight:900; border:1px solid #ddd0b8; white-space:nowrap; }
+    .ingredient.done { background:#d8efdb; border-color:#8dbc94; color:#426d4a; text-decoration:line-through; }
+    .ingredient.next { outline:2px solid var(--tomato); background:#fff0d2; transform:scale(1.05); }
+    .next-sign-panel { position:absolute; z-index:2; top:0; right:0; bottom:0; width:var(--sign-rail); padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom)); display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px; background:var(--white); border-left:3px solid var(--ink); box-shadow:-5px 0 0 rgba(37,49,57,.12); text-align:center; }
+    .next-sign-panel small { color:var(--tomato); font-size:11px; line-height:1.2; letter-spacing:.1em; font-weight:1000; }
+    .next-sign-panel img { display:block; width:100%; aspect-ratio:1; object-fit:contain; border-radius:12px; border:2px solid #e7dece; background:#fff; }
+    #nextSignWord { max-width:100%; font-size:clamp(13px,1.8vw,19px); line-height:1.1; font-weight:1000; overflow-wrap:anywhere; }
+    .controls { position:absolute; z-index:3; bottom:max(18px,env(safe-area-inset-bottom)); left:9px; transform:none; width:calc(100% - var(--sign-rail) - 18px); display:flex; justify-content:center; gap:12px; }
+    .lane-btn { min-width:74px; min-height:58px; flex:1; max-width:130px; border:3px solid var(--ink); border-radius:18px; color:var(--ink); background:var(--white); font:1000 17px inherit; font-size:16px; font-weight:1000; box-shadow:0 5px 0 var(--ink); cursor:pointer; touch-action:manipulation; }
+    .lane-btn:active { transform:translateY(4px); box-shadow:0 1px 0 var(--ink); }
+    .lane-btn.center { background:var(--yellow); }
+    .overlay { position:absolute; z-index:5; inset:0; display:grid; place-items:center; padding:18px; background:rgba(30,43,47,.35); backdrop-filter:blur(4px); }
+    .dialog { width:min(100%,430px); padding:26px 24px 22px; text-align:center; background:var(--white); border:4px solid var(--ink); border-radius:28px; box-shadow:0 9px 0 rgba(27,38,43,.35); }
+    .logo-mark { font-size:56px; line-height:1; margin:0 0 8px; }
+    .dialog h1 { margin:0 0 8px; font-size:clamp(27px,7vw,40px); line-height:.98; letter-spacing:-.04em; }
+    .dialog p { color:#59666a; line-height:1.45; margin:9px auto 18px; max-width:330px; font-weight:650; }
+    .pill { display:inline-block; background:#f6e2ac; padding:5px 10px; border-radius:99px; margin:2px; font-size:12px; font-weight:900; }
+    .action { width:100%; min-height:56px; border:0; border-radius:16px; color:white; background:var(--tomato); font:inherit; font-size:18px; font-weight:1000; cursor:pointer; box-shadow:0 5px 0 #a63e30; touch-action:manipulation; }
+    .action:active { transform:translateY(4px); box-shadow:0 1px 0 #a63e30; }
+    .overlay.hidden { display:none; }
+    .tiny { color:#8b9392; font-size:10px; margin-top:12px; }
+    @media (max-width:600px) {
+      :root { --sign-rail:clamp(88px,24vw,125px); }
+      .topbar { grid-template-columns:1fr auto 1fr; gap:6px; width:calc(100% - var(--sign-rail) - 12px); left:6px; }
+      .brand { padding:9px 10px; font-size:13px; }
+      .ticket { padding:9px 10px 10px; border-width:2px; }
+      .ingredient { font-size:9px; padding:4px 6px; }
+      .score { min-width:70px; padding:7px 9px; }
+      #scoreNum { font-size:18px; }
+      .next-sign-panel { padding:12px 6px; gap:8px; border-left-width:2px; }
+      .next-sign-panel small { font-size:8px; letter-spacing:.06em; }
+      #nextSignWord { font-size:12px; }
+      .controls { left:6px; width:calc(100% - var(--sign-rail) - 12px); }
+      .lane-btn { min-height:54px; min-width:60px; }
+    }
+    @media (max-height:560px) and (orientation:landscape) {
+      .topbar { top:6px; }
+      .ticket { width:min(60vw,440px); padding:6px 10px; }
+      .ingredient { padding:3px 6px; }
+      .next-sign-panel { gap:8px; padding-top:8px; padding-bottom:8px; }
+      .next-sign-panel img { max-height:42vh; }
+      .controls { width:calc(100% - var(--sign-rail) - 18px); left:9px; transform:none; bottom:8px; }
+      .lane-btn { min-height:44px; }
+    }
+  </style>
+</head>
+<body>
+  <main id="game" aria-label="Three-lane ASL food collecting game">
+    <div class="topbar">
+      <div class="brand">FOOD <span>RUNNER</span></div>
+      <div class="score"><small>orders served</small><span id="scoreNum">0</span></div>
+      <section class="ticket" aria-live="polite">
+        <div class="eyebrow">Customer order</div>
+        <div id="orderName">Loading order…</div>
+        <div id="orderNext" class="next-label"></div>
+        <div id="orderItems"></div>
+      </section>
+    </div>
+    <aside class="next-sign-panel" id="nextSignPanel" aria-live="polite">
+      <small id="nextSignLabel">SIGN FOR NEXT ITEM</small>
+      <img id="nextSignGif" alt="ASL sign clip for the next food item" />
+      <strong id="nextSignWord">Ready!</strong>
+    </aside>
+    <div class="controls" aria-label="Lane controls">
+      <button class="lane-btn" data-lane="0" aria-label="Move to left lane">← LEFT</button>
+      <button class="lane-btn center" data-lane="1" aria-label="Move to middle lane">MIDDLE</button>
+      <button class="lane-btn" data-lane="2" aria-label="Move to right lane">RIGHT →</button>
+    </div>
+    <section id="startOverlay" class="overlay">
+      <div class="dialog">
+        <div class="logo-mark">🥪</div>
+        <h1>Ready to<br>run the kitchen?</h1>
+        <p>Read the order, switch lanes, and grab every ingredient. Pick up anything the customer didn’t ask for and the shift is over!</p>
+        <div><span class="pill">← / → keys</span><span class="pill">swipe</span><span class="pill">tap a lane</span></div>
+        <p class="tiny">Food words and ASL sign clips come from your class vocabulary file.</p>
+        <button id="startBtn" class="action">Start the shift</button>
+      </div>
+    </section>
+    <section id="overOverlay" class="overlay hidden">
+      <div class="dialog">
+        <div class="logo-mark" id="overIcon">🧾</div>
+        <h1 id="overTitle">Shift over!</h1>
+        <p id="overMessage">That item wasn't on the order.</p>
+        <p><span class="pill">Orders served: <b id="finalScore">0</b></span></p>
+        <button id="restartBtn" class="action">Restart game</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+
+    const foods = {
+      'HAMBURGER': { emoji:'🍔', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655983/v38mf3jhr5juvlwz1tsi.gif' },
+      'FRENCH-FRIES': { emoji:'🍟', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655967/c0qbizqwgicdc8yc1shr.gif' },
+      'SANDWICH': { emoji:'🥪', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655907/oxwivlgmpln9p8lt1bgg.gif' },
+      'SALAD': { emoji:'🥗', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655999/c084vuouxaprlz8gu69c.gif' },
+      'TACO': { emoji:'🌮', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656138/xx4nuglf977giozpgaw9.gif' },
+      'PIZZA': { emoji:'🍕', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656016/vrytjkzltegtgegvt6g.gif' },
+      'BACON': { emoji:'🥓', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655661/vmmom751icgwjjlv8jta.gif' },
+      'EGG': { emoji:'🥚', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655604/kfspy75ze1v2ky90lpqb.gif' },
+      'WAFFLES': { emoji:'🧇', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655820/eyhakpebq8mzm0htvgyd.gif' },
+      'BANANA': { emoji:'🍌', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522306/cirsdn1himfbecuus0qf.gif' },
+      'STRAWBERRY': { emoji:'🍓', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522144/kc2or90y8ey4o8pbnnml.gif' },
+      'GRAPES': { emoji:'🍇', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522055/nyrttcxrtgip9bxjdwkd.gif' },
+      'TOMATO': { emoji:'🍅', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522229/n9p6vid4v94gzaifhs9o.gif' },
+      'LETTUCE': { emoji:'🥬', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522127/ww6h7rezhefjtlihgmqv.gif' },
+      'CHEESE': { emoji:'🧀', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599746/cj6h16vbga6s5ngmgnl7.gif' },
+      'MUSTARD': { emoji:'🌭', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599854/aksglbyucn9stqdznfzm.gif' },
+      'KETCHUP': { emoji:'🍅', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599801/qtxmxagj0spe1qia49r4.gif' },
+      'MILK': { emoji:'🥛', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655443/kau9hhbktahcfobxsjvi.gif' },
+      'COOKIE': { emoji:'🍪', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656365/yhqzluk2t6oysnb1u8wh.gif' },
+      'ICECREAM': { emoji:'🍦', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656327/nyhu61rmytzoogsfjweb.gif' },
+      'SODA': { emoji:'🥤', sign:'https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655400/kz85cfgkv3skuzpce1pi.gif' }
+    };
+    // The rest of the food words and ASL clips from the class vocabulary list.
+    Object.assign(foods, {
+      "BAGEL": { emoji:"🥯", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655890/la96vn34fmofpxkoua0z.gif" },
+      "BEANS": { emoji:"🫘", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522279/tmw6ztsbd0dljgtk9etz.gif" },
+      "BERRY": { emoji:"🫐", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522489/rey0ivuagi0ky1zhmb5d.gif" },
+      "BREAKFAST": { emoji:"🍳", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656892/zseebsikytql5olj4txc.gif" },
+      "BURRITO": { emoji:"🌯", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655772/y2yyivagjjhwrzcbnoiv.gif" },
+      "BUTTER": { emoji:"🧈", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599732/qxyvnopsksgn5mst9rsd.gif" },
+      "CAKE": { emoji:"🍰", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656424/whwpujqrizbxpklkxmpc.gif" },
+      "CARROT": { emoji:"🥕", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522179/dtj1qx3buigtnhhlait0.gif" },
+      "CEREAL": { emoji:"🥣", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655788/tcv4rbuleuqd9pzjqgww.gif" },
+      "CHERRY": { emoji:"🍒", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522163/bly0zbdjtjehql02dczu.gif" },
+      "CHICKEN": { emoji:"🐔", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656208/pchx6qtdffmse9z4qpeq.gif" },
+      "CHOCOLATE": { emoji:"🍫", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656710/xiqv48jeqigceyq761dt.gif" },
+      "COFFEE": { emoji:"☕", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655375/bo0ndjsbn2g4zwwin8of.gif" },
+      "CORN": { emoji:"🌽", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522214/e42mpmk5r9gvywlft1qt.gif" },
+      "CRAB": { emoji:"🦀", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656849/mjjyszgifi2fpfyzur59.gif" },
+      "DINNER": { emoji:"🍽️", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655305/n15fo6v2q7szkqsar62h.gif" },
+      "DONUT": { emoji:"🍩", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655855/bvdtrcqlgot5dv93ln9c.gif" },
+      "DRINK": { emoji:"🥤", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655560/l73cywxzglyqk0kzal0q.gif" },
+      "ENERGY DRINK": { emoji:"⚡", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599760/salu2sognz2wjzuqxfer.gif" },
+      "FISH": { emoji:"🐟", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656153/wwdvzlcllfmvz9exvmqm.gif" },
+      "FRENCH TOAST": { emoji:"🍞", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655720/pbqjkj3uuk27jackkkdc.gif" },
+      "FRUIT": { emoji:"🍎", sign:"https://media.gimkit.com/image/upload/v1759522384/bdw0emx4ctgocuzgt7my.gif" },
+      "HONEY": { emoji:"🍯", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599777/pichbyc7gfe33afoxzf2.gif" },
+      "LASAGNA": { emoji:"🍝", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522620/mxwmynjm7sfbglcvxpyr.gif" },
+      "LEMON": { emoji:"🍋", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522245/qukqgg2ef4yoi7i4jbsg.gif" },
+      "LOBSTER": { emoji:"🦞", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656873/jcp8l67mjlcmb50skl5z.gif" },
+      "LUNCH": { emoji:"🍱", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655324/pe6w3helaieokmbxwxdx.gif" },
+      "MAYONNAISE": { emoji:"🥪", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599815/a3dafqtpwnc2emmxuoza.gif" },
+      "MEAT": { emoji:"🥩", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656191/plnuvjxenksbfut2c7e0.gif" },
+      "MELON": { emoji:"🍈", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522034/gqtenzo7knkpqtq508kd.gif" },
+      "MILK SHAKE": { emoji:"🥤", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599834/qin3aby71plxvcnv4muy.gif" },
+      "ONION": { emoji:"🧅", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522200/lx5yqigsyf6snfzx6fp3.gif" },
+      "ORANGE JUICE": { emoji:"🧃", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655481/uevolhc2tg6yl6aptfkk.gif" },
+      "PANCAKE": { emoji:"🥞", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655803/yg9stwmvhsqkn3wd0txg.gif" },
+      "PASTA/SPAGHETTI": { emoji:"🍝", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656227/sqqy69ybextqddjbclac.gif" },
+      "PEACH": { emoji:"🍑", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522021/ykfwo9jjenvwgyd2kxuy.gif" },
+      "PEAR": { emoji:"🍐", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759521931/v7hb4ie3bwtwd1oeiunk.gif" },
+      "PEPPER": { emoji:"🌶️", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599869/wnh1azly6ioyn0adfw4t.gif" },
+      "PIE": { emoji:"🥧", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656441/ftve9hrdowanzn4zdnip.gif" },
+      "PUMPKIN": { emoji:"🎃", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759522034/gqtenzo7knkpqtq508kd.gif" },
+      "SALT": { emoji:"🧂", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599883/sjxhggryowyuy23xzdh9.gif" },
+      "SAUSAGE": { emoji:"🌭", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655677/fkdorxlpm6wedigge0uc.gif" },
+      "SOUP": { emoji:"🍲", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656241/h4vsewdifb7re3wo0w4j.gif" },
+      "SOUR CREAM": { emoji:"🥣", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599910/cev6pig7liwoqdl8ioye.gif" },
+      "SUGAR": { emoji:"🍬", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656741/ezzcn76z2ht8ejczvjc6.gif" },
+      "SUSHI": { emoji:"🍣", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656124/tmnk8d5ja0xp57odinf4.gif" },
+      "TEA": { emoji:"🍵", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655418/j0vr3q9czs7rbyx5jj4s.gif" },
+      "TURKEY": { emoji:"🦃", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656103/wp7fo3knqcceid3sqeun.gif" },
+      "VANILLA": { emoji:"🍦", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698656726/nzni2y1waa4jdjqzy7vt.gif" },
+      "VEGETABLE": { emoji:"🥦", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1759521916/wli191zceppcq0w32z5g.gif" },
+      "WATER": { emoji:"💧", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655356/czc7ejlcjukv0bre6qrc.gif" },
+      "YOGURT": { emoji:"🥣", sign:"https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1792599942/i2nnuqmtnyal0eoby6ay.gif" },
+    });
+
+    // Each category cycles through all its vocabulary words as order targets.
+    const vocabularyOrders = [
+      { category:"Drinks", name:"Drink Tray", items:["ORANGE JUICE", "MILK", "TEA", "SODA", "COFFEE", "WATER", "DRINK", "ENERGY DRINK"] },
+      { category:"Breakfast", name:"Breakfast Tray", items:["BREAKFAST", "BACON", "BURRITO", "DONUT", "CEREAL", "WAFFLES", "BAGEL", "PANCAKE", "FRENCH TOAST", "EGG"] },
+      { category:"Lunch + Dinner", name:"Lunch & Dinner Tray", items:["LUNCH", "SANDWICH", "FRENCH-FRIES", "HAMBURGER", "SALAD", "BURRITO", "TACO", "DINNER", "PIZZA", "SUSHI", "PASTA/SPAGHETTI", "SOUP", "LASAGNA"] },
+      { category:"Meats & Seafood", name:"Meat & Seafood Plate", items:["MEAT", "BACON", "SAUSAGE", "LOBSTER", "CRAB", "CHICKEN", "TURKEY", "FISH"] },
+      { category:"Desserts & Sweets", name:"Dessert Tray", items:["ICECREAM", "COOKIE", "CAKE", "CHOCOLATE", "VANILLA", "PIE", "SUGAR"] },
+      { category:"Fruits", name:"Fruit Bowl", items:["BERRY", "FRUIT", "BANANA", "LEMON", "TOMATO", "CHERRY", "STRAWBERRY", "GRAPES", "MELON", "PEACH", "PEAR"] },
+      { category:"Vegetables", name:"Veggie Tray", items:["BEANS", "CORN", "ONION", "CARROT", "LETTUCE", "PUMPKIN", "VEGETABLE"] },
+      { category:"Dairy", name:"Dairy Order", items:["YOGURT", "SOUR CREAM", "MILK SHAKE", "CHEESE", "BUTTER", "MILK"] },
+      { category:"Condiments", name:"Condiment Set", items:["HONEY", "KETCHUP", "MAYONNAISE", "MUSTARD", "PEPPER", "SALT"] },
+    ];
+    // Split the whole class food list into consecutive orders so every word appears early and predictably.
+    const vocabularySequence = vocabularyOrders.flatMap(template => {
+      const batches = [];
+      for (let i = 0; i < template.items.length; i += 3) {
+        batches.push({ name: `${template.name} ${Math.floor(i / 3) + 1}`, items: template.items.slice(i, i + 3) });
+      }
+      return batches;
+    });
+    let vocabularyRound = 0;
+    function resetOrderSequence(){ vocabularyRound=0; }
+    const foodNames = Object.keys(foods);
+    const laneX = [-2.5, 0, 2.5];
+    const el = id => document.getElementById(id);
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#bde2dc');
+    scene.fog = new THREE.Fog('#bde2dc', 22, 48);
+    const gameWidth = () => innerWidth - el('nextSignPanel').getBoundingClientRect().width;
+    const camera = new THREE.PerspectiveCamera(48, gameWidth() / innerHeight, .1, 100);
+    camera.position.set(0, 3.4, 12.4);
+    camera.lookAt(0, 1.0, -5.2);
+    camera.fov = 55;
+    camera.updateProjectionMatrix();
+    const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+    renderer.setSize(gameWidth(), innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    el('game').prepend(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight('#fff8e9', '#577a75', 2.2));
+    const sun = new THREE.DirectionalLight('#fff2d5', 2.6);
+    sun.position.set(-5, 11, 6); sun.castShadow = true; sun.shadow.mapSize.set(1024,1024); scene.add(sun);
+
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(60,60), new THREE.MeshStandardMaterial({color:'#92c79e', roughness:1}));
+    floor.rotation.x = -Math.PI/2; floor.position.y = -0.38; floor.position.z = -3; floor.receiveShadow = true; scene.add(floor);
+    const road = new THREE.Mesh(new THREE.BoxGeometry(9, .3, 42), new THREE.MeshStandardMaterial({color:'#424d51', roughness:1}));
+    road.position.set(0,-.2,-5); road.receiveShadow = true; scene.add(road);
+    const edgeMat = new THREE.MeshStandardMaterial({color:'#f2c45e'});
+    for (const x of [-4.55,4.55]) { const edge = new THREE.Mesh(new THREE.BoxGeometry(.18,.09,42),edgeMat); edge.position.set(x,-.02,-5); scene.add(edge); }
+    const dashed = [];
+    for (const x of [-1.25,1.25]) for (let i=0;i<8;i++) {
+      const dash = new THREE.Mesh(new THREE.BoxGeometry(.08,.03,1.7), new THREE.MeshStandardMaterial({color:'#d9d7c7'}));
+      dash.position.set(x,-.02,-20+i*4); scene.add(dash); dashed.push(dash);
+    }
+    // Friendly roadside shrubs give the track a little depth.
+    const shrubMat = new THREE.MeshStandardMaterial({color:'#4c9470', roughness:1});
+    for (const side of [-1,1]) for (let i=0;i<9;i++) {
+      const shrub = new THREE.Mesh(new THREE.IcosahedronGeometry(.55 + (i%3)*.12,1),shrubMat);
+      shrub.position.set(side*(6.2+(i%2)*.7),-.05,-19+i*3.7); shrub.scale.y=.72; shrub.castShadow=true; scene.add(shrub);
+    }
+
+    const player = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(.47,.8,4,8), new THREE.MeshStandardMaterial({color:'#e75e46', roughness:.72}));
+    body.position.y=.95; body.castShadow=true; player.add(body);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(.38,18,14), new THREE.MeshStandardMaterial({color:'#f0c19a', roughness:.82}));
+    head.position.set(0,1.75,.03); head.castShadow=true; player.add(head);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(.39,18,8,0,Math.PI*2,0,Math.PI/2), new THREE.MeshStandardMaterial({color:'#f2c45e',roughness:.7}));
+    cap.position.set(0,1.88,.02); cap.castShadow=true; player.add(cap);
+    const armMat = new THREE.MeshStandardMaterial({color:'#f0c19a'});
+    for (const side of [-1,1]) {
+      const arm = new THREE.Mesh(new THREE.CapsuleGeometry(.12,.55,3,6),armMat); arm.position.set(side*.56,1.03,0); arm.rotation.z=side*.24; arm.castShadow=true; player.add(arm);
+      const leg = new THREE.Mesh(new THREE.CapsuleGeometry(.15,.4,3,6),new THREE.MeshStandardMaterial({color:'#34464d'})); leg.position.set(side*.2,.24,0); leg.castShadow=true; player.add(leg);
+    }
+    player.position.set(0,0,3.3); scene.add(player);
+
+    const order = { score:0, recipe:null, got:new Set(), lane:1, running:false, over:false, speed:4.4, rows:[], spawnClock:0, targetIndex:0, reviewUntil:0 };
+    const foodMaterials = new Map();
+    function labelTexture(name, emoji) {
+      const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=300;
+      const c=canvas.getContext('2d'); c.fillStyle='#fffaf1'; c.beginPath(); c.roundRect(14,14,484,272,40); c.fill();
+      c.strokeStyle='#253139'; c.lineWidth=12; c.stroke();
+      c.textAlign='center'; c.textBaseline='middle'; c.font='116px "Apple Color Emoji","Segoe UI Emoji",sans-serif'; c.fillText(emoji,256,125);
+      c.fillStyle='#253139'; c.font='bold 34px system-ui,sans-serif'; c.fillText(name.replaceAll('-',' '),256,232);
+      const texture=new THREE.CanvasTexture(canvas); texture.colorSpace=THREE.SRGBColorSpace; return texture;
+    }
+    function makePickup(name,lane,z) {
+      const group=new THREE.Group(); group.position.set(laneX[lane],.12,z); group.userData={name,lane};
+      const base=new THREE.Mesh(new THREE.CylinderGeometry(.78,.84,.28,18),new THREE.MeshStandardMaterial({color:'#f2c45e',roughness:.7}));
+      base.position.y=.25; base.castShadow=true; group.add(base);
+      const key=name+'|'+foods[name].emoji;
+      if(!foodMaterials.has(key)) foodMaterials.set(key,new THREE.MeshStandardMaterial({map:labelTexture(name,foods[name].emoji),roughness:.85}));
+      const card=new THREE.Mesh(new THREE.BoxGeometry(1.62,1.26,.16),foodMaterials.get(key)); card.position.y=1.08; card.castShadow=true; group.add(card);
+      scene.add(group); return group;
+    }
+    function clearRows(){ for(const row of order.rows){ for(const item of row){scene.remove(item); item.traverse(o=>{if(o.geometry)o.geometry.dispose();});} } order.rows=[]; }
+    function chooseRecipe(){
+      order.recipe=vocabularySequence[vocabularyRound % vocabularySequence.length];
+      vocabularyRound++;
+      order.got=new Set(); updateTicket();
+    }
+    function updateTicket(){
+      el('orderName').textContent=order.recipe.name;
+      const next=order.recipe.items.find(n=>!order.got.has(n));
+      el('orderNext').textContent=next ? `NEXT ITEM: ${next.replaceAll('-',' ')}` : 'ORDER COMPLETE!';
+      el('orderItems').innerHTML=order.recipe.items.map(n=>`<span class="ingredient ${order.got.has(n)?'done':''} ${n===next?'next':''}">${foods[n].emoji} ${n.replaceAll('-',' ')}</span>`).join('');
+      const signName=next || order.recipe.items.at(-1);
+      el('nextSignLabel').textContent=next ? 'SIGN FOR NEXT ITEM' : 'ORDER COMPLETE';
+      el('nextSignWord').textContent=signName.replaceAll('-',' ');
+      el('nextSignGif').src=foods[signName].sign;
+      el('nextSignGif').alt=`ASL sign clip for ${signName.replaceAll('-',' ')}`;
+      el('scoreNum').textContent=order.score;
+    }
+    function createRow(){
+      if(!order.running)return;
+      const remaining=order.recipe.items.filter(n=>!order.got.has(n));
+      if(!remaining.length)return;
+      // Keep every still-needed food on the track, using the next row when an order has more than three.
+      const lanes=[0,1,2].sort(()=>Math.random()-.5);
+      // Put the requested foods on the track together; with more than three left, the next row fills in the rest.
+      const choices=remaining.slice(0,3);
+      const decoys=foodNames.filter(n=>!order.recipe.items.includes(n));
+      while(choices.length<3){const n=decoys[Math.floor(Math.random()*decoys.length)]; if(!choices.includes(n)) choices.push(n);}
+      choices.sort(()=>Math.random()-.5);
+      const row=choices.map((name,i)=>makePickup(name,lanes[i],-16)); order.rows.push(row);
+    }
+    function showGameOver(name){
+      order.running=false; order.over=true;
+      el('overIcon').textContent=foods[name]?.emoji||'🧾';
+      el('overTitle').textContent='Wrong item!';
+      el('overMessage').textContent=`You picked up ${name.replaceAll('-',' ')}. It wasn't on the ${order.recipe.name.toLowerCase()} order. Start over and try again!`;
+      el('finalScore').textContent=order.score; el('overOverlay').classList.remove('hidden');
+    }
+    function collect(item){
+      const name=item.userData.name;
+      scene.remove(item); item.traverse(o=>{if(o.geometry)o.geometry.dispose();});
+      if(!order.recipe.items.includes(name) || order.got.has(name)){showGameOver(name);return;}
+      order.got.add(name);
+      // Remove duplicate copies already on the track so collecting one needed food cannot cause a later duplicate collision.
+      for(const row of order.rows){
+        for(const duplicate of [...row]){
+          if(duplicate.userData.name===name){
+            row.splice(row.indexOf(duplicate),1);
+            scene.remove(duplicate);
+            duplicate.traverse(o=>{if(o.geometry)o.geometry.dispose();});
+          }
+        }
+      }
+      updateTicket();
+      if(order.got.size===order.recipe.items.length){
+        order.score++; el('scoreNum').textContent=order.score;
+        order.reviewUntil=performance.now()+900;
+        clearRows();
+        setTimeout(()=>{if(order.running){chooseRecipe();createRow();order.spawnClock=0;}},950);
+      }
+    }
+    function moveTo(lane){ if(!order.running)return; order.lane=Math.max(0,Math.min(2,lane)); }
+    document.querySelectorAll('.lane-btn').forEach(btn=>btn.addEventListener('pointerdown',e=>{e.preventDefault();moveTo(Number(btn.dataset.lane));}));
+    addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')moveTo(order.lane-1);if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')moveTo(order.lane+1);});
+    let touchX=null;
+    renderer.domElement.addEventListener('pointerdown',e=>{touchX=e.clientX;});
+    renderer.domElement.addEventListener('pointerup',e=>{if(touchX===null)return;const dx=e.clientX-touchX;if(Math.abs(dx)>25)moveTo(order.lane+(dx<0?-1:1));touchX=null;});
+    function start(){
+      order.score=0; order.lane=1; order.speed=4.4; order.running=true; order.over=false; order.spawnClock=0; order.reviewUntil=0;
+      resetOrderSequence();
+      clearRows();
+      chooseRecipe(); createRow(); el('startOverlay').classList.add('hidden'); el('overOverlay').classList.add('hidden');
+    }
+    el('startBtn').addEventListener('click',start); el('restartBtn').addEventListener('click',start);
+
+    let last=performance.now();
+    function animate(now){
+      requestAnimationFrame(animate); const dt=Math.min((now-last)/1000,.04); last=now;
+      if(order.running && now>=order.reviewUntil){
+        order.spawnClock+=dt;
+        if(order.spawnClock>3.7){createRow();order.spawnClock=0;}
+        player.position.x += (laneX[order.lane]-player.position.x)*Math.min(1,dt*12);
+        player.rotation.z += ((laneX[order.lane]-player.position.x)*-.06-player.rotation.z)*Math.min(1,dt*8);
+        player.position.y=.035+Math.abs(Math.sin(now*.012))*.035;
+        for(const row of [...order.rows]){
+          for(const item of [...row]){
+            item.position.z += order.speed*dt; item.rotation.y=Math.sin(now*.002+item.position.x)*.10;
+            if(order.got.size<order.recipe.items.length && Math.abs(item.position.z-player.position.z)<.48 && Math.abs(item.position.x-player.position.x)<.75){
+              row.splice(row.indexOf(item),1); collect(item);
+            }
+            if(item.position.z>7.3){scene.remove(item);const idx=row.indexOf(item);if(idx>=0)row.splice(idx,1);}
+          }
+          if(!row.length)order.rows.splice(order.rows.indexOf(row),1);
+        }
+        for(const d of dashed){d.position.z += order.speed*dt*.8;if(d.position.z>5)d.position.z-=32;}
+      }
+      renderer.render(scene,camera);
+    }
+    requestAnimationFrame(animate);
+    addEventListener('resize',()=>{const width=gameWidth();camera.aspect=width/innerHeight;camera.updateProjectionMatrix();renderer.setSize(width,innerHeight);});
+  </script>
+</body>
+</html>
+Zoomed item to 100 percent.
