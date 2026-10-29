@@ -1,14 +1,14 @@
 const games = [
-    { title: 'ASL Bistro', description: 'Practice food signs as you build and serve orders in a 3D kitchen.', url: 'longmore_zone_games/aslkitchen.html', icon: '🍳', tags: ['FOOD', 'INTERACTIVE', '3D'] },
-    { title: 'Short Order', description: 'Watch signed food orders, then build each order from the menu.', url: 'longmore_zone_games/food_shorts_game.html', icon: '🥪', tags: ['FOOD', 'QUIZ'] },
-    { title: 'ASL Table Service', description: 'Practice food signs while serving restaurant customers.', url: 'longmore_zone_games/asltable.html', icon: '🍽️', tags: ['FOOD'] },
-    { title: 'ASL Garden', description: 'Plant food-themed crops while practicing their signs.', url: 'longmore_zone_games/asl_garden.html', icon: '🌱', tags: ['FOOD', '3D'] },
-    { title: 'ASL Warehouse', description: 'Practice signs while steering a forklift and completing warehouse goals.', url: 'longmore_zone_games/aslwarehouse.html', icon: '📦', tags: ['INTERACTIVE', '3D', 'ARCADE'] },
-    { title: 'Horse Racer', description: 'Practice vocabulary, train your horse, and compete in races.', url: 'longmore_zone_games/horse_racer.html', icon: '🐎', tags: ['INTERACTIVE', 'QUIZ'] },
-    { title: 'ASL Grand Prix', description: 'Take a quiz and race through an ASL-themed Grand Prix.', url: 'longmore_zone_games/asl_grand_prix.html', icon: '🏎️', tags: ['QUIZ', 'ARCADE', '3D'] },
+    { title: 'ASL Bistro', description: 'Practice food signs as you build and serve orders in a 3D kitchen.', url: 'longmore_zone_games/aslkitchen.html', image: 'game_thumbnails/aslkitchen.png', icon: '🍳', tags: ['FOOD', 'INTERACTIVE', '3D'] },
+    { title: 'Short Order', description: 'Watch signed food orders, then build each order from the menu.', url: 'longmore_zone_games/food_shorts_game.html', image: 'game_thumbnails/food_shorts_game.png', icon: '🥪', tags: ['FOOD', 'QUIZ'] },
+    { title: 'ASL Table Service', description: 'Practice food signs while serving restaurant customers.', url: 'longmore_zone_games/asltable.html', image: 'game_thumbnails/asl_table_service.png', icon: '🍽️', tags: ['FOOD'] },
+    { title: 'ASL Garden', description: 'Plant food-themed crops while practicing their signs.', url: 'longmore_zone_games/asl_garden.html', image: 'game_thumbnails/asl_garden.png', icon: '🌱', tags: ['FOOD', '3D'] },
+    { title: 'ASL Warehouse', description: 'Practice signs while steering a forklift and completing warehouse goals.', url: 'longmore_zone_games/aslwarehouse.html', image: 'game_thumbnails/asl_warehouse.png', icon: '📦', tags: ['INTERACTIVE', '3D', 'ARCADE'] },
+    { title: 'Horse Racer', description: 'Practice vocabulary, train your horse, and compete in races.', url: 'longmore_zone_games/horse_racer.html', image: 'game_thumbnails/horse_racer.png', icon: '🐎', tags: ['INTERACTIVE', 'QUIZ'] },
+    { title: 'ASL Grand Prix', description: 'Take a quiz and race through an ASL-themed Grand Prix.', url: 'longmore_zone_games/asl_grand_prix.html', image: 'game_thumbnails/asl_grand_prix.png', icon: '🏎️', tags: ['QUIZ', 'ARCADE', '3D'] },
     { title: 'Vertical Rush', description: 'Race upward while practicing vocabulary in a platform game.', url: 'longmore_zone_games/vertical_rush.html', icon: '🚀', tags: ['ARCADE', 'QUIZ', '3D'] },
-    { title: 'Jumper Quiz Challenge', description: 'Jump into a vocabulary quiz challenge.', url: 'longmore_zone_games/jump_man.html', icon: '🦘', tags: ['ARCADE', 'QUIZ'] },
-    { title: 'Subway Signer', description: 'Practice signing in an endless-runner game.', url: 'longmore_zone_games/subway_signer.html', image:"game_thumbnails/subway_signer.png", icon: '🚇', tags: ['ARCADE', '3D'] },
+    { title: 'Jumper Quiz Challenge', description: 'Jump into a vocabulary quiz challenge.', url: 'longmore_zone_games/jump_man.html', image: 'game_thumbnails/jump_man.png', icon: '🦘', tags: ['ARCADE', 'QUIZ'] },
+    { title: 'Subway Signer', description: 'Practice signing in an endless-runner game.', url: 'longmore_zone_games/subway_signer.html', image: 'game_thumbnails/subway_signer.png', icon: '🚇', tags: ['ARCADE', '3D'] },
     { title: 'City Dispatch', description: 'Navigate a city grid in this dispatch-themed runner.', url: 'longmore_zone_games/car_gps.html', icon: '🚕', tags: ['ARCADE'] },
     { title: 'Crazy Uber', description: 'Drive and answer ASL questions in a ride-share adventure.', url: 'longmore_zone_games/crazy_uber.html', icon: '🚘', tags: ['QUIZ', 'ARCADE'] },
     { title: 'Soccer Car', description: 'Take a car into an action-packed soccer challenge.', url: 'longmore_zone_games/soccercar.html', icon: '⚽', tags: ['ARCADE', '3D'] },
@@ -153,8 +153,10 @@ function renderCards() {
             image.alt = '';
             image.loading = 'lazy';
             image.decoding = 'async';
+            image.addEventListener('load', () => {
+                art.classList.add('has-image');
+            }, { once: true });
             image.addEventListener('error', () => {
-                image.hidden = true;
                 console.error(`Unable to load image for ${game.title}: ${game.image}`);
             }, { once: true });
             image.src = game.image;
