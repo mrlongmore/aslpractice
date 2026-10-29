@@ -17,12 +17,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 2rem;
+            margin: 2rem 16px;
         }
         .container {
             position: relative;
-            width: 640px;
-            height: 480px;
+            width: min(640px, 100%);
+            aspect-ratio: 4 / 3;
             margin-top: 20px;
             border-radius: 12px;
             overflow: hidden;
@@ -46,7 +46,8 @@
             padding: 20px;
             border-radius: 8px;
             text-align: center;
-            width: 600px;
+            width: min(600px, 100%);
+            box-sizing: border-box;
         }
         .letter-display {
             font-size: 5rem;
@@ -55,14 +56,74 @@
             margin: 10px 0;
             min-height: 120px;
         }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        select, button {
+            border: 1px solid #777;
+            border-radius: 6px;
+            padding: 9px 12px;
+            font: inherit;
+        }
+        button {
+            color: white;
+            background: #287c48;
+            cursor: pointer;
+        }
+        button:disabled, select:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+        #targetWord {
+            display: block;
+            color: #ffd166;
+            font-size: 2rem;
+            letter-spacing: 0.12em;
+            margin-top: 6px;
+        }
+        #recordedWord {
+            min-height: 1.5em;
+            font-size: 1.2rem;
+            letter-spacing: 0.12em;
+        }
+        @media (max-width: 480px) {
+            #statusPanel { padding: 16px; }
+            .letter-display { font-size: 4rem; min-height: 90px; }
+        }
     </style>
 </head>
 <body>
 
     <div id="statusPanel">
-        <h2 id="statusText">1. Loading Data & Training Model...</h2>
+        <h2 id="statusText">Loading dataset and model...</h2>
         <div class="letter-display" id="predictedLetter">-</div>
         <p id="confidenceText">Confidence: 0%</p>
+        <div class="controls">
+            <label for="handSelect">Signing hand</label>
+            <select id="handSelect" disabled>
+                <option value="left">Left hand</option>
+                <option value="right">Right hand</option>
+            </select>
+        </div>
+        <div class="controls">
+            <div>
+                <span>Fingerspell this word</span>
+                <strong id="targetWord">Loading...</strong>
+            </div>
+            <button id="nextWordButton" type="button" disabled>New word</button>
+        </div>
+        <p id="recordedWord">Recorded: </p>
+        <label class="controls" for="autoRecordToggle">
+            <input id="autoRecordToggle" type="checkbox">
+            Auto-record after holding a letter for 0.8 seconds
+        </label>
+        <button id="recordLetterButton" type="button" disabled>Record predicted letter</button>
+        <p id="wordFeedback" aria-live="polite"></p>
     </div>
 
     <div class="container">
@@ -79,10 +140,31 @@
         const statusText = document.getElementById('statusText');
         const predictedLetterEl = document.getElementById('predictedLetter');
         const confidenceText = document.getElementById('confidenceText');
+        const handSelect = document.getElementById('handSelect');
+        const targetWordEl = document.getElementById('targetWord');
+        const nextWordButton = document.getElementById('nextWordButton');
+        const recordLetterButton = document.getElementById('recordLetterButton');
+        const recordedWordEl = document.getElementById('recordedWord');
+        const wordFeedback = document.getElementById('wordFeedback');
+        const autoRecordToggle = document.getElementById('autoRecordToggle');
 
         let handLandmarker;
         let tfModel;
-        let vocabLabels = []; // This acts as our "vocab.json"
+        let dataset = [];
+        let datasetSignature = '';
+        let vocabLabels = [];
+        let latestPrediction = '';
+        let stablePredictionSince = 0;
+        let autoRecordedPrediction = '';
+        let currentWord = '';
+        let recordedLetters = '';
+        let modelRequestId = 0;
+        const AUTO_RECORD_DELAY_MS = 800;
+        const practiceWords = [
+            'HELLO', 'WORLD', 'CLASS', 'LEARN', 'TEACH', 'HAPPY', 'SMILE',
+            'MUSIC', 'WATER', 'EARTH', 'DREAM', 'BRAVE', 'POWER', 'QUIET',
+            'FUNNY', 'SMART', 'GAMES', 'VIDEO', 'APPLE'
+        ];
         
         // Ensure canvas matches video size
         canvas.width = 640;
@@ -90,56 +172,21 @@
 
         async function init() {
             try {
-                // 1. Fetch the JSON dataset you created
+                // 1. Load the dataset and fingerprint it to invalidate stale cached models.
                 const response = await fetch('my_clean_asl_dataset.json');
-                const dataset = await response.json();
-                
-                // 2. Build the Vocab array and prepare the data for TensorFlow
-                // Extract unique letters and sort them (e.g., ['A', 'B', 'C'])
+                const datasetText = await response.text();
+                dataset = JSON.parse(datasetText);
+                datasetSignature = hashString(datasetText);
                 vocabLabels = [...new Set(dataset.map(item => item.label))].sort();
-                
-                const features = [];
-                const labels = [];
-                
-                dataset.forEach(item => {
-                    features.push(item.features);
-                    // Find the index of the letter in our vocab array (One-Hot Encoding prep)
-                    labels.push(vocabLabels.indexOf(item.label));
-                });
+                const availableLetters = new Set(vocabLabels);
+                const usableWords = practiceWords.filter(word => [...word].every(letter => availableLetters.has(letter)));
+                if (!usableWords.length) throw new Error('No practice words match the dataset letters.');
+                nextWordButton.disabled = false;
+                chooseNextWord(usableWords);
 
-                // Convert arrays to Tensors
-                const xs = tf.tensor2d(features);
-                const ys = tf.oneHot(tf.tensor1d(labels, 'int32'), vocabLabels.length);
+                handSelect.disabled = false;
+                await loadOrTrainModel(handSelect.value);
 
-                // 3. Create a lightweight Neural Network
-                tfModel = tf.sequential();
-                tfModel.add(tf.layers.dense({ inputShape: [63], units: 128, activation: 'relu' }));
-                tfModel.add(tf.layers.dropout({ rate: 0.2 }));
-                tfModel.add(tf.layers.dense({ units: 64, activation: 'relu' }));
-                tfModel.add(tf.layers.dense({ units: vocabLabels.length, activation: 'softmax' }));
-
-                tfModel.compile({
-                    optimizer: 'adam',
-                    loss: 'categoricalCrossentropy',
-                    metrics: ['accuracy']
-                });
-
-                // 4. Train the model (takes a few seconds)
-                statusText.innerText = `Training model on ${dataset.length} samples...`;
-                await tfModel.fit(xs, ys, {
-                    epochs: 50,
-                    callbacks: {
-                        onEpochEnd: (epoch, logs) => {
-                            if (epoch % 10 === 0) console.log(`Epoch ${epoch}: loss = ${logs.loss.toFixed(4)}`);
-                        }
-                    }
-                });
-
-                // Cleanup memory
-                xs.dispose();
-                ys.dispose();
-
-                // 5. Initialize MediaPipe Hands
                 statusText.innerText = "Loading MediaPipe Tasks...";
                 const vision = await FilesetResolver.forVisionTasks(
                     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
@@ -154,7 +201,6 @@
                     numHands: 1
                 });
 
-                // 6. Start Webcam
                 statusText.innerText = "Opening Webcam...";
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
                 video.srcObject = stream;
@@ -166,9 +212,128 @@
 
             } catch (error) {
                 console.error(error);
-                statusText.innerText = "Error! Check console.";
+                statusText.innerText = `Could not start: ${error.message}`;
             }
         }
+
+        function hashString(value) {
+            let hash = 2166136261;
+            for (let index = 0; index < value.length; index++) {
+                hash ^= value.charCodeAt(index);
+                hash = Math.imul(hash, 16777619);
+            }
+            return (hash >>> 0).toString(16);
+        }
+
+        function mirrorFeatures(features) {
+            return features.map((value, index) => index % 3 === 0 ? -value : value);
+        }
+
+        function getCanonicalFeatures(item) {
+            const itemHand = (item.hand || 'left').toLowerCase();
+            return itemHand === 'right' ? mirrorFeatures(item.features) : item.features;
+        }
+
+        async function loadOrTrainModel(hand) {
+            const requestId = ++modelRequestId;
+            const modelUrl = `indexeddb://asl-fingerspelling-${hand}-v1-${datasetSignature}`;
+            let model;
+            let loadedFromCache = false;
+
+            try {
+                model = await tf.loadLayersModel(modelUrl);
+                loadedFromCache = true;
+            } catch (error) {
+                const features = [];
+                const labels = [];
+                dataset.forEach(item => {
+                    if (!Array.isArray(item.features) || item.features.length !== 63) return;
+                    features.push(getCanonicalFeatures(item));
+                    labels.push(vocabLabels.indexOf(item.label));
+                });
+
+                const xs = tf.tensor2d(features);
+                const labelTensor = tf.tensor1d(labels, 'int32');
+                const ys = tf.oneHot(labelTensor, vocabLabels.length);
+                labelTensor.dispose();
+
+                model = tf.sequential();
+                model.add(tf.layers.dense({ inputShape: [63], units: 128, activation: 'relu' }));
+                model.add(tf.layers.dropout({ rate: 0.2 }));
+                model.add(tf.layers.dense({ units: 64, activation: 'relu' }));
+                model.add(tf.layers.dense({ units: vocabLabels.length, activation: 'softmax' }));
+                model.compile({ optimizer: 'adam', loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
+
+                statusText.innerText = `Training ${hand}-hand model on ${features.length} samples...`;
+                try {
+                    await model.fit(xs, ys, { epochs: 50 });
+                } finally {
+                    xs.dispose();
+                    ys.dispose();
+                }
+
+                try {
+                    await model.save(modelUrl);
+                } catch (saveError) {
+                    console.warn('Model could not be saved for future sessions.', saveError);
+                }
+            }
+
+            if (requestId !== modelRequestId) {
+                model.dispose();
+                return;
+            }
+            if (tfModel) tfModel.dispose();
+            tfModel = model;
+            statusText.innerText = loadedFromCache
+                ? `Ready! Loaded saved ${hand}-hand model.`
+                : `Ready! Trained and saved ${hand}-hand model.`;
+        }
+
+        function chooseNextWord(usableWords) {
+            const choices = usableWords.filter(word => word !== currentWord);
+            currentWord = choices[Math.floor(Math.random() * choices.length)];
+            recordedLetters = '';
+            targetWordEl.innerText = currentWord;
+            recordedWordEl.innerText = 'Recorded: ';
+            wordFeedback.innerText = '';
+            recordLetterButton.disabled = !latestPrediction;
+        }
+
+        function recordPredictedLetter() {
+            if (!latestPrediction || recordedLetters.length >= currentWord.length) return;
+            recordedLetters += latestPrediction;
+            recordedWordEl.innerText = `Recorded: ${recordedLetters}`;
+            autoRecordedPrediction = latestPrediction;
+            if (recordedLetters === currentWord) {
+                wordFeedback.innerText = 'Word complete!';
+                recordLetterButton.disabled = true;
+            } else if (currentWord.startsWith(recordedLetters)) {
+                wordFeedback.innerText = 'Correct so far';
+            } else {
+                wordFeedback.innerText = 'That does not match the prompt. Choose a new word to try again.';
+            }
+        }
+
+        handSelect.addEventListener('change', () => {
+            handSelect.disabled = true;
+            statusText.innerText = `Loading ${handSelect.value}-hand model...`;
+            loadOrTrainModel(handSelect.value).finally(() => {
+                handSelect.disabled = false;
+            });
+        });
+
+        nextWordButton.addEventListener('click', () => {
+            const availableLetters = new Set(vocabLabels);
+            chooseNextWord(practiceWords.filter(word => [...word].every(letter => availableLetters.has(letter))));
+        });
+
+        recordLetterButton.addEventListener('click', recordPredictedLetter);
+
+        autoRecordToggle.addEventListener('change', () => {
+            stablePredictionSince = latestPrediction ? performance.now() : 0;
+            autoRecordedPrediction = '';
+        });
 
         async function predictLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -192,29 +357,48 @@
                 // Normalize coordinates just like we did in Python
                 const flatArray = [];
                 for (let landmark of hand) {
-                    flatArray.push(landmark.x - wrist.x);
+                    const x = landmark.x - wrist.x;
+                    flatArray.push(handSelect.value === 'right' ? -x : x);
                     flatArray.push(landmark.y - wrist.y);
                     flatArray.push(landmark.z - wrist.z);
                 }
 
-                // Predict using our trained TF.js model
-                tf.tidy(() => {
-                    const input = tf.tensor2d([flatArray]);
-                    const prediction = tfModel.predict(input);
-                    
-                    // Get the highest probability
-                    const classId = prediction.argMax(-1).dataSync()[0];
-                    const confidence = prediction.max().dataSync()[0];
+                if (tfModel) {
+                    tf.tidy(() => {
+                        const prediction = tfModel.predict(tf.tensor2d([flatArray]));
+                        const classId = prediction.argMax(-1).dataSync()[0];
+                        const confidence = prediction.max().dataSync()[0];
 
-                    if (confidence > 0.6) {
-                        predictedLetterEl.innerText = vocabLabels[classId];
-                        confidenceText.innerText = `Confidence: ${(confidence * 100).toFixed(1)}%`;
-                    } else {
-                        predictedLetterEl.innerText = "?";
-                        confidenceText.innerText = "Confidence: Too Low";
-                    }
-                });
+                        if (confidence > 0.6) {
+                            const detectedLetter = vocabLabels[classId];
+                            const now = performance.now();
+                            if (detectedLetter !== latestPrediction) {
+                                stablePredictionSince = now;
+                                autoRecordedPrediction = '';
+                            }
+                            latestPrediction = detectedLetter;
+                            predictedLetterEl.innerText = latestPrediction;
+                            confidenceText.innerText = `Confidence: ${(confidence * 100).toFixed(1)}%`;
+                            if (recordedLetters.length < currentWord.length) recordLetterButton.disabled = false;
+                            if (autoRecordToggle.checked && autoRecordedPrediction !== latestPrediction &&
+                                now - stablePredictionSince >= AUTO_RECORD_DELAY_MS) {
+                                recordPredictedLetter();
+                            }
+                        } else {
+                            latestPrediction = '';
+                            stablePredictionSince = 0;
+                            autoRecordedPrediction = '';
+                            predictedLetterEl.innerText = '?';
+                            confidenceText.innerText = 'Confidence: Too Low';
+                            recordLetterButton.disabled = true;
+                        }
+                    });
+                }
             } else {
+                latestPrediction = '';
+                stablePredictionSince = 0;
+                autoRecordedPrediction = '';
+                recordLetterButton.disabled = true;
                 predictedLetterEl.innerText = "-";
                 confidenceText.innerText = "No Hand Detected";
             }
