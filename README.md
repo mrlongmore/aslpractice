@@ -18,6 +18,8 @@ The original ASL Anchor quiz is available at [`asl_anchor.html`](asl_anchor.html
 
 [`fstool.html`](fstool.html) loads the pre-trained TensorFlow.js model from [`models/fstool/`](models/fstool/), so visitors do not train it in their browser. To regenerate the model after changing [`my_clean_asl_dataset.json`](my_clean_asl_dataset.json), install the dependencies with `npm install` and run `npm run train:fstool`.
 
-The trainer augments each sample with a horizontally mirrored feature vector so one model can accept either hand. The dataset does not identify which hand produced each sample, so this is synthetic mirror augmentation—not validation on independently collected examples from both hands.
+The trainer excludes J, R, and Z, and uses a deterministic, label-stratified holdout for validation, balanced class sampling, early stopping, and training-only hand-mirror, scale, small rotation, and coordinate-noise augmentation. The published validation score is measured on held-out records, but the dataset does not identify signers or handedness, so it is not a measure of performance on new signers or independently collected left/right hands. Mirroring is synthetic augmentation. The browser reports the model's held-out score and lets learners adjust the auto-record hold time.
+
+The dataset contains one 63-feature landmark frame per sample, not labeled motion sequences. The model therefore recognizes static handshapes; adding movement-based letters requires labeled sequences from different signers and hands at varied signing speeds. The practice word bank uses only letters in the trained model.
 
 FStool practice asks for a learner name and a word goal, tracks correctly completed words, and provides a printable certificate when the goal is reached.

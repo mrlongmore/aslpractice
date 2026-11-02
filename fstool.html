@@ -19,16 +19,26 @@
             flex-direction: column;
             align-items: center;
             margin: 0;
+            min-height: 100vh;
         }
         .lz-site-header {
             width: 100%;
             align-self: stretch;
         }
+        .page-main {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+            align-items: start;
+            gap: 20px;
+            width: min(1440px, 100%);
+            box-sizing: border-box;
+            padding: 20px;
+        }
         .container {
             position: relative;
-            width: min(640px, 100%);
+            width: 100%;
             aspect-ratio: 4 / 3;
-            margin-top: 20px;
+            margin: 0;
             border-radius: 12px;
             overflow: hidden;
             background-color: #000;
@@ -48,16 +58,16 @@
         }
         #statusPanel {
             background-color: #333;
-            padding: 20px;
+            padding: clamp(16px, 2vw, 24px);
             border-radius: 8px;
             text-align: center;
-            width: min(600px, calc(100% - 32px));
+            width: 100%;
             box-sizing: border-box;
-            margin: 2rem 16px 0;
+            margin: 0;
         }
         .setup-controls {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
             gap: 12px;
             text-align: left;
         }
@@ -74,12 +84,26 @@
             padding: 9px 12px;
             font: inherit;
         }
+        input, select {
+            accent-color: #4CAF50;
+        }
+        input[type="text"] {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .model-note {
+            margin: 8px 0;
+            color: #ddd;
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
         .letter-display {
             font-size: 5rem;
             font-weight: bold;
             color: #4CAF50;
-            margin: 10px 0;
-            min-height: 120px;
+            margin: 8px 0;
+            min-height: 1.15em;
+            line-height: 1.15;
         }
         .controls {
             display: flex;
@@ -89,11 +113,31 @@
             gap: 12px;
             margin-top: 16px;
         }
+        .timing-control {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 4px 12px;
+            width: 100%;
+            text-align: left;
+        }
+        .timing-control input {
+            grid-column: 1;
+            width: 100%;
+        }
+        .timing-control output {
+            grid-column: 2;
+            grid-row: 1 / span 2;
+            font-variant-numeric: tabular-nums;
+        }
         select, button {
             border: 1px solid #777;
             border-radius: 6px;
             padding: 9px 12px;
             font: inherit;
+        }
+        button, select, input {
+            touch-action: manipulation;
         }
         button {
             color: white;
@@ -121,8 +165,10 @@
             font-weight: bold;
         }
         .certificate {
+            grid-column: 1 / -1;
             width: min(760px, calc(100% - 32px));
-            margin: 2rem 16px;
+            justify-self: center;
+            margin: 0;
             padding: clamp(24px, 6vw, 56px);
             box-sizing: border-box;
             border: 8px double #c49a43;
@@ -153,8 +199,14 @@
                 background: white;
                 color: #252525;
             }
-            body > * { display: none !important; }
-            body > #certificate:not([hidden]) {
+            body > *:not(.page-main) { display: none !important; }
+            .page-main {
+                display: block !important;
+                width: 100%;
+                padding: 0;
+            }
+            .page-main > *:not(#certificate) { display: none !important; }
+            #certificate:not([hidden]) {
                 display: block !important;
                 width: 100%;
                 margin: 0;
@@ -164,9 +216,39 @@
             }
             #certificate button { display: none; }
         }
+        @media (max-width: 1100px) {
+            .page-main {
+                gap: 16px;
+                padding: 16px;
+            }
+            #statusPanel {
+                padding: 16px;
+            }
+            button, select, input[type="text"] {
+                min-height: 44px;
+            }
+            input[type="range"] {
+                min-height: 44px;
+            }
+            .controls {
+                min-height: 48px;
+            }
+            input[type="checkbox"] {
+                width: 24px;
+                height: 24px;
+            }
+        }
+        @media (max-width: 900px) {
+            .page-main {
+                grid-template-columns: minmax(0, 1fr);
+                max-width: 860px;
+            }
+        }
         @media (max-width: 480px) {
-            #statusPanel { padding: 16px; }
-            .letter-display { font-size: 4rem; min-height: 90px; }
+            .page-main { padding: 12px; gap: 12px; }
+            #statusPanel { padding: 14px; }
+            .letter-display { font-size: 4rem; }
+            .controls { gap: 8px; }
         }
     </style>
 </head>
@@ -185,11 +267,13 @@
         </nav>
     </header>
 
-    <div id="statusPanel">
+    <main class="page-main">
+    <section id="statusPanel" aria-label="Fingerspelling practice controls">
         <h2 id="statusText">Loading pre-trained model...</h2>
         <div class="letter-display" id="predictedLetter">-</div>
-        <p id="confidenceText">Confidence: 0%</p>
-        <p>Pre-trained model supports either signing hand.</p>
+        <p id="confidenceText" aria-live="polite">Confidence: 0%</p>
+        <p id="modelAccuracy" class="model-note">Loading held-out model evaluation...</p>
+        <p class="model-note">Supported letters: A–Y except J and R. Z is not included. Training mirrors hand landmarks to encourage left/right recognition, but separate accuracy for each hand is unavailable. The model recognizes still handshapes; movement-based letters require labeled motion data.</p>
         <form id="practiceSetup">
             <div class="setup-controls">
                 <label for="learnerName">Your name
@@ -217,11 +301,16 @@
         <p id="recordedWord">Recorded: </p>
         <label class="controls" for="autoRecordToggle">
             <input id="autoRecordToggle" type="checkbox">
-            Auto-record after holding a letter for 0.8 seconds
+            Auto-record after holding a letter
+        </label>
+        <label class="timing-control" for="autoRecordDelay">
+            <span>Hold time</span>
+            <input id="autoRecordDelay" type="range" min="300" max="2000" step="100" value="800" disabled>
+            <output id="autoRecordDelayOutput" for="autoRecordDelay">0.8 seconds</output>
         </label>
         <button id="recordLetterButton" type="button" disabled>Record predicted letter</button>
         <p id="wordFeedback" aria-live="polite"></p>
-    </div>
+    </section>
 
     <section id="certificate" class="certificate" aria-labelledby="certificateTitle" hidden>
         <p>Longmore Zone</p>
@@ -237,9 +326,16 @@
         <video id="webcam" autoplay playsinline></video>
         <canvas id="output_canvas"></canvas>
     </div>
+    </main>
 
     <script type="module">
         const { HandLandmarker, FilesetResolver } = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest");
+
+        try {
+            localStorage.removeItem('fstool-letter-calibration-v1');
+        } catch (error) {
+            console.warn('Could not remove previously saved FStool calibration samples.', error);
+        }
 
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('output_canvas');
@@ -247,6 +343,7 @@
         const statusText = document.getElementById('statusText');
         const predictedLetterEl = document.getElementById('predictedLetter');
         const confidenceText = document.getElementById('confidenceText');
+        const modelAccuracy = document.getElementById('modelAccuracy');
         const practiceSetup = document.getElementById('practiceSetup');
         const learnerNameInput = document.getElementById('learnerName');
         const wordGoalSelect = document.getElementById('wordGoal');
@@ -258,6 +355,8 @@
         const recordedWordEl = document.getElementById('recordedWord');
         const wordFeedback = document.getElementById('wordFeedback');
         const autoRecordToggle = document.getElementById('autoRecordToggle');
+        const autoRecordDelay = document.getElementById('autoRecordDelay');
+        const autoRecordDelayOutput = document.getElementById('autoRecordDelayOutput');
         const certificate = document.getElementById('certificate');
         const certificateName = document.getElementById('certificateName');
         const certificateScore = document.getElementById('certificateScore');
@@ -277,11 +376,11 @@
         let wordGoal = Number(wordGoalSelect.value);
         let score = 0;
         let practiceStarted = false;
-        const AUTO_RECORD_DELAY_MS = 800;
+        let autoRecordDelayMs = Number(autoRecordDelay.value);
         const practiceWords = [
-            'HELLO', 'WORLD', 'CLASS', 'LEARN', 'TEACH', 'HAPPY', 'SMILE',
-            'MUSIC', 'WATER', 'EARTH', 'DREAM', 'BRAVE', 'POWER', 'QUIET',
-            'FUNNY', 'SMART', 'GAMES', 'VIDEO', 'APPLE'
+            'HELLO', 'HOUSE', 'CLASS', 'OCEAN', 'TEACH', 'HAPPY', 'SMILE',
+            'MUSIC', 'WHITE', 'CLOUD', 'NIGHT', 'SEASON', 'POCKET', 'QUIET',
+            'FUNNY', 'MOUNTAIN', 'GAMES', 'VIDEO', 'APPLE'
         ];
         
         // Ensure canvas matches video size
@@ -297,6 +396,14 @@
                     throw new Error('Model metadata does not contain any labels.');
                 }
                 vocabLabels = metadata.labels;
+                if (['J', 'R', 'Z'].some(letter => vocabLabels.includes(letter))) {
+                    throw new Error('The model includes unsupported letters. Regenerate it with the current training script.');
+                }
+                if (Number.isFinite(metadata.validationAccuracy)) {
+                    modelAccuracy.innerText = `Held-out record validation accuracy: ${(metadata.validationAccuracy * 100).toFixed(1)}%. This is not a new-signer score.`;
+                } else {
+                    modelAccuracy.innerText = 'Held-out validation score is not available for this model.';
+                }
                 const availableLetters = new Set(vocabLabels);
                 usableWords = practiceWords.filter(word => [...word].every(letter => availableLetters.has(letter)));
                 if (!usableWords.length) throw new Error('No practice words match the dataset letters.');
@@ -417,6 +524,14 @@
         printCertificateButton.addEventListener('click', () => window.print());
 
         autoRecordToggle.addEventListener('change', () => {
+            autoRecordDelay.disabled = !autoRecordToggle.checked;
+            stablePredictionSince = latestPrediction ? performance.now() : 0;
+            autoRecordedPrediction = '';
+        });
+
+        autoRecordDelay.addEventListener('input', () => {
+            autoRecordDelayMs = Number(autoRecordDelay.value);
+            autoRecordDelayOutput.value = `${(autoRecordDelayMs / 1000).toFixed(1)} seconds`;
             stablePredictionSince = latestPrediction ? performance.now() : 0;
             autoRecordedPrediction = '';
         });
@@ -466,7 +581,7 @@
                             confidenceText.innerText = `Confidence: ${(confidence * 100).toFixed(1)}%`;
                             if (practiceStarted && recordedLetters.length < currentWord.length) recordLetterButton.disabled = false;
                             if (practiceStarted && autoRecordToggle.checked && autoRecordedPrediction !== latestPrediction &&
-                                now - stablePredictionSince >= AUTO_RECORD_DELAY_MS) {
+                                now - stablePredictionSince >= autoRecordDelayMs) {
                                 recordPredictedLetter();
                             }
                         } else {

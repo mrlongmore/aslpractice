@@ -9,7 +9,6 @@
     "G",
     "H",
     "I",
-    "J",
     "K",
     "L",
     "M",
@@ -17,7 +16,6 @@
     "O",
     "P",
     "Q",
-    "R",
     "S",
     "T",
     "U",
@@ -26,7 +24,27 @@
     "X",
     "Y"
   ],
+  "excludedLabels": [
+    "J",
+    "R",
+    "Z"
+  ],
   "inputFeatures": 63,
-  "trainingSamples": 6440,
-  "mirroredAugmentation": true
+  "trainingSamples": 2384,
+  "balancedTrainingSamples": 2392,
+  "augmentedTrainingSamples": 19136,
+  "validationSamples": 585,
+  "validationAccuracy": 1,
+  "validationLoss": 0.000001994210151678999,
+  "bestEpoch": 57,
+  "mirroredAugmentation": true,
+  "scaleAugmentation": [
+    0.8,
+    1.2
+  ],
+  "rotationAugmentationDegrees": 10,
+  "coordinateNoise": 0.004,
+  "validationSplitByLabel": 0.2,
+  "datasetHasHandednessLabels": false,
+  "temporalAugmentation": false
 }
