@@ -13,3 +13,11 @@ The homepage hero chooses a random sign GIF from the image entries in [`vocab.js
 The Practice, Vocabulary, and Word Search navigation items link to `asl_anchor.html` (the original homepage quiz), `buttonboard.html`, and `longbot.html`, respectively. Catalog game pages include a shared back link to the homepage.
 
 The original ASL Anchor quiz is available at [`asl_anchor.html`](asl_anchor.html).
+
+## Fingerspelling model
+
+[`fstool.html`](fstool.html) loads the pre-trained TensorFlow.js model from [`models/fstool/`](models/fstool/), so visitors do not train it in their browser. To regenerate the model after changing [`my_clean_asl_dataset.json`](my_clean_asl_dataset.json), install the dependencies with `npm install` and run `npm run train:fstool`.
+
+The trainer augments each sample with a horizontally mirrored feature vector so one model can accept either hand. The dataset does not identify which hand produced each sample, so this is synthetic mirror augmentation—not validation on independently collected examples from both hands.
+
+FStool practice asks for a learner name and a word goal, tracks correctly completed words, and provides a printable certificate when the goal is reached.

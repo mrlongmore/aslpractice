@@ -21,6 +21,7 @@ const games = [
     { title: 'ASL Word Search', description: 'Find vocabulary by selecting words in the letter grid.', url: 'longmore_zone_games/asl_word_search.html', icon: '🔎', tags: ['VOCAB', 'WORD SEARCH', 'PUZZLE'] },
     { title: 'ASL Word Builder', description: 'Build vocabulary words in this word puzzle.', url: 'longmore_zone_games/asl_word_unscramble.html', icon: '🔤', tags: ['VOCAB', 'PUZZLE'] },
     { title: 'Fingerspelling Challenge', description: 'Watch a word signed and type what you see.', url: 'longmore_zone_games/fingerspelling_tool.html', icon: '🤟', tags: ['FINGERSPELLING', 'QUIZ'] },
+    { title: 'FStool Fingerspelling', description: 'Practice fingerspelling with live hand tracking, a score goal, and a printable certificate.', url: 'fstool.html', icon: '🤟', tags: ['FINGERSPELLING', 'PRACTICE'], type: 'tool' },
     { title: 'ASL Anchor', description: 'Choose vocabulary topics, take a quiz, and see your results.', url: 'asl_anchor.html', icon: '⚓', tags: ['VOCAB', 'QUIZ'] },
     { title: 'Money Game', description: 'Practice money skills with an interactive register.', url: 'money_register/money_register.html', icon: '💵', tags: ['INTERACTIVE', 'PRACTICE'], type: 'tool' },
     { title: 'Eyebrow Grammar Challenge', description: 'Practice the role of eyebrows in ASL grammar.', url: 'eyebrows.html', icon: '👀', tags: ['GRAMMAR', 'PRACTICE'], type: 'tool' },

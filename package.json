@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "train:fstool": "node scripts/train-fstool-model.mjs"
+  },
+  "devDependencies": {
+    "@tensorflow/tfjs": "4.22.0"
+  }
+}

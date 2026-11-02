@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASL Practice Tool</title>
+    <link rel="stylesheet" href="site-nav.css">
     
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     
@@ -17,7 +18,11 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 2rem 16px;
+            margin: 0;
+        }
+        .lz-site-header {
+            width: 100%;
+            align-self: stretch;
         }
         .container {
             position: relative;
@@ -46,8 +51,28 @@
             padding: 20px;
             border-radius: 8px;
             text-align: center;
-            width: min(600px, 100%);
+            width: min(600px, calc(100% - 32px));
             box-sizing: border-box;
+            margin: 2rem 16px 0;
+        }
+        .setup-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            text-align: left;
+        }
+        .setup-controls label {
+            display: grid;
+            gap: 6px;
+        }
+        .setup-controls input,
+        .setup-controls select {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #777;
+            border-radius: 6px;
+            padding: 9px 12px;
+            font: inherit;
         }
         .letter-display {
             font-size: 5rem;
@@ -91,6 +116,54 @@
             font-size: 1.2rem;
             letter-spacing: 0.12em;
         }
+        #scoreCounter {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .certificate {
+            width: min(760px, calc(100% - 32px));
+            margin: 2rem 16px;
+            padding: clamp(24px, 6vw, 56px);
+            box-sizing: border-box;
+            border: 8px double #c49a43;
+            background: #fffdf5;
+            color: #252525;
+            text-align: center;
+        }
+        .certificate h2 {
+            color: #8b6820;
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            margin: 0.5rem 0 1.5rem;
+        }
+        .certificate-name {
+            margin: 1rem 0;
+            color: #243f66;
+            font-family: Georgia, serif;
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            overflow-wrap: anywhere;
+        }
+        .certificate button {
+            margin-top: 1.5rem;
+        }
+        @media print {
+            @page { margin: 1.5cm; }
+            body {
+                display: block;
+                margin: 0;
+                background: white;
+                color: #252525;
+            }
+            body > * { display: none !important; }
+            body > #certificate:not([hidden]) {
+                display: block !important;
+                width: 100%;
+                margin: 0;
+                padding: 2cm 1cm;
+                border: 8px double #c49a43;
+                print-color-adjust: exact;
+            }
+            #certificate button { display: none; }
+        }
         @media (max-width: 480px) {
             #statusPanel { padding: 16px; }
             .letter-display { font-size: 4rem; min-height: 90px; }
@@ -99,21 +172,45 @@
 </head>
 <body>
 
+    <header class="lz-site-header">
+        <a class="lz-site-brand" href="index.html">Longmore Zone</a>
+        <nav class="lz-site-nav" aria-label="Website navigation">
+            <a href="index.html">Home</a>
+            <a href="asl_anchor.html">Practice</a>
+            <a href="buttonboard.html">Vocabulary</a>
+            <a href="longbot.html">Word Search</a>
+            <a href="fstool.html" aria-current="page">Fingerspelling</a>
+            <a href="updates.html">Updates</a>
+            <a href="roadmap.html">Roadmap</a>
+        </nav>
+    </header>
+
     <div id="statusPanel">
-        <h2 id="statusText">Loading dataset and model...</h2>
+        <h2 id="statusText">Loading pre-trained model...</h2>
         <div class="letter-display" id="predictedLetter">-</div>
         <p id="confidenceText">Confidence: 0%</p>
-        <div class="controls">
-            <label for="handSelect">Signing hand</label>
-            <select id="handSelect" disabled>
-                <option value="left">Left hand</option>
-                <option value="right">Right hand</option>
-            </select>
-        </div>
+        <p>Pre-trained model supports either signing hand.</p>
+        <form id="practiceSetup">
+            <div class="setup-controls">
+                <label for="learnerName">Your name
+                    <input id="learnerName" name="name" type="text" maxlength="60" autocomplete="name" required>
+                </label>
+                <label for="wordGoal">Words to complete for your certificate
+                    <select id="wordGoal" name="wordGoal">
+                        <option value="5">5 words</option>
+                        <option value="10" selected>10 words</option>
+                        <option value="15">15 words</option>
+                        <option value="20">20 words</option>
+                    </select>
+                </label>
+            </div>
+            <button id="startPracticeButton" type="submit">Start practice</button>
+        </form>
+        <p id="scoreCounter" aria-live="polite">Words completed: 0 / 10</p>
         <div class="controls">
             <div>
                 <span>Fingerspell this word</span>
-                <strong id="targetWord">Loading...</strong>
+                <strong id="targetWord">Start practice to get a word</strong>
             </div>
             <button id="nextWordButton" type="button" disabled>New word</button>
         </div>
@@ -125,6 +222,16 @@
         <button id="recordLetterButton" type="button" disabled>Record predicted letter</button>
         <p id="wordFeedback" aria-live="polite"></p>
     </div>
+
+    <section id="certificate" class="certificate" aria-labelledby="certificateTitle" hidden>
+        <p>Longmore Zone</p>
+        <h2 id="certificateTitle">Certificate of Achievement</h2>
+        <p>This certificate is proudly presented to</p>
+        <p id="certificateName" class="certificate-name"></p>
+        <p>for successfully fingerspelling <strong id="certificateScore"></strong> practice words.</p>
+        <p id="certificateDate"></p>
+        <button id="printCertificateButton" type="button">Print or save certificate</button>
+    </section>
 
     <div class="container">
         <video id="webcam" autoplay playsinline></video>
@@ -140,25 +247,36 @@
         const statusText = document.getElementById('statusText');
         const predictedLetterEl = document.getElementById('predictedLetter');
         const confidenceText = document.getElementById('confidenceText');
-        const handSelect = document.getElementById('handSelect');
+        const practiceSetup = document.getElementById('practiceSetup');
+        const learnerNameInput = document.getElementById('learnerName');
+        const wordGoalSelect = document.getElementById('wordGoal');
+        const startPracticeButton = document.getElementById('startPracticeButton');
+        const scoreCounter = document.getElementById('scoreCounter');
         const targetWordEl = document.getElementById('targetWord');
         const nextWordButton = document.getElementById('nextWordButton');
         const recordLetterButton = document.getElementById('recordLetterButton');
         const recordedWordEl = document.getElementById('recordedWord');
         const wordFeedback = document.getElementById('wordFeedback');
         const autoRecordToggle = document.getElementById('autoRecordToggle');
+        const certificate = document.getElementById('certificate');
+        const certificateName = document.getElementById('certificateName');
+        const certificateScore = document.getElementById('certificateScore');
+        const certificateDate = document.getElementById('certificateDate');
+        const printCertificateButton = document.getElementById('printCertificateButton');
 
         let handLandmarker;
         let tfModel;
-        let dataset = [];
-        let datasetSignature = '';
         let vocabLabels = [];
+        let usableWords = [];
         let latestPrediction = '';
         let stablePredictionSince = 0;
         let autoRecordedPrediction = '';
         let currentWord = '';
         let recordedLetters = '';
-        let modelRequestId = 0;
+        let learnerName = '';
+        let wordGoal = Number(wordGoalSelect.value);
+        let score = 0;
+        let practiceStarted = false;
         const AUTO_RECORD_DELAY_MS = 800;
         const practiceWords = [
             'HELLO', 'WORLD', 'CLASS', 'LEARN', 'TEACH', 'HAPPY', 'SMILE',
@@ -172,20 +290,20 @@
 
         async function init() {
             try {
-                // 1. Load the dataset and fingerprint it to invalidate stale cached models.
-                const response = await fetch('my_clean_asl_dataset.json');
-                const datasetText = await response.text();
-                dataset = JSON.parse(datasetText);
-                datasetSignature = hashString(datasetText);
-                vocabLabels = [...new Set(dataset.map(item => item.label))].sort();
+                const metadataResponse = await fetch('./models/fstool/metadata.json');
+                if (!metadataResponse.ok) throw new Error(`Could not load model metadata (${metadataResponse.status}).`);
+                const metadata = await metadataResponse.json();
+                if (!Array.isArray(metadata.labels) || metadata.labels.length === 0) {
+                    throw new Error('Model metadata does not contain any labels.');
+                }
+                vocabLabels = metadata.labels;
                 const availableLetters = new Set(vocabLabels);
-                const usableWords = practiceWords.filter(word => [...word].every(letter => availableLetters.has(letter)));
+                usableWords = practiceWords.filter(word => [...word].every(letter => availableLetters.has(letter)));
                 if (!usableWords.length) throw new Error('No practice words match the dataset letters.');
-                nextWordButton.disabled = false;
-                chooseNextWord(usableWords);
 
-                handSelect.disabled = false;
-                await loadOrTrainModel(handSelect.value);
+                statusText.innerText = 'Loading pre-trained model...';
+                tfModel = await tf.loadLayersModel('./models/fstool/model.json');
+                statusText.innerText = 'Ready! Sign a letter with either hand.';
 
                 statusText.innerText = "Loading MediaPipe Tasks...";
                 const vision = await FilesetResolver.forVisionTasks(
@@ -206,7 +324,7 @@
                 video.srcObject = stream;
                 
                 video.addEventListener('loadeddata', () => {
-                    statusText.innerText = "Ready! Sign a letter.";
+                    statusText.innerText = "Ready! Enter your name and start practicing.";
                     predictLoop();
                 });
 
@@ -216,81 +334,33 @@
             }
         }
 
-        function hashString(value) {
-            let hash = 2166136261;
-            for (let index = 0; index < value.length; index++) {
-                hash ^= value.charCodeAt(index);
-                hash = Math.imul(hash, 16777619);
-            }
-            return (hash >>> 0).toString(16);
+        function updateScoreCounter() {
+            scoreCounter.innerText = `Words completed: ${score} / ${wordGoal}`;
         }
 
-        function mirrorFeatures(features) {
-            return features.map((value, index) => index % 3 === 0 ? -value : value);
-        }
-
-        function getCanonicalFeatures(item) {
-            const itemHand = (item.hand || 'left').toLowerCase();
-            return itemHand === 'right' ? mirrorFeatures(item.features) : item.features;
-        }
-
-        async function loadOrTrainModel(hand) {
-            const requestId = ++modelRequestId;
-            const modelUrl = `indexeddb://asl-fingerspelling-${hand}-v1-${datasetSignature}`;
-            let model;
-            let loadedFromCache = false;
-
-            try {
-                model = await tf.loadLayersModel(modelUrl);
-                loadedFromCache = true;
-            } catch (error) {
-                const features = [];
-                const labels = [];
-                dataset.forEach(item => {
-                    if (!Array.isArray(item.features) || item.features.length !== 63) return;
-                    features.push(getCanonicalFeatures(item));
-                    labels.push(vocabLabels.indexOf(item.label));
-                });
-
-                const xs = tf.tensor2d(features);
-                const labelTensor = tf.tensor1d(labels, 'int32');
-                const ys = tf.oneHot(labelTensor, vocabLabels.length);
-                labelTensor.dispose();
-
-                model = tf.sequential();
-                model.add(tf.layers.dense({ inputShape: [63], units: 128, activation: 'relu' }));
-                model.add(tf.layers.dropout({ rate: 0.2 }));
-                model.add(tf.layers.dense({ units: 64, activation: 'relu' }));
-                model.add(tf.layers.dense({ units: vocabLabels.length, activation: 'softmax' }));
-                model.compile({ optimizer: 'adam', loss: 'categoricalCrossentropy', metrics: ['accuracy'] });
-
-                statusText.innerText = `Training ${hand}-hand model on ${features.length} samples...`;
-                try {
-                    await model.fit(xs, ys, { epochs: 50 });
-                } finally {
-                    xs.dispose();
-                    ys.dispose();
-                }
-
-                try {
-                    await model.save(modelUrl);
-                } catch (saveError) {
-                    console.warn('Model could not be saved for future sessions.', saveError);
-                }
-            }
-
-            if (requestId !== modelRequestId) {
-                model.dispose();
+        function startPractice(event) {
+            event.preventDefault();
+            learnerName = learnerNameInput.value.trim();
+            if (!learnerName) {
+                learnerNameInput.setCustomValidity('Enter your name to start and receive your certificate.');
+                learnerNameInput.reportValidity();
                 return;
             }
-            if (tfModel) tfModel.dispose();
-            tfModel = model;
-            statusText.innerText = loadedFromCache
-                ? `Ready! Loaded saved ${hand}-hand model.`
-                : `Ready! Trained and saved ${hand}-hand model.`;
+            learnerNameInput.setCustomValidity('');
+            wordGoal = Number(wordGoalSelect.value);
+            score = 0;
+            practiceStarted = true;
+            certificate.hidden = true;
+            learnerNameInput.disabled = true;
+            wordGoalSelect.disabled = true;
+            startPracticeButton.disabled = true;
+            nextWordButton.disabled = false;
+            updateScoreCounter();
+            chooseNextWord();
+            statusText.innerText = 'Practice started! Sign each letter in the word.';
         }
 
-        function chooseNextWord(usableWords) {
+        function chooseNextWord() {
             const choices = usableWords.filter(word => word !== currentWord);
             currentWord = choices[Math.floor(Math.random() * choices.length)];
             recordedLetters = '';
@@ -298,16 +368,31 @@
             recordedWordEl.innerText = 'Recorded: ';
             wordFeedback.innerText = '';
             recordLetterButton.disabled = !latestPrediction;
+            stablePredictionSince = latestPrediction ? performance.now() : 0;
+            autoRecordedPrediction = '';
         }
 
         function recordPredictedLetter() {
-            if (!latestPrediction || recordedLetters.length >= currentWord.length) return;
+            if (!practiceStarted || !latestPrediction || recordedLetters.length >= currentWord.length) return;
             recordedLetters += latestPrediction;
             recordedWordEl.innerText = `Recorded: ${recordedLetters}`;
             autoRecordedPrediction = latestPrediction;
             if (recordedLetters === currentWord) {
-                wordFeedback.innerText = 'Word complete!';
+                score++;
+                updateScoreCounter();
                 recordLetterButton.disabled = true;
+                if (score >= wordGoal) {
+                    practiceStarted = false;
+                    nextWordButton.disabled = true;
+                    wordFeedback.innerText = `Goal reached! Congratulations, ${learnerName}.`;
+                    certificateName.innerText = learnerName;
+                    certificateScore.innerText = String(score);
+                    certificateDate.innerText = new Date().toLocaleDateString();
+                    certificate.hidden = false;
+                    statusText.innerText = 'Practice goal complete!';
+                } else {
+                    wordFeedback.innerText = `Word complete! Score: ${score} / ${wordGoal}. Choose a new word to continue.`;
+                }
             } else if (currentWord.startsWith(recordedLetters)) {
                 wordFeedback.innerText = 'Correct so far';
             } else {
@@ -315,20 +400,21 @@
             }
         }
 
-        handSelect.addEventListener('change', () => {
-            handSelect.disabled = true;
-            statusText.innerText = `Loading ${handSelect.value}-hand model...`;
-            loadOrTrainModel(handSelect.value).finally(() => {
-                handSelect.disabled = false;
-            });
+        practiceSetup.addEventListener('submit', startPractice);
+
+        learnerNameInput.addEventListener('input', () => learnerNameInput.setCustomValidity(''));
+
+        wordGoalSelect.addEventListener('change', () => {
+            if (practiceStarted) return;
+            wordGoal = Number(wordGoalSelect.value);
+            updateScoreCounter();
         });
 
-        nextWordButton.addEventListener('click', () => {
-            const availableLetters = new Set(vocabLabels);
-            chooseNextWord(practiceWords.filter(word => [...word].every(letter => availableLetters.has(letter))));
-        });
+        nextWordButton.addEventListener('click', chooseNextWord);
 
         recordLetterButton.addEventListener('click', recordPredictedLetter);
+
+        printCertificateButton.addEventListener('click', () => window.print());
 
         autoRecordToggle.addEventListener('change', () => {
             stablePredictionSince = latestPrediction ? performance.now() : 0;
@@ -357,8 +443,7 @@
                 // Normalize coordinates just like we did in Python
                 const flatArray = [];
                 for (let landmark of hand) {
-                    const x = landmark.x - wrist.x;
-                    flatArray.push(handSelect.value === 'right' ? -x : x);
+                    flatArray.push(landmark.x - wrist.x);
                     flatArray.push(landmark.y - wrist.y);
                     flatArray.push(landmark.z - wrist.z);
                 }
@@ -379,8 +464,8 @@
                             latestPrediction = detectedLetter;
                             predictedLetterEl.innerText = latestPrediction;
                             confidenceText.innerText = `Confidence: ${(confidence * 100).toFixed(1)}%`;
-                            if (recordedLetters.length < currentWord.length) recordLetterButton.disabled = false;
-                            if (autoRecordToggle.checked && autoRecordedPrediction !== latestPrediction &&
+                            if (practiceStarted && recordedLetters.length < currentWord.length) recordLetterButton.disabled = false;
+                            if (practiceStarted && autoRecordToggle.checked && autoRecordedPrediction !== latestPrediction &&
                                 now - stablePredictionSince >= AUTO_RECORD_DELAY_MS) {
                                 recordPredictedLetter();
                             }
@@ -406,6 +491,8 @@
             // Loop continuously
             requestAnimationFrame(predictLoop);
         }
+
+        updateScoreCounter();
 
         // Start the app!
         init();
