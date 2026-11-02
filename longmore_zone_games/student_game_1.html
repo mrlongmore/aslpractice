@@ -12,24 +12,15 @@
     body { min-height:100dvh; touch-action:pan-x pan-y; }
     #game { position:fixed; inset:0; }
     canvas { display:block; width:100%; height:100%; touch-action:none; }
-    .topbar { position:absolute; z-index:3; top:max(12px,env(safe-area-inset-top)); left:9px; transform:none; width:calc(100% - var(--sign-rail) - 18px); display:grid; grid-template-columns:1fr auto 1fr; align-items:start; gap:12px; pointer-events:none; }
+    .topbar { position:absolute; z-index:3; top:max(12px,env(safe-area-inset-top)); left:9px; transform:none; width:calc(100% - var(--sign-rail) - 18px); display:grid; grid-template-columns:1fr 1fr; align-items:start; gap:12px; pointer-events:none; }
     .brand { font-size:clamp(14px,2vw,19px); font-weight:1000; letter-spacing:.06em; line-height:1; padding:10px 13px; background:var(--ink); color:var(--white); border-radius:14px; box-shadow:0 4px 0 #131d22; width:max-content; }
     .brand span { color:var(--yellow); }
     .score { justify-self:end; padding:9px 13px; border-radius:14px; background:var(--white); font-weight:900; box-shadow:0 4px 0 rgba(37,49,57,.15); text-align:right; min-width:90px; }
     .score small { display:block; color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.1em; }
     #scoreNum { font-size:21px; }
-    .ticket { grid-column:1 / -1; justify-self:center; width:min(100%,500px); margin-top:0; padding:11px 16px 12px; background:var(--white); border:3px solid var(--ink); border-radius:18px; box-shadow:0 5px 0 rgba(37,49,57,.22); text-align:center; transform:rotate(-.5deg); }
-    .ticket .eyebrow { color:var(--tomato); font-weight:1000; font-size:10px; letter-spacing:.16em; text-transform:uppercase; }
-    #orderName { font-size:clamp(17px,3vw,25px); font-weight:1000; margin:1px 0 5px; }
-    .next-label { color:var(--tomato); font-size:10px; font-weight:1000; letter-spacing:.08em; margin:0 0 5px; }
-    #orderItems { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
-    .ingredient { padding:4px 8px; background:#f1eadb; border-radius:999px; font-size:11px; font-weight:900; border:1px solid #ddd0b8; white-space:nowrap; }
-    .ingredient.done { background:#d8efdb; border-color:#8dbc94; color:#426d4a; text-decoration:line-through; }
-    .ingredient.next { outline:2px solid var(--tomato); background:#fff0d2; transform:scale(1.05); }
     .next-sign-panel { position:absolute; z-index:2; top:0; right:0; bottom:0; width:var(--sign-rail); padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom)); display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px; background:var(--white); border-left:3px solid var(--ink); box-shadow:-5px 0 0 rgba(37,49,57,.12); text-align:center; }
     .next-sign-panel small { color:var(--tomato); font-size:11px; line-height:1.2; letter-spacing:.1em; font-weight:1000; }
     .next-sign-panel img { display:block; width:100%; aspect-ratio:1; object-fit:contain; border-radius:12px; border:2px solid #e7dece; background:#fff; }
-    #nextSignWord { max-width:100%; font-size:clamp(13px,1.8vw,19px); line-height:1.1; font-weight:1000; overflow-wrap:anywhere; }
     .controls { position:absolute; z-index:3; bottom:max(18px,env(safe-area-inset-bottom)); left:9px; transform:none; width:calc(100% - var(--sign-rail) - 18px); display:flex; justify-content:center; gap:12px; }
     .lane-btn { min-width:74px; min-height:58px; flex:1; max-width:130px; border:3px solid var(--ink); border-radius:18px; color:var(--ink); background:var(--white); font:1000 17px inherit; font-size:16px; font-weight:1000; box-shadow:0 5px 0 var(--ink); cursor:pointer; touch-action:manipulation; }
     .lane-btn:active { transform:translateY(4px); box-shadow:0 1px 0 var(--ink); }
@@ -46,22 +37,17 @@
     .tiny { color:#8b9392; font-size:10px; margin-top:12px; }
     @media (max-width:600px) {
       :root { --sign-rail:clamp(88px,24vw,125px); }
-      .topbar { grid-template-columns:1fr auto 1fr; gap:6px; width:calc(100% - var(--sign-rail) - 12px); left:6px; }
+      .topbar { grid-template-columns:1fr 1fr; gap:6px; width:calc(100% - var(--sign-rail) - 12px); left:6px; }
       .brand { padding:9px 10px; font-size:13px; }
-      .ticket { padding:9px 10px 10px; border-width:2px; }
-      .ingredient { font-size:9px; padding:4px 6px; }
       .score { min-width:70px; padding:7px 9px; }
       #scoreNum { font-size:18px; }
       .next-sign-panel { padding:12px 6px; gap:8px; border-left-width:2px; }
       .next-sign-panel small { font-size:8px; letter-spacing:.06em; }
-      #nextSignWord { font-size:12px; }
       .controls { left:6px; width:calc(100% - var(--sign-rail) - 12px); }
       .lane-btn { min-height:54px; min-width:60px; }
     }
     @media (max-height:560px) and (orientation:landscape) {
       .topbar { top:6px; }
-      .ticket { width:min(60vw,440px); padding:6px 10px; }
-      .ingredient { padding:3px 6px; }
       .next-sign-panel { gap:8px; padding-top:8px; padding-bottom:8px; }
       .next-sign-panel img { max-height:42vh; }
       .controls { width:calc(100% - var(--sign-rail) - 18px); left:9px; transform:none; bottom:8px; }
@@ -74,17 +60,10 @@
     <div class="topbar">
       <div class="brand">FOOD <span>RUNNER</span></div>
       <div class="score"><small>orders served</small><span id="scoreNum">0</span></div>
-      <section class="ticket" aria-live="polite">
-        <div class="eyebrow">Customer order</div>
-        <div id="orderName">Loading order…</div>
-        <div id="orderNext" class="next-label"></div>
-        <div id="orderItems"></div>
-      </section>
     </div>
     <aside class="next-sign-panel" id="nextSignPanel" aria-live="polite">
-      <small id="nextSignLabel">SIGN FOR NEXT ITEM</small>
-      <img id="nextSignGif" alt="ASL sign clip for the next food item" />
-      <strong id="nextSignWord">Ready!</strong>
+      <small id="nextSignLabel">WATCH THE SIGN</small>
+      <img id="nextSignGif" alt="ASL sign clip" />
     </aside>
     <div class="controls" aria-label="Lane controls">
       <button class="lane-btn" data-lane="0" aria-label="Move to left lane">← LEFT</button>
@@ -95,17 +74,16 @@
       <div class="dialog">
         <div class="logo-mark">🥪</div>
         <h1>Ready to<br>run the kitchen?</h1>
-        <p>Read the order, switch lanes, and grab every ingredient. Pick up anything the customer didn’t ask for and the shift is over!</p>
+        <p>Watch the sign, switch lanes, and collect the matching item. Pick up a different item and the shift is over!</p>
         <div><span class="pill">← / → keys</span><span class="pill">swipe</span><span class="pill">tap a lane</span></div>
-        <p class="tiny">Food words and ASL sign clips come from your class vocabulary file.</p>
         <button id="startBtn" class="action">Start the shift</button>
       </div>
     </section>
     <section id="overOverlay" class="overlay hidden">
       <div class="dialog">
-        <div class="logo-mark" id="overIcon">🧾</div>
-        <h1 id="overTitle">Shift over!</h1>
-        <p id="overMessage">That item wasn't on the order.</p>
+        <div class="logo-mark" id="overIcon">↩️</div>
+        <h1 id="overTitle">Try again!</h1>
+        <p id="overMessage">That wasn't the item shown in the sign. Watch the sign and try again.</p>
         <p><span class="pill">Orders served: <b id="finalScore">0</b></span></p>
         <button id="restartBtn" class="action">Restart game</button>
       </div>
@@ -295,18 +273,14 @@
     function chooseRecipe(){
       order.recipe=vocabularySequence[vocabularyRound % vocabularySequence.length];
       vocabularyRound++;
-      order.got=new Set(); updateTicket();
+      order.got=new Set(); updateSign();
     }
-    function updateTicket(){
-      el('orderName').textContent=order.recipe.name;
+    function updateSign(){
       const next=order.recipe.items.find(n=>!order.got.has(n));
-      el('orderNext').textContent=next ? `NEXT ITEM: ${next.replaceAll('-',' ')}` : 'ORDER COMPLETE!';
-      el('orderItems').innerHTML=order.recipe.items.map(n=>`<span class="ingredient ${order.got.has(n)?'done':''} ${n===next?'next':''}">${foods[n].emoji} ${n.replaceAll('-',' ')}</span>`).join('');
       const signName=next || order.recipe.items.at(-1);
-      el('nextSignLabel').textContent=next ? 'SIGN FOR NEXT ITEM' : 'ORDER COMPLETE';
-      el('nextSignWord').textContent=signName.replaceAll('-',' ');
+      el('nextSignLabel').textContent='WATCH THE SIGN';
       el('nextSignGif').src=foods[signName].sign;
-      el('nextSignGif').alt=`ASL sign clip for ${signName.replaceAll('-',' ')}`;
+      el('nextSignGif').alt='ASL sign clip';
       el('scoreNum').textContent=order.score;
     }
     function createRow(){
@@ -322,17 +296,17 @@
       choices.sort(()=>Math.random()-.5);
       const row=choices.map((name,i)=>makePickup(name,lanes[i],-16)); order.rows.push(row);
     }
-    function showGameOver(name){
+    function showGameOver(){
       order.running=false; order.over=true;
-      el('overIcon').textContent=foods[name]?.emoji||'🧾';
-      el('overTitle').textContent='Wrong item!';
-      el('overMessage').textContent=`You picked up ${name.replaceAll('-',' ')}. It wasn't on the ${order.recipe.name.toLowerCase()} order. Start over and try again!`;
+      el('overIcon').textContent='↩️';
+      el('overTitle').textContent='Try again!';
+      el('overMessage').textContent="That wasn't the item shown in the sign. Watch the sign and try again.";
       el('finalScore').textContent=order.score; el('overOverlay').classList.remove('hidden');
     }
     function collect(item){
       const name=item.userData.name;
       scene.remove(item); item.traverse(o=>{if(o.geometry)o.geometry.dispose();});
-      if(!order.recipe.items.includes(name) || order.got.has(name)){showGameOver(name);return;}
+      if(!order.recipe.items.includes(name) || order.got.has(name)){showGameOver();return;}
       order.got.add(name);
       // Remove duplicate copies already on the track so collecting one needed food cannot cause a later duplicate collision.
       for(const row of order.rows){
@@ -344,7 +318,7 @@
           }
         }
       }
-      updateTicket();
+      updateSign();
       if(order.got.size===order.recipe.items.length){
         order.score++; el('scoreNum').textContent=order.score;
         order.reviewUntil=performance.now()+900;
