@@ -413,6 +413,8 @@
             </div>
             <h2 class="text-2xl md:text-3xl font-bold text-slate-900 mt-4">Welcome to ASL Bistro!</h2>
             <p class="text-sm text-slate-600 mt-2">Choose how many customers you want to serve.</p>
+            <label for="player-name" class="block text-left text-xs font-bold uppercase tracking-wider text-slate-600 mt-4 mb-2">Player Name</label>
+            <input id="player-name" type="text" maxlength="60" autocomplete="name" required placeholder="Enter your name" class="w-full bg-white border-2 border-slate-300 rounded-xl px-4 py-3 text-base font-bold text-slate-800 focus:outline-none focus:border-amber-500" style="user-select: text; -webkit-user-select: text;">
             <label for="customer-goal" class="block text-left text-xs font-bold uppercase tracking-wider text-slate-600 mt-6 mb-2">Customer Goal</label>
             <select id="customer-goal" class="w-full bg-white border-2 border-slate-300 rounded-xl px-4 py-3 text-base font-bold text-slate-800 focus:outline-none focus:border-amber-500">
                 <option value="10">10 customers</option>
@@ -446,6 +448,9 @@
                 <i class="fa-solid fa-trophy text-3xl"></i>
             </div>
             <h2 id="game-end-title" class="text-2xl md:text-3xl font-bold text-slate-900 mt-4">You Win!</h2>
+            <p class="text-sm text-slate-600 mt-2">This certifies that</p>
+            <p id="game-end-player-name" class="text-3xl font-bold text-indigo-700 mt-1 break-words"></p>
+            <p class="text-sm text-slate-600 mt-1">completed the ASL Bistro challenge.</p>
             <p class="text-sm text-slate-600 mt-2">Customers served</p>
             <p id="game-end-served-count" class="text-5xl font-bold text-emerald-700 mt-2">0</p>
             <button id="btn-play-again" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition active:scale-95">
@@ -727,6 +732,7 @@
         const TIME_PURCHASE_BASE_PRICE = 6;
 
         const gameState = {
+            playerName: "",
             earnings: 0,
             customersServed: 0,
             currentOrder: [], 
@@ -1331,6 +1337,16 @@
         }
 
         function startGame() {
+            const playerNameInput = document.getElementById('player-name');
+            const playerName = playerNameInput.value.trim();
+            if (!playerName) {
+                playerNameInput.setCustomValidity('Enter your name to start.');
+                playerNameInput.reportValidity();
+                playerNameInput.focus();
+                return;
+            }
+            playerNameInput.setCustomValidity('');
+            gameState.playerName = playerName;
             const selectedGoal = document.getElementById('customer-goal').value;
             gameState.customerGoal = selectedGoal === 'endless' ? null : Number(selectedGoal);
             gameState.difficulty = document.getElementById('difficulty').value;
@@ -1373,6 +1389,7 @@
             endGameButton.classList.add('hidden');
             endGameButton.classList.remove('flex');
             document.getElementById('game-end-title').innerText = won ? 'You Win!' : 'Game Complete!';
+            document.getElementById('game-end-player-name').textContent = gameState.playerName;
             document.getElementById('game-end-served-count').innerText = gameState.customersServed;
             const endScreen = document.getElementById('game-end-screen');
             endScreen.classList.remove('hidden');
