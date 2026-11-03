@@ -155,6 +155,13 @@
             letter-spacing: 0.12em;
             margin-top: 6px;
         }
+        #currentLetter {
+            display: inline-block;
+            color: #4CAF50;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-top: 8px;
+        }
         #recordedWord {
             min-height: 1.5em;
             font-size: 1.2rem;
@@ -295,20 +302,18 @@
             <div>
                 <span>Fingerspell this word</span>
                 <strong id="targetWord">Start practice to get a word</strong>
+                <span>Current letter: </span>
+                <strong id="currentLetter" aria-live="polite">-</strong>
+                <span id="targetProgress"></span>
             </div>
             <button id="nextWordButton" type="button" disabled>New word</button>
         </div>
         <p id="recordedWord">Recorded: </p>
-        <label class="controls" for="autoRecordToggle">
-            <input id="autoRecordToggle" type="checkbox">
-            Auto-record after holding a letter
-        </label>
         <label class="timing-control" for="autoRecordDelay">
-            <span>Hold time</span>
-            <input id="autoRecordDelay" type="range" min="300" max="2000" step="100" value="800" disabled>
+            <span>Automatic recording hold time</span>
+            <input id="autoRecordDelay" type="range" min="300" max="2000" step="100" value="800">
             <output id="autoRecordDelayOutput" for="autoRecordDelay">0.8 seconds</output>
         </label>
-        <button id="recordLetterButton" type="button" disabled>Record predicted letter</button>
         <p id="wordFeedback" aria-live="polite"></p>
     </section>
 
@@ -350,11 +355,11 @@
         const startPracticeButton = document.getElementById('startPracticeButton');
         const scoreCounter = document.getElementById('scoreCounter');
         const targetWordEl = document.getElementById('targetWord');
+        const currentLetterEl = document.getElementById('currentLetter');
+        const targetProgress = document.getElementById('targetProgress');
         const nextWordButton = document.getElementById('nextWordButton');
-        const recordLetterButton = document.getElementById('recordLetterButton');
         const recordedWordEl = document.getElementById('recordedWord');
         const wordFeedback = document.getElementById('wordFeedback');
-        const autoRecordToggle = document.getElementById('autoRecordToggle');
         const autoRecordDelay = document.getElementById('autoRecordDelay');
         const autoRecordDelayOutput = document.getElementById('autoRecordDelayOutput');
         const certificate = document.getElementById('certificate');
@@ -464,30 +469,45 @@
             nextWordButton.disabled = false;
             updateScoreCounter();
             chooseNextWord();
-            statusText.innerText = 'Practice started! Sign each letter in the word.';
+            statusText.innerText = 'Practice started! Hold each letter until it is recorded.';
         }
 
         function chooseNextWord() {
             const choices = usableWords.filter(word => word !== currentWord);
             currentWord = choices[Math.floor(Math.random() * choices.length)];
             recordedLetters = '';
-            targetWordEl.innerText = currentWord;
+            updateLetterPrompt();
             recordedWordEl.innerText = 'Recorded: ';
             wordFeedback.innerText = '';
-            recordLetterButton.disabled = !latestPrediction;
             stablePredictionSince = latestPrediction ? performance.now() : 0;
             autoRecordedPrediction = '';
         }
 
+        function updateLetterPrompt() {
+            const letterIndex = recordedLetters.length;
+            targetWordEl.innerText = currentWord;
+            currentLetterEl.innerText = currentWord[letterIndex] || '-';
+            targetProgress.innerText = letterIndex < currentWord.length
+                ? `Letter ${letterIndex + 1} of ${currentWord.length}`
+                : 'Word complete';
+        }
+
         function recordPredictedLetter() {
             if (!practiceStarted || !latestPrediction || recordedLetters.length >= currentWord.length) return;
+            const expectedLetter = currentWord[recordedLetters.length];
+            if (latestPrediction !== expectedLetter) {
+                wordFeedback.innerText = 'Try that letter again.';
+                autoRecordedPrediction = latestPrediction;
+                return;
+            }
+
             recordedLetters += latestPrediction;
             recordedWordEl.innerText = `Recorded: ${recordedLetters}`;
             autoRecordedPrediction = latestPrediction;
+            updateLetterPrompt();
             if (recordedLetters === currentWord) {
                 score++;
                 updateScoreCounter();
-                recordLetterButton.disabled = true;
                 if (score >= wordGoal) {
                     practiceStarted = false;
                     nextWordButton.disabled = true;
@@ -500,10 +520,8 @@
                 } else {
                     wordFeedback.innerText = `Word complete! Score: ${score} / ${wordGoal}. Choose a new word to continue.`;
                 }
-            } else if (currentWord.startsWith(recordedLetters)) {
-                wordFeedback.innerText = 'Correct so far';
             } else {
-                wordFeedback.innerText = 'That does not match the prompt. Choose a new word to try again.';
+                wordFeedback.innerText = 'Correct! Keep going.';
             }
         }
 
@@ -519,15 +537,7 @@
 
         nextWordButton.addEventListener('click', chooseNextWord);
 
-        recordLetterButton.addEventListener('click', recordPredictedLetter);
-
         printCertificateButton.addEventListener('click', () => window.print());
-
-        autoRecordToggle.addEventListener('change', () => {
-            autoRecordDelay.disabled = !autoRecordToggle.checked;
-            stablePredictionSince = latestPrediction ? performance.now() : 0;
-            autoRecordedPrediction = '';
-        });
 
         autoRecordDelay.addEventListener('input', () => {
             autoRecordDelayMs = Number(autoRecordDelay.value);
@@ -579,8 +589,7 @@
                             latestPrediction = detectedLetter;
                             predictedLetterEl.innerText = latestPrediction;
                             confidenceText.innerText = `Confidence: ${(confidence * 100).toFixed(1)}%`;
-                            if (practiceStarted && recordedLetters.length < currentWord.length) recordLetterButton.disabled = false;
-                            if (practiceStarted && autoRecordToggle.checked && autoRecordedPrediction !== latestPrediction &&
+                            if (practiceStarted && autoRecordedPrediction !== latestPrediction &&
                                 now - stablePredictionSince >= autoRecordDelayMs) {
                                 recordPredictedLetter();
                             }
@@ -590,7 +599,6 @@
                             autoRecordedPrediction = '';
                             predictedLetterEl.innerText = '?';
                             confidenceText.innerText = 'Confidence: Too Low';
-                            recordLetterButton.disabled = true;
                         }
                     });
                 }
@@ -598,7 +606,6 @@
                 latestPrediction = '';
                 stablePredictionSince = 0;
                 autoRecordedPrediction = '';
-                recordLetterButton.disabled = true;
                 predictedLetterEl.innerText = "-";
                 confidenceText.innerText = "No Hand Detected";
             }
