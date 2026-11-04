@@ -8,8 +8,6 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision"></script>
-
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -105,6 +103,35 @@
             min-height: 1.15em;
             line-height: 1.15;
         }
+        #recordedWord.letter-success {
+            color: #a5e8b5;
+            animation: letter-success 420ms ease-out;
+        }
+        #wordCompleteTitle.word-success {
+            color: #fff0a8;
+            animation: word-success 650ms ease-out;
+        }
+        @keyframes letter-success {
+            0% { transform: scale(0.96); }
+            55% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes word-success {
+            0% { transform: scale(0.9); text-shadow: 0 0 0 transparent; }
+            45% { transform: scale(1.1); text-shadow: 0 0 18px rgba(255, 209, 102, 0.8); }
+            100% { transform: scale(1); text-shadow: 0 0 0 transparent; }
+        }
+        .sound-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .sound-control input {
+            width: 18px;
+            height: 18px;
+        }
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -197,6 +224,32 @@
         }
         .certificate button {
             margin-top: 1.5rem;
+        }
+        #wordCompleteDialog {
+            width: min(420px, calc(100% - 48px));
+            border: 0;
+            border-radius: 12px;
+            padding: 28px;
+            background: #333;
+            color: white;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+        #wordCompleteDialog::backdrop {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        #wordCompleteDialog h2 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        #wordCompleteDialog button {
+            margin-top: 12px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #recordedWord.letter-success,
+            #wordCompleteTitle.word-success {
+                animation: none;
+            }
         }
         @media print {
             @page { margin: 1.5cm; }
@@ -311,8 +364,12 @@
         <p id="recordedWord">Recorded: </p>
         <label class="timing-control" for="autoRecordDelay">
             <span>Automatic recording hold time</span>
-            <input id="autoRecordDelay" type="range" min="300" max="2000" step="100" value="800">
+            <input id="autoRecordDelay" type="range" min="100" max="2000" step="100" value="800">
             <output id="autoRecordDelayOutput" for="autoRecordDelay">0.8 seconds</output>
+        </label>
+        <label class="sound-control" for="soundEffects">
+            <input id="soundEffects" type="checkbox" checked>
+            <span>Sound effects</span>
         </label>
         <p id="wordFeedback" aria-live="polite"></p>
     </section>
@@ -327,6 +384,12 @@
         <button id="printCertificateButton" type="button">Print or save certificate</button>
     </section>
 
+    <dialog id="wordCompleteDialog" aria-labelledby="wordCompleteTitle" aria-describedby="wordCompleteMessage">
+        <h2 id="wordCompleteTitle">Word complete!</h2>
+        <p id="wordCompleteMessage"></p>
+        <button id="closeWordCompleteDialog" type="button">Continue</button>
+    </dialog>
+
     <div class="container">
         <video id="webcam" autoplay playsinline></video>
         <canvas id="output_canvas"></canvas>
@@ -334,7 +397,7 @@
     </main>
 
     <script type="module">
-        const { HandLandmarker, FilesetResolver } = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest");
+        const { HandLandmarker, FilesetResolver } = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.2");
 
         try {
             localStorage.removeItem('fstool-letter-calibration-v1');
@@ -362,11 +425,16 @@
         const wordFeedback = document.getElementById('wordFeedback');
         const autoRecordDelay = document.getElementById('autoRecordDelay');
         const autoRecordDelayOutput = document.getElementById('autoRecordDelayOutput');
+        const soundEffectsToggle = document.getElementById('soundEffects');
         const certificate = document.getElementById('certificate');
         const certificateName = document.getElementById('certificateName');
         const certificateScore = document.getElementById('certificateScore');
         const certificateDate = document.getElementById('certificateDate');
         const printCertificateButton = document.getElementById('printCertificateButton');
+        const wordCompleteDialog = document.getElementById('wordCompleteDialog');
+        const wordCompleteTitle = document.getElementById('wordCompleteTitle');
+        const wordCompleteMessage = document.getElementById('wordCompleteMessage');
+        const closeWordCompleteDialog = document.getElementById('closeWordCompleteDialog');
 
         let handLandmarker;
         let tfModel;
@@ -382,11 +450,14 @@
         let score = 0;
         let practiceStarted = false;
         let autoRecordDelayMs = Number(autoRecordDelay.value);
+        let feedbackAudioContext;
+        const feedbackAnimationTimeouts = new WeakMap();
         const practiceWords = [
             'HELLO', 'HOUSE', 'CLASS', 'OCEAN', 'TEACH', 'HAPPY', 'SMILE',
             'MUSIC', 'WHITE', 'CLOUD', 'NIGHT', 'SEASON', 'POCKET', 'QUIET',
             'FUNNY', 'MOUNTAIN', 'GAMES', 'VIDEO', 'APPLE'
         ];
+        const confusingLetterPairs = [['A', 'M'], ['D', 'L'], ['O', 'E'], ['T', 'A']];
         
         // Ensure canvas matches video size
         canvas.width = 640;
@@ -410,7 +481,10 @@
                     modelAccuracy.innerText = 'Held-out validation score is not available for this model.';
                 }
                 const availableLetters = new Set(vocabLabels);
-                usableWords = practiceWords.filter(word => [...word].every(letter => availableLetters.has(letter)));
+                usableWords = practiceWords.filter(word =>
+                    [...word].every(letter => availableLetters.has(letter)) &&
+                    !confusingLetterPairs.some(([first, second]) => word.includes(first) && word.includes(second))
+                );
                 if (!usableWords.length) throw new Error('No practice words match the dataset letters.');
 
                 statusText.innerText = 'Loading pre-trained model...';
@@ -419,7 +493,7 @@
 
                 statusText.innerText = "Loading MediaPipe Tasks...";
                 const vision = await FilesetResolver.forVisionTasks(
-                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.2/wasm"
                 );
                 
                 handLandmarker = await HandLandmarker.createFromOptions(vision, {
@@ -450,6 +524,52 @@
             scoreCounter.innerText = `Words completed: ${score} / ${wordGoal}`;
         }
 
+        function unlockFeedbackAudio() {
+            const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+            if (!soundEffectsToggle.checked || !AudioContextConstructor) return;
+
+            try {
+                feedbackAudioContext ||= new AudioContextConstructor();
+                if (feedbackAudioContext.state === 'suspended') {
+                    feedbackAudioContext.resume().catch(() => {});
+                }
+            } catch {
+                feedbackAudioContext = null;
+            }
+        }
+
+        function playFeedbackSound(wordCompleted) {
+            if (!soundEffectsToggle.checked || !feedbackAudioContext) return;
+
+            const notes = wordCompleted ? [523.25, 659.25, 783.99] : [659.25];
+            const startTime = feedbackAudioContext.currentTime;
+            notes.forEach((frequency, index) => {
+                const noteStart = startTime + index * 0.12;
+                const oscillator = feedbackAudioContext.createOscillator();
+                const gain = feedbackAudioContext.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.value = frequency;
+                gain.gain.setValueAtTime(0.0001, noteStart);
+                gain.gain.exponentialRampToValueAtTime(0.07, noteStart + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.15);
+                oscillator.connect(gain);
+                gain.connect(feedbackAudioContext.destination);
+                oscillator.start(noteStart);
+                oscillator.stop(noteStart + 0.16);
+            });
+        }
+
+        function showFeedbackAnimation(element, className) {
+            window.clearTimeout(feedbackAnimationTimeouts.get(element));
+            element.classList.remove(className);
+            void element.offsetWidth;
+            element.classList.add(className);
+            feedbackAnimationTimeouts.set(element, window.setTimeout(() => {
+                element.classList.remove(className);
+                feedbackAnimationTimeouts.delete(element);
+            }, 700));
+        }
+
         function startPractice(event) {
             event.preventDefault();
             learnerName = learnerNameInput.value.trim();
@@ -459,6 +579,7 @@
                 return;
             }
             learnerNameInput.setCustomValidity('');
+            unlockFeedbackAudio();
             wordGoal = Number(wordGoalSelect.value);
             score = 0;
             practiceStarted = true;
@@ -505,7 +626,10 @@
             recordedWordEl.innerText = `Recorded: ${recordedLetters}`;
             autoRecordedPrediction = latestPrediction;
             updateLetterPrompt();
-            if (recordedLetters === currentWord) {
+            const wordCompleted = recordedLetters === currentWord;
+            playFeedbackSound(wordCompleted);
+            showFeedbackAnimation(recordedWordEl, 'letter-success');
+            if (wordCompleted) {
                 score++;
                 updateScoreCounter();
                 if (score >= wordGoal) {
@@ -517,13 +641,22 @@
                     certificateDate.innerText = new Date().toLocaleDateString();
                     certificate.hidden = false;
                     statusText.innerText = 'Practice goal complete!';
+                    wordCompleteMessage.innerText = `You completed ${currentWord} and reached your goal of ${wordGoal} words. Congratulations, ${learnerName}!`;
                 } else {
                     wordFeedback.innerText = `Word complete! Score: ${score} / ${wordGoal}. Choose a new word to continue.`;
+                    wordCompleteMessage.innerText = `You completed ${currentWord}! Words completed: ${score} / ${wordGoal}. Choose a new word when you're ready.`;
                 }
+                wordCompleteDialog.showModal();
+                showFeedbackAnimation(wordCompleteTitle, 'word-success');
             } else {
                 wordFeedback.innerText = 'Correct! Keep going.';
             }
         }
+
+        closeWordCompleteDialog.addEventListener('click', () => {
+            wordCompleteDialog.close();
+            if (practiceStarted) chooseNextWord();
+        });
 
         practiceSetup.addEventListener('submit', startPractice);
 
@@ -545,6 +678,8 @@
             stablePredictionSince = latestPrediction ? performance.now() : 0;
             autoRecordedPrediction = '';
         });
+
+        soundEffectsToggle.addEventListener('change', unlockFeedbackAudio);
 
         async function predictLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
