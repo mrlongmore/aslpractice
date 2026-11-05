@@ -200,7 +200,7 @@
         }
         .certificate {
             grid-column: 1 / -1;
-            width: min(760px, calc(100% - 32px));
+            width: min(900px, 100%);
             justify-self: center;
             margin: 0;
             padding: clamp(24px, 6vw, 56px);
@@ -209,6 +209,23 @@
             background: #fffdf5;
             color: #252525;
             text-align: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        body.certificate-mode .page-main {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: none;
+            padding: clamp(16px, 5vw, 56px);
+        }
+        body.certificate-mode .page-main > *:not(#certificate) {
+            display: none;
+        }
+        body.certificate-mode #certificate:not([hidden]) {
+            display: block;
         }
         .certificate h2 {
             color: #8b6820;
@@ -364,8 +381,8 @@
         <p id="recordedWord">Recorded: </p>
         <label class="timing-control" for="autoRecordDelay">
             <span>Automatic recording hold time</span>
-            <input id="autoRecordDelay" type="range" min="100" max="2000" step="100" value="800">
-            <output id="autoRecordDelayOutput" for="autoRecordDelay">0.8 seconds</output>
+            <input id="autoRecordDelay" type="range" min="100" max="2000" step="100" value="100">
+            <output id="autoRecordDelayOutput" for="autoRecordDelay">0.1 seconds</output>
         </label>
         <label class="sound-control" for="soundEffects">
             <input id="soundEffects" type="checkbox" checked>
@@ -381,6 +398,8 @@
         <p id="certificateName" class="certificate-name"></p>
         <p>for successfully fingerspelling <strong id="certificateScore"></strong> practice words.</p>
         <p id="certificateDate"></p>
+        <button id="playAgainButton" type="button">Play again</button>
+        <button id="airhornButton" type="button">Celebration button</button>
         <button id="printCertificateButton" type="button">Print or save certificate</button>
     </section>
 
@@ -430,6 +449,8 @@
         const certificateName = document.getElementById('certificateName');
         const certificateScore = document.getElementById('certificateScore');
         const certificateDate = document.getElementById('certificateDate');
+        const playAgainButton = document.getElementById('playAgainButton');
+        const airhornButton = document.getElementById('airhornButton');
         const printCertificateButton = document.getElementById('printCertificateButton');
         const wordCompleteDialog = document.getElementById('wordCompleteDialog');
         const wordCompleteTitle = document.getElementById('wordCompleteTitle');
@@ -559,6 +580,82 @@
             });
         }
 
+        function playCelebrationTune() {
+            if (!soundEffectsToggle.checked || !feedbackAudioContext) return;
+
+            const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5, 1174.66, 1318.51, 1046.5];
+            const play = () => {
+                const startTime = feedbackAudioContext.currentTime;
+                notes.forEach((frequency, index) => {
+                    const noteStart = startTime + index * 0.16;
+                    const duration = index === notes.length - 1 ? 0.36 : 0.14;
+                    const oscillator = feedbackAudioContext.createOscillator();
+                    const gain = feedbackAudioContext.createGain();
+                    oscillator.type = 'square';
+                    oscillator.frequency.value = frequency;
+                    gain.gain.setValueAtTime(0.0001, noteStart);
+                    gain.gain.exponentialRampToValueAtTime(0.045, noteStart + 0.01);
+                    gain.gain.setValueAtTime(0.045, noteStart + duration * 0.65);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + duration);
+                    oscillator.connect(gain);
+                    gain.connect(feedbackAudioContext.destination);
+                    oscillator.start(noteStart);
+                    oscillator.stop(noteStart + duration);
+                });
+            };
+
+            if (feedbackAudioContext.state === 'suspended') {
+                feedbackAudioContext.resume().then(play).catch(error => {
+                    console.warn('Could not play the certificate celebration tune.', error);
+                });
+                return;
+            }
+            play();
+        }
+
+        function playAirhornCelebration() {
+            if (!soundEffectsToggle.checked || !feedbackAudioContext) return;
+
+            const play = () => {
+                const startTime = feedbackAudioContext.currentTime;
+                const envelope = feedbackAudioContext.createGain();
+                const blasts = [[0, 0.14], [0.21, 0.16], [0.47, 0.48]];
+                blasts.forEach(([offset, duration]) => {
+                    const blastStart = startTime + offset;
+                    envelope.gain.setValueAtTime(0.0001, blastStart);
+                    envelope.gain.exponentialRampToValueAtTime(0.06, blastStart + 0.015);
+                    envelope.gain.setValueAtTime(0.06, blastStart + duration * 0.7);
+                    envelope.gain.exponentialRampToValueAtTime(0.0001, blastStart + duration);
+                });
+                [440, 554.37].forEach(frequency => {
+                    const oscillator = feedbackAudioContext.createOscillator();
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.value = frequency;
+                    oscillator.connect(envelope);
+                    oscillator.start(startTime);
+                    oscillator.stop(startTime + 0.96);
+                });
+                envelope.connect(feedbackAudioContext.destination);
+            };
+
+            if (feedbackAudioContext.state === 'suspended') {
+                feedbackAudioContext.resume().then(play).catch(error => {
+                    console.warn('Could not play the certificate airhorn celebration.', error);
+                });
+                return;
+            }
+            play();
+        }
+
+        function startAnotherGame() {
+            document.body.classList.remove('certificate-mode');
+            certificate.hidden = true;
+            learnerNameInput.disabled = false;
+            wordGoalSelect.disabled = false;
+            startPracticeButton.disabled = false;
+            practiceSetup.requestSubmit();
+        }
+
         function showFeedbackAnimation(element, className) {
             window.clearTimeout(feedbackAnimationTimeouts.get(element));
             element.classList.remove(className);
@@ -627,7 +724,7 @@
             autoRecordedPrediction = latestPrediction;
             updateLetterPrompt();
             const wordCompleted = recordedLetters === currentWord;
-            playFeedbackSound(wordCompleted);
+            playFeedbackSound(wordCompleted && score + 1 < wordGoal);
             showFeedbackAnimation(recordedWordEl, 'letter-success');
             if (wordCompleted) {
                 score++;
@@ -640,14 +737,18 @@
                     certificateScore.innerText = String(score);
                     certificateDate.innerText = new Date().toLocaleDateString();
                     certificate.hidden = false;
+                    document.body.classList.add('certificate-mode');
+                    playCelebrationTune();
                     statusText.innerText = 'Practice goal complete!';
                     wordCompleteMessage.innerText = `You completed ${currentWord} and reached your goal of ${wordGoal} words. Congratulations, ${learnerName}!`;
                 } else {
                     wordFeedback.innerText = `Word complete! Score: ${score} / ${wordGoal}. Choose a new word to continue.`;
                     wordCompleteMessage.innerText = `You completed ${currentWord}! Words completed: ${score} / ${wordGoal}. Choose a new word when you're ready.`;
                 }
-                wordCompleteDialog.showModal();
-                showFeedbackAnimation(wordCompleteTitle, 'word-success');
+                if (practiceStarted) {
+                    wordCompleteDialog.showModal();
+                    showFeedbackAnimation(wordCompleteTitle, 'word-success');
+                }
             } else {
                 wordFeedback.innerText = 'Correct! Keep going.';
             }
@@ -669,6 +770,9 @@
         });
 
         nextWordButton.addEventListener('click', chooseNextWord);
+
+        playAgainButton.addEventListener('click', startAnotherGame);
+        airhornButton.addEventListener('click', playAirhornCelebration);
 
         printCertificateButton.addEventListener('click', () => window.print());
 
