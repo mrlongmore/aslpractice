@@ -3226,7 +3226,7 @@
     {
       "question": "What is being signed?",
       "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1698655677/fkdorxlpm6wedigge0uc.gif",
-      "options": ["HOTDOG", "MEAT-TUBE", "LINK", "SAUSAGE"],
+      "options": ["GROUND MEAT", "MEAT-TUBE", "LINK", "SAUSAGE/HOTDOG"],
       "correct": 3,
       "emoji": "🌭",
       "signParameters": {
