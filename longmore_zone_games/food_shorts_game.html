@@ -332,7 +332,9 @@
         let incorrectBannerTimer = null;
 
         const el = id => document.getElementById(id);
-        const displayName = value => value.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+        const displayName = value => value === 'SAUSAGE'
+            ? 'Sausage/Hotdog'
+            : value.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
 
         function iconFor(text) { return text.replaceAll(/[^a-z0-9]/gi, '').slice(0, 2).toUpperCase(); }
 

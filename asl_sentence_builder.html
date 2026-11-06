@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#eaf3fb">
+    <title>ASL Sentence Builder</title>
+    <link rel="stylesheet" href="site-nav.css">
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #1d2b3a;
+            --muted: #586a7d;
+            --blue: #286da8;
+            --blue-dark: #1d527f;
+            --panel: #fff;
+            --green: #23804d;
+            --red: #b13d4c;
+        }
+        * { box-sizing: border-box; }
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(145deg, #eaf3fb, #f8f2df);
+            color: var(--ink);
+            font-family: system-ui, sans-serif;
+        }
+        button, input, select { font: inherit; }
+        button { cursor: pointer; touch-action: manipulation; }
+        button:focus-visible, input:focus-visible, select:focus-visible {
+            outline: 3px solid #e58b48;
+            outline-offset: 3px;
+        }
+        .page { width: min(940px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 48px; }
+        .card {
+            border: 1px solid #d5e0e9;
+            border-radius: 20px;
+            padding: clamp(20px, 5vw, 40px);
+            background: var(--panel);
+            box-shadow: 0 14px 40px #17345118;
+        }
+        h1, h2, p { margin-top: 0; }
+        h1 { margin-bottom: 8px; font-size: clamp(30px, 6vw, 44px); letter-spacing: -.04em; }
+        h2 { font-size: clamp(23px, 4vw, 32px); }
+        .intro, .help { color: var(--muted); line-height: 1.55; }
+        .setup-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .field { display: grid; gap: 7px; font-weight: 700; }
+        .field input, .field select {
+            width: 100%;
+            min-height: 48px;
+            border: 1px solid #aebdcb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #fff;
+            color: var(--ink);
+        }
+        .primary, .secondary {
+            min-height: 46px;
+            border: 0;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-weight: 800;
+        }
+        .primary { color: #fff; background: var(--blue); }
+        .primary:hover { background: var(--blue-dark); }
+        .secondary { border: 1px solid #b9ccdc; color: var(--blue-dark); background: #eff6fc; }
+        .setup-submit { width: 100%; margin-top: 20px; }
+        .error { min-height: 1.5em; margin: 12px 0 0; color: var(--red); }
+        [hidden] { display: none !important; }
+        .game-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+        .game-top p { margin: 0; }
+        .prompt-box {
+            margin: 0 0 20px;
+            border-radius: 16px;
+            padding: clamp(18px, 4vw, 28px);
+            background: #edf5fc;
+            text-align: center;
+        }
+        .eyebrow {
+            margin-bottom: 8px;
+            color: var(--blue-dark);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+        .english-sentence {
+            margin: 0;
+            font-size: clamp(24px, 5vw, 36px);
+            font-weight: 800;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+        .section-label { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
+        .answer-row, .word-bank {
+            display: flex;
+            min-height: 58px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 12px;
+            padding: 10px;
+        }
+        .answer-row { border: 2px dashed #b9c9d7; background: #f8fbfd; }
+        .word-bank { margin-top: 10px; }
+        .word-tile {
+            min-height: 44px;
+            border: 1px solid #aac2d7;
+            border-radius: 9px;
+            padding: 8px 13px;
+            color: #173d5e;
+            background: #eaf4fc;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+        .word-tile:hover:not(:disabled) { background: #d7eafb; }
+        .word-tile:disabled { cursor: default; opacity: .38; }
+        .answer-tile { border-color: #9dc9aa; color: #215b36; background: #e9f6ec; }
+        .answer-tile:disabled { opacity: 1; }
+        .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 16px; }
+        .controls button { min-width: 140px; }
+        .feedback { min-height: 26px; margin: 14px 0 0; text-align: center; font-weight: 800; }
+        .feedback.success { color: var(--green); }
+        .feedback.incorrect { color: var(--red); }
+        .certificate { border: 8px double #c49a43; background: #fffdf5; text-align: center; }
+        .certificate h2 { color: #8b6820; font-family: Georgia, serif; }
+        .certificate-name {
+            margin: 10px 0;
+            color: #243f66;
+            font-family: Georgia, serif;
+            font-size: clamp(32px, 8vw, 58px);
+            overflow-wrap: anywhere;
+        }
+        .certificate-score { color: var(--green); font-size: clamp(30px, 7vw, 48px); font-weight: 900; }
+        .certificate-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+        @media (max-width: 600px) {
+            .page { width: min(100% - 20px, 940px); padding: 14px 0 28px; }
+            .setup-grid { grid-template-columns: 1fr; gap: 12px; }
+            .game-top { align-items: flex-start; flex-direction: column; }
+            .controls { flex-direction: column; }
+            .controls button { width: 100%; }
+        }
+        @media print {
+            body * { visibility: hidden !important; }
+            #certificate-screen, #certificate-screen * { visibility: visible !important; }
+            #certificate-screen { position: absolute; inset: 0; display: grid !important; place-items: center; padding: 20px; background: #fff; }
+            .certificate-actions { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="lz-site-header">
+        <a class="lz-site-brand" href="index.html">Longmore Zone</a>
+        <nav class="lz-site-nav" aria-label="Website navigation">
+            <a href="index.html">Home</a>
+            <a href="asl_anchor.html">Practice</a>
+            <a href="buttonboard.html">Vocabulary</a>
+            <a href="longbot.html">Word Search</a>
+            <a href="fstool.html">Fingerspelling</a>
+            <a href="updates.html">Updates</a>
+            <a href="roadmap.html">Roadmap</a>
+        </nav>
+    </header>
+
+    <main class="page">
+        <section id="setup-screen" class="card" aria-labelledby="page-title">
+            <p class="eyebrow">ASL vocabulary practice</p>
+            <h1 id="page-title">ASL Sentence Builder</h1>
+            <p class="intro">Read the English sentence, then tap the words to build its ASL gloss in order. Each answer is scored once.</p>
+            <form id="setup-form">
+                <div class="setup-grid">
+                    <label class="field" for="player-name">Your name
+                        <input id="player-name" name="name" type="text" maxlength="60" autocomplete="name" required>
+                    </label>
+                    <label class="field" for="topic-select">Vocabulary topic
+                        <select id="topic-select" name="topic" required disabled>
+                            <option value="">Loading topics…</option>
+                        </select>
+                    </label>
+                </div>
+                <button id="start-button" class="primary setup-submit" type="submit" disabled>Start game</button>
+                <p id="setup-error" class="error" role="alert"></p>
+            </form>
+        </section>
+
+        <section id="game-screen" class="card" aria-labelledby="game-title" hidden>
+            <div class="game-top">
+                <p id="game-title"></p>
+                <p id="progress-label" aria-live="polite"></p>
+            </div>
+            <div class="prompt-box">
+                <p class="eyebrow">Build the ASL gloss for this sentence</p>
+                <p id="english-sentence" class="english-sentence"></p>
+            </div>
+            <p class="section-label">Your ASL gloss (tap a word to remove it)</p>
+            <div id="answer-row" class="answer-row" aria-label="Your answer"></div>
+            <p class="section-label">Word bank</p>
+            <div id="word-bank" class="word-bank" aria-label="Available words"></div>
+            <div class="controls">
+                <button id="clear-button" class="secondary" type="button">Clear answer</button>
+                <button id="check-button" class="primary" type="button">Check answer</button>
+                <button id="next-button" class="primary" type="button" hidden>Next sentence</button>
+            </div>
+            <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+        </section>
+
+        <section id="certificate-screen" class="card certificate" aria-labelledby="certificate-title" hidden>
+            <p class="eyebrow">Longmore Zone</p>
+            <h2 id="certificate-title">Certificate of Achievement</h2>
+            <p>This certificate is proudly presented to</p>
+            <p id="certificate-name" class="certificate-name"></p>
+            <p>for completing the ASL Sentence Builder topic<br><strong id="certificate-topic"></strong></p>
+            <p id="certificate-score" class="certificate-score"></p>
+            <p id="certificate-detail"></p>
+            <p>Great work practicing ASL gloss word order!</p>
+            <div class="certificate-actions">
+                <button id="print-button" class="secondary" type="button">Print certificate</button>
+                <button id="play-again-button" class="primary" type="button">Choose another topic</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const FILLER_WORDS = ['I', 'YOU', 'WANT', 'LIKE', 'HAVE', 'SEE', 'GO', 'PLEASE', 'TODAY', 'SIGN', 'KNOW'];
+        const ROUND_SIZE = 10;
+        const el = (selector) => document.querySelector(selector);
+        const ui = {
+            setup: el('#setup-screen'),
+            form: el('#setup-form'),
+            name: el('#player-name'),
+            topic: el('#topic-select'),
+            start: el('#start-button'),
+            setupError: el('#setup-error'),
+            game: el('#game-screen'),
+            gameTitle: el('#game-title'),
+            progress: el('#progress-label'),
+            sentence: el('#english-sentence'),
+            answer: el('#answer-row'),
+            bank: el('#word-bank'),
+            feedback: el('#feedback'),
+            clear: el('#clear-button'),
+            check: el('#check-button'),
+            next: el('#next-button'),
+            certificate: el('#certificate-screen'),
+            certificateName: el('#certificate-name'),
+            certificateTopic: el('#certificate-topic'),
+            certificateScore: el('#certificate-score'),
+            certificateDetail: el('#certificate-detail')
+        };
+        let vocabulary = {};
+        let round = [];
+        let playerName = '';
+        let activeTopic = '';
+        let questionIndex = 0;
+        let correctAnswers = 0;
+        let answered = false;
+        let selectedTiles = [];
+
+        function shuffle(items) {
+            const result = [...items];
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            return result;
+        }
+
+        function vocabularyTerms(topic) {
+            const questions = topic.questions;
+            if (!Array.isArray(questions)) return [];
+            const terms = questions.flatMap((question) => {
+                const options = question?.options;
+                const correct = question?.correct;
+                if (!Array.isArray(options) || !Number.isInteger(correct) || correct < 0 || correct >= options.length) return [];
+                const term = options[correct];
+                return typeof term === 'string' && term.trim() ? [term.trim()] : [];
+            });
+            return [...new Map(terms.map((term) => [term.toLocaleUpperCase(), term])).values()];
+        }
+
+        function glossTokens(term, topicKey) {
+            if (topicKey === 'Classifiers') return [term.toLocaleUpperCase()];
+            return term.trim().toLocaleUpperCase().split(/\s+/);
+        }
+
+        function englishTerm(term) {
+            return term
+                .replace(/^#/, '')
+                .replace(/[-_]+/g, ' ')
+                .replace(/\//g, ' or ')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toLocaleLowerCase();
+        }
+
+        function sentenceFor(topicKey, term) {
+            const word = englishTerm(term);
+            const target = glossTokens(term, topicKey);
+            if (topicKey === 'Fingerspelling') return { english: `Spell the letter ${word}.`, gloss: ['SPELL', 'LETTER', ...target] };
+            if (topicKey.startsWith('Numbers ')) return { english: `Show me the number ${word}.`, gloss: ['SHOW-ME', 'NUMBER', ...target] };
+            if (topicKey === 'Days of the Week') return { english: `Today is ${word}.`, gloss: ['TODAY', ...target] };
+            if (topicKey === 'Time') return { english: `The time is ${word}.`, gloss: ['TIME', ...target] };
+            if (topicKey === 'Weather') return { english: `It is ${word} today.`, gloss: [...target, 'TODAY'] };
+            if (topicKey === 'Colors') return { english: `The color is ${word}.`, gloss: ['COLOR', ...target] };
+            if (topicKey === 'Descriptions') return { english: `The person is ${word}.`, gloss: ['PERSON', ...target] };
+            if (topicKey === 'Money') return { english: `I have ${word}.`, gloss: ['I', 'HAVE', ...target] };
+            if (topicKey.startsWith('House ') || topicKey === 'Locations') return { english: `I go to ${word}.`, gloss: ['I', 'GO', ...target] };
+            if (topicKey === 'Clothing' || topicKey === 'Accessories' || topicKey === 'General and Patterns') {
+                return { english: `I wear ${word}.`, gloss: ['I', 'WEAR', ...target] };
+            }
+            if (topicKey === 'Pronouns and Family' || topicKey === 'School' || topicKey === 'Ordering & Feelings') {
+                return { english: `I know the sign for “${term}.”`, gloss: ['I', 'KNOW', 'SIGN', ...target] };
+            }
+            if (['Drinks', 'Breakfast', 'Lunch + Dinner', 'Meats & Seafood', 'Desserts & Sweets', 'Fruits', 'Vegetables', 'Dairy', 'Condiments'].includes(topicKey)) {
+                return { english: `I want ${word}.`, gloss: ['I', 'WANT', ...target] };
+            }
+            if (['Classes', 'Sports'].includes(topicKey)) return { english: `I like ${word}.`, gloss: ['I', 'LIKE', ...target] };
+            if (['Directions', 'Directional Verbs', 'Noun-Verb Pairs', 'Classifiers'].includes(topicKey)) {
+                return { english: `Sign the word “${term}.”`, gloss: ['SIGN', ...target] };
+            }
+            return { english: `I see ${word}.`, gloss: ['I', 'SEE', ...target] };
+        }
+
+        function makeRound(topicKey) {
+            const terms = vocabularyTerms(vocabulary[topicKey]);
+            if (!terms.length) throw new Error('This topic does not have any usable vocabulary answers.');
+            return shuffle(terms).slice(0, ROUND_SIZE).map((term) => {
+                const sentence = sentenceFor(topicKey, term);
+                const distractors = shuffle(FILLER_WORDS.filter((word) => !sentence.gloss.includes(word))).slice(0, 3);
+                const bank = shuffle([
+                    ...sentence.gloss.map((word, index) => ({ id: `answer-${index}`, word })),
+                    ...distractors.map((word, index) => ({ id: `filler-${index}`, word }))
+                ]);
+                return { term, ...sentence, bank };
+            });
+        }
+
+        function updateProgress() {
+            const completed = Math.min(questionIndex, round.length);
+            const sentenceLabel = completed === round.length
+                ? `Completed ${round.length} sentences`
+                : `Sentence ${completed + 1} of ${round.length}`;
+            const accuracy = completed ? Math.round(correctAnswers / completed * 100) : 0;
+            ui.progress.textContent = `${sentenceLabel} · Accuracy ${accuracy}%`;
+        }
+
+        function renderQuestion() {
+            const question = round[questionIndex];
+            answered = false;
+            selectedTiles = [];
+            ui.gameTitle.textContent = `Topic: ${vocabulary[activeTopic].title || activeTopic}`;
+            ui.sentence.textContent = question.english;
+            ui.feedback.textContent = '';
+            ui.feedback.className = 'feedback';
+            ui.check.hidden = false;
+            ui.next.hidden = true;
+            ui.clear.disabled = false;
+            updateProgress();
+            renderTiles();
+        }
+
+        function renderTiles() {
+            const question = round[questionIndex];
+            ui.answer.replaceChildren();
+            ui.bank.replaceChildren();
+            selectedTiles.forEach((tile, position) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'word-tile answer-tile';
+                button.textContent = tile.word;
+                button.disabled = answered;
+                button.setAttribute('aria-label', `Remove ${tile.word} from answer`);
+                button.addEventListener('click', () => {
+                    if (answered) return;
+                    selectedTiles.splice(position, 1);
+                    renderTiles();
+                });
+                ui.answer.append(button);
+            });
+            question.bank.forEach((tile) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'word-tile';
+                button.textContent = tile.word;
+                button.disabled = answered || selectedTiles.some((selected) => selected.id === tile.id);
+                button.addEventListener('click', () => {
+                    if (answered) return;
+                    selectedTiles.push(tile);
+                    renderTiles();
+                });
+                ui.bank.append(button);
+            });
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+            const expected = round[questionIndex].gloss;
+            if (selectedTiles.length !== expected.length) {
+                ui.feedback.textContent = `Choose all ${expected.length} words before checking.`;
+                ui.feedback.className = 'feedback';
+                return;
+            }
+            answered = true;
+            const isCorrect = selectedTiles.every((tile, index) => tile.word === expected[index]);
+            if (isCorrect) correctAnswers++;
+            ui.feedback.textContent = isCorrect
+                ? 'Correct! Great ASL gloss word order.'
+                : `Not quite. The correct gloss is: ${expected.join(' ')}.`;
+            ui.feedback.className = `feedback ${isCorrect ? 'success' : 'incorrect'}`;
+            ui.check.hidden = true;
+            ui.next.hidden = false;
+            ui.clear.disabled = true;
+            renderTiles();
+            questionIndex++;
+            updateProgress();
+        }
+
+        function showCertificate() {
+            const accuracy = Math.round(correctAnswers / round.length * 100);
+            ui.game.hidden = true;
+            ui.certificate.hidden = false;
+            ui.certificateName.textContent = playerName;
+            ui.certificateTopic.textContent = vocabulary[activeTopic].title || activeTopic;
+            ui.certificateScore.textContent = `${accuracy}% accuracy`;
+            ui.certificateDetail.textContent = `${correctAnswers} correct out of ${round.length} sentences`;
+        }
+
+        ui.form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const name = ui.name.value.trim();
+            const topicKey = ui.topic.value;
+            if (!name || !topicKey || !vocabulary[topicKey]) return;
+            try {
+                round = makeRound(topicKey);
+            } catch (error) {
+                ui.setupError.textContent = error.message;
+                return;
+            }
+            playerName = name;
+            activeTopic = topicKey;
+            questionIndex = 0;
+            correctAnswers = 0;
+            ui.setup.hidden = true;
+            ui.certificate.hidden = true;
+            ui.game.hidden = false;
+            renderQuestion();
+        });
+
+        ui.clear.addEventListener('click', () => {
+            if (answered) return;
+            selectedTiles = [];
+            renderTiles();
+        });
+        ui.check.addEventListener('click', checkAnswer);
+        ui.next.addEventListener('click', () => {
+            if (questionIndex >= round.length) showCertificate();
+            else renderQuestion();
+        });
+        el('#print-button').addEventListener('click', () => window.print());
+        el('#play-again-button').addEventListener('click', () => {
+            ui.certificate.hidden = true;
+            ui.setup.hidden = false;
+            ui.setupError.textContent = '';
+            ui.name.focus();
+        });
+
+        async function loadTopics() {
+            try {
+                const response = await fetch('vocab.json');
+                if (!response.ok) throw new Error(`Vocabulary request failed with status ${response.status}.`);
+                const data = await response.json();
+                if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Vocabulary data has an unexpected format.');
+                vocabulary = data;
+                const available = Object.entries(vocabulary)
+                    .filter(([, topic]) => vocabularyTerms(topic).length > 0);
+                if (!available.length) throw new Error('No topics with usable vocabulary answers were found.');
+                ui.topic.replaceChildren();
+                available.forEach(([key, topic]) => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = topic.title || key;
+                    ui.topic.append(option);
+                });
+                ui.topic.disabled = false;
+                ui.start.disabled = false;
+            } catch (error) {
+                ui.topic.replaceChildren(new Option('Topics unavailable', ''));
+                ui.setupError.textContent = `Could not load the vocabulary topics: ${error.message}`;
+            }
+        }
+
+        loadTopics();
+    </script>
+</body>
+</html>

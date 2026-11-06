@@ -20,6 +20,7 @@ const games = [
     { title: 'ASL Vocab Sorting', description: 'Sort vocabulary into the right groups.', url: 'longmore_zone_games/crates.html', icon: '🗂️', tags: ['VOCAB', 'PUZZLE'] },
     { title: 'ASL Word Search', description: 'Find vocabulary by selecting words in the letter grid.', url: 'longmore_zone_games/asl_word_search.html', icon: '🔎', tags: ['VOCAB', 'WORD SEARCH', 'PUZZLE'] },
     { title: 'ASL Word Builder', description: 'Build vocabulary words in this word puzzle.', url: 'longmore_zone_games/asl_word_unscramble.html', icon: '🔤', tags: ['VOCAB', 'PUZZLE'] },
+    { title: 'ASL Sentence Builder', description: 'Build ASL gloss sentences in the right word order using vocabulary from every topic.', url: 'asl_sentence_builder.html', icon: '🧩', tags: ['VOCAB', 'SENTENCE', 'PRACTICE'] },
     { title: 'Fingerspelling Challenge', description: 'Watch a word signed and type what you see.', url: 'longmore_zone_games/fingerspelling_tool.html', icon: '🤟', tags: ['FINGERSPELLING', 'QUIZ'] },
     { title: 'FStool Fingerspelling', description: 'Practice fingerspelling with live hand tracking, a score goal, and a printable certificate.', url: 'fstool.html', icon: '🤟', tags: ['FINGERSPELLING', 'PRACTICE'], type: 'tool' },
     { title: 'ASL Anchor', description: 'Choose vocabulary topics, take a quiz, and see your results.', url: 'asl_anchor.html', icon: '⚓', tags: ['VOCAB', 'QUIZ'] },
