@@ -23,3 +23,9 @@ The trainer excludes J, R, and Z, and uses a deterministic, label-stratified hol
 The dataset contains one 63-feature landmark frame per sample, not labeled motion sequences. The model therefore recognizes static handshapes; adding movement-based letters requires labeled sequences from different signers and hands at varied signing speeds. The practice word bank uses only letters in the trained model.
 
 FStool practice asks for a learner name and a word goal, tracks correctly completed words, and provides a printable certificate when the goal is reached.
+
+## Eyebrow practice
+
+[`eyebrowstool.html`](eyebrowstool.html) uses MediaPipe Face Landmarker blendshapes to recognize raised and furrowed eyebrows in the browser. Learners calibrate a neutral expression first, enter their name, and choose a sentence goal. Each sentence stays on screen until the requested expression is held; incorrect movements do not count as a mistake or reduce the score. Reaching the goal earns a printable certificate. Camera frames are processed in the browser and are not uploaded by this page.
+
+[`eyebrow-sentences.js`](eyebrow-sentences.js) is the shared sentence list used by both [`eyebrows.html`](eyebrows.html) and the practice tool. The pretrained MediaPipe model is general facial-expression technology, not an ASL-specific eyebrow dataset; model and library assets are provided by Google MediaPipe.

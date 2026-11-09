@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1e1e1e">
+    <title>Eyebrow Practice Tool | Longmore Zone</title>
+    <link rel="stylesheet" href="site-nav.css">
+    <style>
+        :root { color-scheme: dark; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background: #1e1e1e;
+            color: #fff;
+            font: 16px/1.5 system-ui, sans-serif;
+        }
+        .lz-site-header { width: 100%; box-sizing: border-box; }
+        main {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(300px, 0.95fr);
+            gap: 16px;
+            width: min(1200px, 100%);
+            margin: 0 auto;
+            padding: 18px;
+            box-sizing: border-box;
+        }
+        .panel {
+            min-width: 0;
+            padding: clamp(16px, 2vw, 24px);
+            border: 1px solid #444;
+            border-radius: 12px;
+            background: #303030;
+        }
+        h1, h2, p { margin-top: 0; }
+        h1 { margin-bottom: 4px; font-size: clamp(1.6rem, 3vw, 2.2rem); }
+        h2 { margin-bottom: 8px; font-size: 1.25rem; }
+        .subheading, .muted { color: #c9c9c9; }
+        .sentence-card {
+            display: grid;
+            gap: 6px;
+            margin: 18px 0;
+            padding: 18px;
+            border: 2px solid #5978dc;
+            border-radius: 12px;
+            background: #202b49;
+            text-align: center;
+        }
+        .sentence-card .gloss {
+            font-size: clamp(1.35rem, 3.5vw, 2rem);
+            font-weight: 800;
+            letter-spacing: .025em;
+        }
+        .sentence-card .translation { color: #d3d9ec; font-style: italic; }
+        .target {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            color: #ffe28a;
+            font-weight: 800;
+        }
+        .counter { font-size: 1.15rem; font-weight: 700; }
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+        .setup-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 18px;
+        }
+        .setup-fields label { display: grid; flex: 1 1 220px; gap: 6px; font-weight: 700; }
+        .setup-fields input, .setup-fields select {
+            min-height: 44px;
+            padding: 8px 10px;
+            border: 1px solid #777;
+            border-radius: 7px;
+            background: #202020;
+            color: white;
+            font: inherit;
+        }
+        .certificate {
+            grid-column: 1 / -1;
+            width: min(900px, 100%);
+            justify-self: center;
+            margin: 0;
+            padding: clamp(24px, 6vw, 56px);
+            box-sizing: border-box;
+            border: 8px double #c49a43;
+            background: #fffdf5;
+            color: #252525;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+        .certificate h2 { color: #8b6820; font-size: clamp(2rem, 6vw, 3.5rem); margin: .5rem 0 1.5rem; }
+        .certificate-name {
+            margin: 1rem 0;
+            color: #243f66;
+            font-family: Georgia, serif;
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            overflow-wrap: anywhere;
+        }
+        .certificate button { margin: 1.5rem 8px 0; }
+        body.certificate-mode main {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: none;
+            padding: clamp(16px, 5vw, 56px);
+        }
+        body.certificate-mode > .lz-site-header,
+        body.certificate-mode > footer,
+        body.certificate-mode main > *:not(#certificate) { display: none; }
+        body.certificate-mode #certificate:not([hidden]) { display: block; }
+        button {
+            min-height: 44px;
+            padding: 9px 14px;
+            border: 0;
+            border-radius: 7px;
+            background: #4479d8;
+            color: white;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        button:hover:not(:disabled) { background: #588ce8; }
+        button:focus-visible { outline: 3px solid #ffd166; outline-offset: 2px; }
+        button:disabled { cursor: not-allowed; opacity: .5; }
+        button.secondary { background: #4a4a4a; }
+        button.secondary:hover:not(:disabled) { background: #5b5b5b; }
+        .camera-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #080808;
+        }
+        video, canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1);
+        }
+        canvas { pointer-events: none; }
+        .status-box {
+            min-height: 3.1em;
+            margin: 14px 0 0;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #202020;
+        }
+        .state { color: #a9d8ff; font-weight: 800; }
+        .privacy, .attribution { font-size: .88rem; color: #c9c9c9; }
+        .privacy { margin-top: 16px; }
+        footer {
+            width: min(1200px, 100%);
+            margin: 0 auto;
+            padding: 0 18px 24px;
+            box-sizing: border-box;
+        }
+        a { color: #a9c5ff; }
+        @media (max-width: 760px) {
+            main { grid-template-columns: 1fr; padding: 12px; }
+            .camera-panel { grid-row: 1; }
+            footer { padding-inline: 12px; }
+        }
+        @media print {
+            @page { margin: 1.5cm; }
+            body { display: block; margin: 0; background: white; color: #252525; }
+            body > *:not(main) { display: none !important; }
+            main { display: block !important; width: 100%; padding: 0; }
+            main > *:not(#certificate) { display: none !important; }
+            #certificate:not([hidden]) {
+                display: block !important;
+                width: 100%;
+                margin: 0;
+                padding: 2cm 1cm;
+                border: 8px double #c49a43;
+                print-color-adjust: exact;
+            }
+            #certificate button { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="lz-site-header">
+        <a class="lz-site-brand" href="index.html">Longmore Zone</a>
+        <nav class="lz-site-nav" aria-label="Website navigation">
+            <a href="index.html">Home</a>
+            <a href="asl_anchor.html">Practice</a>
+            <a href="buttonboard.html">Vocabulary</a>
+            <a href="longbot.html">Word Search</a>
+            <a href="fstool.html">Fingerspelling</a>
+            <a href="eyebrowstool.html" aria-current="page">Eyebrow Practice</a>
+            <a href="updates.html">Updates</a>
+            <a href="roadmap.html">Roadmap</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="panel" aria-labelledby="page-title">
+            <h1 id="page-title">Eyebrow Practice</h1>
+            <p class="subheading">Match the eyebrow movement for each sentence. Take your time: the sentence stays up until the camera recognizes the requested expression.</p>
+
+            <div class="sentence-card" aria-live="polite">
+                <span id="sentence-number" class="muted">Ready when you are</span>
+                <span id="sentence-gloss" class="gloss">Enable the camera to begin</span>
+                <span id="sentence-translation" class="translation"></span>
+                <span id="sentence-target" class="target"></span>
+            </div>
+
+            <p id="practice-status" class="status-box" role="status" aria-live="polite">Enable your camera, look toward it with a neutral expression, and calibrate before starting.</p>
+            <p>Camera reading: <span id="expression-state" class="state" aria-live="polite">Not active</span></p>
+            <p class="counter">Sentences completed: <span id="score">0</span> / <span id="sentence-goal-display">10</span></p>
+
+            <div class="controls">
+                <button id="enable-camera" type="button">Enable camera</button>
+                <button id="calibrate" class="secondary" type="button" disabled>Calibrate neutral eyebrows</button>
+            </div>
+
+            <form id="practice-setup">
+                <div class="setup-fields">
+                    <label for="learner-name">Your name
+                        <input id="learner-name" name="name" type="text" maxlength="60" autocomplete="name" required>
+                    </label>
+                    <label for="sentence-goal">Sentences to complete for your certificate
+                        <select id="sentence-goal" name="sentenceGoal">
+                            <option value="5">5 sentences</option>
+                            <option value="10" selected>10 sentences</option>
+                            <option value="15">15 sentences</option>
+                            <option value="20">20 sentences</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="controls">
+                    <button id="start-practice" type="submit" disabled>Start practice</button>
+                </div>
+            </form>
+
+            <p class="muted">Calibration takes about a second. Hold a relaxed, neutral face during calibration. Once practice starts, keep trying each sentence without returning to neutral; a hint appears after about 10 seconds.</p>
+            <p class="privacy">Your camera video is processed in this browser and is not uploaded by this page. The face-tracking library and model are downloaded from Google’s MediaPipe CDN.</p>
+        </section>
+
+        <section class="panel camera-panel" aria-label="Live camera preview">
+            <h2>Live preview</h2>
+            <div class="camera-frame">
+                <video id="webcam" autoplay muted playsinline aria-label="Mirrored webcam preview"></video>
+                <canvas id="face-overlay" aria-hidden="true"></canvas>
+            </div>
+            <p id="camera-status" class="status-box" role="status" aria-live="polite">Camera is off.</p>
+        </section>
+
+        <section id="certificate" class="certificate" aria-labelledby="certificate-title" hidden>
+            <p>Longmore Zone</p>
+            <h2 id="certificate-title">Certificate of Achievement</h2>
+            <p>This certificate is proudly presented to</p>
+            <p id="certificate-name" class="certificate-name"></p>
+            <p>for successfully completing <strong id="certificate-score"></strong> eyebrow practice sentences.</p>
+            <p id="certificate-date"></p>
+            <button id="play-again" type="button">Play again</button>
+            <button id="print-certificate" type="button">Print or save certificate</button>
+        </section>
+    </main>
+
+    <footer>
+        <p class="attribution">
+            Sentence examples and grammar categories are shared with the
+            <a href="eyebrows.html">Eyebrow Grammar Challenge</a>.
+            Face tracking uses
+            <a href="https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker">MediaPipe Face Landmarker</a>
+            and its pretrained blendshape model; it is not trained on an ASL eyebrow-expression dataset.
+        </p>
+    </footer>
+
+    <script src="eyebrow-sentences.js"></script>
+    <script type="module">
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('face-overlay');
+        const context = canvas.getContext('2d');
+        const cameraStatus = document.getElementById('camera-status');
+        const practiceStatus = document.getElementById('practice-status');
+        const expressionState = document.getElementById('expression-state');
+        const enableCameraButton = document.getElementById('enable-camera');
+        const calibrateButton = document.getElementById('calibrate');
+        const practiceSetup = document.getElementById('practice-setup');
+        const learnerNameInput = document.getElementById('learner-name');
+        const sentenceGoalSelect = document.getElementById('sentence-goal');
+        const startPracticeButton = document.getElementById('start-practice');
+        const certificate = document.getElementById('certificate');
+        const certificateName = document.getElementById('certificate-name');
+        const certificateScore = document.getElementById('certificate-score');
+        const certificateDate = document.getElementById('certificate-date');
+        const playAgainButton = document.getElementById('play-again');
+        const printCertificateButton = document.getElementById('print-certificate');
+        const sentenceNumber = document.getElementById('sentence-number');
+        const sentenceGloss = document.getElementById('sentence-gloss');
+        const sentenceTranslation = document.getElementById('sentence-translation');
+        const sentenceTarget = document.getElementById('sentence-target');
+        const scoreDisplay = document.getElementById('score');
+        const sentenceGoalDisplay = document.getElementById('sentence-goal-display');
+        const eyebrowSentences = window.ASL_EYEBROW_SENTENCES;
+
+        const RAISE_THRESHOLD = 0.08;
+        const LOWER_THRESHOLD = 0.08;
+        const NEUTRAL_THRESHOLD = 0.07;
+        const HOLD_DURATION_MS = 700;
+        const HINT_DELAY_MS = 10000;
+        const CALIBRATION_DURATION_MS = 1200;
+        const MIN_CALIBRATION_SAMPLES = 12;
+        const EYEBROW_LANDMARKS = [70, 63, 105, 66, 107, 336, 296, 334, 293, 300];
+
+        let FaceLandmarker;
+        let FilesetResolver;
+        let faceLandmarker;
+        let cameraStream;
+        let latestFeatures;
+        let neutralBaseline;
+        let calibrationStartedAt = 0;
+        let calibrationSamples = [];
+        let practiceActive = false;
+        let currentQuestion;
+        let previousQuestion;
+        let learnerName = '';
+        let score = 0;
+        let sentenceGoal = Number(sentenceGoalSelect.value);
+        let matchSince = 0;
+        let advanceTimeout;
+        let hintTimeout;
+        let hintShown = false;
+        let frameRequest;
+
+        function setCameraStatus(message) {
+            cameraStatus.textContent = message;
+        }
+
+        function setPracticeStatus(message) {
+            practiceStatus.textContent = message;
+        }
+
+        function blendshapeScore(categories, name) {
+            const category = categories.find(item => item.categoryName === name);
+            if (!category || !Number.isFinite(category.score)) {
+                throw new Error(`Face model output is missing the ${name} eyebrow blendshape.`);
+            }
+            return category.score;
+        }
+
+        function readFeatures(categories) {
+            const innerUp = blendshapeScore(categories, 'browInnerUp');
+            const outerUpLeft = blendshapeScore(categories, 'browOuterUpLeft');
+            const outerUpRight = blendshapeScore(categories, 'browOuterUpRight');
+            const downLeft = blendshapeScore(categories, 'browDownLeft');
+            const downRight = blendshapeScore(categories, 'browDownRight');
+
+            return {
+                up: (innerUp + outerUpLeft + outerUpRight) / 3,
+                down: (downLeft + downRight) / 2
+            };
+        }
+
+        function expressionFor(features) {
+            if (!neutralBaseline) return 'Neutral';
+            const upDelta = features.up - neutralBaseline.up;
+            const downDelta = features.down - neutralBaseline.down;
+            const raised = upDelta >= RAISE_THRESHOLD && upDelta > downDelta;
+            const lowered = downDelta >= LOWER_THRESHOLD && downDelta > upDelta;
+
+            if (raised) return 'Raised';
+            if (lowered) return 'Furrowed';
+            if (Math.abs(upDelta) < NEUTRAL_THRESHOLD && Math.abs(downDelta) < NEUTRAL_THRESHOLD) {
+                return 'Neutral';
+            }
+            return 'Changing';
+        }
+
+        function expectedExpression(question) {
+            return question.type === 'YN' ? 'Raised' : 'Furrowed';
+        }
+
+        function drawEyebrowLandmarks(landmarks) {
+            if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = '#6effa8';
+            for (const index of EYEBROW_LANDMARKS) {
+                const landmark = landmarks[index];
+                if (!landmark) continue;
+                context.beginPath();
+                context.arc(landmark.x * canvas.width, landmark.y * canvas.height, 3.5, 0, Math.PI * 2);
+                context.fill();
+            }
+        }
+
+        function finishCalibration() {
+            const count = calibrationSamples.length;
+            if (count < MIN_CALIBRATION_SAMPLES) {
+                calibrationSamples = [];
+                calibrationStartedAt = 0;
+                calibrateButton.disabled = false;
+                calibrateButton.textContent = 'Calibrate neutral eyebrows';
+                setPracticeStatus('I could not collect enough face frames. Keep your face visible and try calibrating again.');
+                return;
+            }
+
+            neutralBaseline = calibrationSamples.reduce((average, sample) => ({
+                up: average.up + sample.up / count,
+                down: average.down + sample.down / count
+            }), { up: 0, down: 0 });
+            calibrationSamples = [];
+            calibrationStartedAt = 0;
+            calibrateButton.disabled = false;
+            calibrateButton.textContent = 'Recalibrate neutral eyebrows';
+            startPracticeButton.disabled = false;
+            setPracticeStatus('Neutral calibration complete. Start practice when you are ready.');
+        }
+
+        function updateCalibration(features, now) {
+            if (!calibrationStartedAt) return;
+            calibrationSamples.push(features);
+            if (now - calibrationStartedAt >= CALIBRATION_DURATION_MS) finishCalibration();
+        }
+
+        function chooseQuestion() {
+            const available = eyebrowSentences.filter(question => question !== previousQuestion);
+            currentQuestion = available[Math.floor(Math.random() * available.length)];
+            previousQuestion = currentQuestion;
+            sentenceGloss.textContent = currentQuestion.gloss;
+            sentenceTranslation.textContent = `"${currentQuestion.translation}"`;
+            sentenceTarget.textContent = 'A hint will appear after about 10 seconds.';
+            sentenceNumber.textContent = `Sentence ${score + 1}`;
+            matchSince = 0;
+            hintShown = false;
+            window.clearTimeout(hintTimeout);
+            hintTimeout = window.setTimeout(() => {
+                const target = expectedExpression(currentQuestion);
+                sentenceTarget.textContent = target === 'Raised'
+                    ? 'Hint: Raise your eyebrows'
+                    : 'Hint: Furrow your eyebrows';
+                hintShown = true;
+            }, HINT_DELAY_MS);
+        }
+
+        function completeQuestion() {
+            practiceActive = false;
+            matchSince = 0;
+            window.clearTimeout(hintTimeout);
+            score += 1;
+            scoreDisplay.textContent = String(score);
+            if (score >= sentenceGoal) {
+                certificateName.textContent = learnerName;
+                certificateScore.textContent = String(score);
+                certificateDate.textContent = new Date().toLocaleDateString();
+                certificate.hidden = false;
+                document.body.classList.add('certificate-mode');
+                setPracticeStatus(`Goal reached! Congratulations, ${learnerName}.`);
+                return;
+            }
+            setPracticeStatus('That’s it! Correct expression recognized. Getting your next sentence…');
+            advanceTimeout = window.setTimeout(() => {
+                chooseQuestion();
+                practiceActive = true;
+                setPracticeStatus('Match the sentence with your eyebrows and hold the expression. Incorrect attempts do not count against you.');
+            }, 900);
+        }
+
+        function updatePractice(expression, now) {
+            if (!practiceActive || !currentQuestion) return;
+
+            const expected = expectedExpression(currentQuestion);
+            if (expression === expected) {
+                if (!matchSince) matchSince = now;
+                const heldFor = now - matchSince;
+                const progress = `${Math.min(100, Math.round(heldFor / HOLD_DURATION_MS * 100))}%`;
+                setPracticeStatus(hintShown
+                    ? `Good — keep your eyebrows ${expected === 'Raised' ? 'raised' : 'furrowed'}… ${progress}`
+                    : `Good — hold that expression… ${progress}`);
+                if (heldFor >= HOLD_DURATION_MS) completeQuestion();
+            } else {
+                matchSince = 0;
+                setPracticeStatus(hintShown
+                    ? `Waiting for ${expected === 'Raised' ? 'raised' : 'furrowed'} eyebrows. No penalty — try again when ready.`
+                    : 'Not quite yet. Keep trying — incorrect attempts do not count against you.');
+            }
+        }
+
+        function handleTrackingError(error) {
+            cancelAnimationFrame(frameRequest);
+            practiceActive = false;
+            setCameraStatus(`Face tracking stopped: ${error.message}`);
+            setPracticeStatus('Reload this page to restart face tracking.');
+            console.error('Eyebrow face tracking failed.', error);
+        }
+
+        function predictLoop() {
+            if (!faceLandmarker || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+                frameRequest = requestAnimationFrame(predictLoop);
+                return;
+            }
+
+            try {
+                const now = performance.now();
+                const results = faceLandmarker.detectForVideo(video, now);
+                const landmarks = results.faceLandmarks?.[0];
+                const categories = results.faceBlendshapes?.[0]?.categories;
+
+                if (!landmarks || !categories) {
+                    latestFeatures = null;
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    expressionState.textContent = 'Face not detected';
+                    matchSince = 0;
+                    if (calibrationStartedAt && now - calibrationStartedAt > 5000) finishCalibration();
+                    if (practiceActive) setPracticeStatus('Keep your face visible in the camera. Your sentence is waiting.');
+                } else {
+                    drawEyebrowLandmarks(landmarks);
+                    latestFeatures = readFeatures(categories);
+                    const expression = expressionFor(latestFeatures);
+                    expressionState.textContent = expression;
+                    if (calibrationStartedAt) updateCalibration(latestFeatures, now);
+                    updatePractice(expression, now);
+                    if (!calibrationStartedAt && !practiceActive && !neutralBaseline) {
+                        calibrateButton.disabled = false;
+                        setCameraStatus('Face detected. Look at the camera with a relaxed, neutral expression and calibrate.');
+                    } else if (neutralBaseline) {
+                        setCameraStatus('Face tracking is on. Green dots mark the eyebrow landmarks.');
+                    }
+                }
+            } catch (error) {
+                handleTrackingError(error);
+                return;
+            }
+
+            frameRequest = requestAnimationFrame(predictLoop);
+        }
+
+        async function enableCamera() {
+            enableCameraButton.disabled = true;
+            setCameraStatus('Loading the face model…');
+            setPracticeStatus('Please allow camera access when your browser asks.');
+
+            try {
+                if (!FaceLandmarker || !FilesetResolver) {
+                    ({ FaceLandmarker, FilesetResolver } =
+                        await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.2"));
+                }
+                if (!navigator.mediaDevices?.getUserMedia) {
+                    throw new Error('Camera access is unavailable. Use a secure connection (HTTPS) in a supported browser.');
+                }
+
+                const vision = await FilesetResolver.forVisionTasks(
+                    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.2/wasm'
+                );
+                faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+                        delegate: 'GPU'
+                    },
+                    runningMode: 'VIDEO',
+                    numFaces: 1,
+                    outputFaceBlendshapes: true
+                });
+
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+                });
+                video.srcObject = cameraStream;
+                await video.play();
+                calibrateButton.disabled = true;
+                frameRequest = requestAnimationFrame(predictLoop);
+            } catch (error) {
+                enableCameraButton.disabled = false;
+                setCameraStatus(`Could not start camera or face model: ${error.message}`);
+                setPracticeStatus('Check camera permissions and your internet connection, then try again.');
+                console.error('Could not initialize eyebrow practice.', error);
+            }
+        }
+
+        enableCameraButton.addEventListener('click', enableCamera);
+
+        calibrateButton.addEventListener('click', () => {
+            if (!latestFeatures) {
+                setPracticeStatus('No face is visible yet. Center your face in the preview and try again.');
+                return;
+            }
+            calibrationSamples = [];
+            calibrationStartedAt = performance.now();
+            calibrateButton.disabled = true;
+            startPracticeButton.disabled = true;
+            calibrateButton.textContent = 'Calibrating… hold neutral';
+            setPracticeStatus('Hold still with a relaxed, neutral expression while calibration samples your face.');
+        });
+
+        practiceSetup.addEventListener('submit', event => {
+            event.preventDefault();
+            learnerName = learnerNameInput.value.trim();
+            if (!learnerName) {
+                learnerNameInput.setCustomValidity('Enter your name to start and receive your certificate.');
+                learnerNameInput.reportValidity();
+                return;
+            }
+            if (!neutralBaseline || !eyebrowSentences?.length) {
+                setPracticeStatus('Camera calibration or sentence data is unavailable. Reload the page and try again.');
+                return;
+            }
+            learnerNameInput.setCustomValidity('');
+            learnerNameInput.disabled = true;
+            sentenceGoalSelect.disabled = true;
+            sentenceGoal = Number(sentenceGoalSelect.value);
+            sentenceGoalDisplay.textContent = String(sentenceGoal);
+            score = 0;
+            scoreDisplay.textContent = '0';
+            previousQuestion = null;
+            chooseQuestion();
+            practiceActive = true;
+            startPracticeButton.disabled = true;
+            setPracticeStatus('Match the sentence with your eyebrows and hold the expression. A hint appears after about 10 seconds. Incorrect attempts do not count against you.');
+        });
+
+        learnerNameInput.addEventListener('input', () => learnerNameInput.setCustomValidity(''));
+
+        playAgainButton.addEventListener('click', () => {
+            document.body.classList.remove('certificate-mode');
+            certificate.hidden = true;
+            score = 0;
+            scoreDisplay.textContent = '0';
+            chooseQuestion();
+            practiceActive = true;
+            setPracticeStatus('Match the sentence with your eyebrows and hold the expression. A hint appears after about 10 seconds. Incorrect attempts do not count against you.');
+        });
+
+        printCertificateButton.addEventListener('click', () => window.print());
+
+        window.addEventListener('pagehide', () => {
+            cancelAnimationFrame(frameRequest);
+            window.clearTimeout(advanceTimeout);
+            window.clearTimeout(hintTimeout);
+            cameraStream?.getTracks().forEach(track => track.stop());
+            faceLandmarker?.close();
+        });
+
+        if (!Array.isArray(eyebrowSentences) || eyebrowSentences.length === 0) {
+            throw new Error('The shared eyebrow sentence list could not be loaded.');
+        }
+    </script>
+</body>
+</html>
