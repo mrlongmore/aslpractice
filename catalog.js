@@ -26,7 +26,7 @@ const games = [
     { title: 'ASL Anchor', description: 'Choose vocabulary topics, take a quiz, and see your results.', url: 'asl_anchor.html', icon: '⚓', tags: ['VOCAB', 'QUIZ'] },
     { title: 'Money Game', description: 'Practice money skills with an interactive register.', url: 'money_register/money_register.html', icon: '💵', tags: ['INTERACTIVE', 'PRACTICE'], type: 'tool' },
     { title: 'Eyebrow Grammar Challenge', description: 'Practice the role of eyebrows in ASL grammar.', url: 'eyebrows.html', icon: '👀', tags: ['GRAMMAR', 'PRACTICE'], type: 'tool' },
-    { title: 'Eyebrow Practice Tool', description: 'Use live facial-expression tracking to practice eyebrow movements for ASL sentences. Wrong attempts do not reduce your score.', url: 'eyebrowstool.html', icon: '🤨', tags: ['GRAMMAR', 'PRACTICE', 'FACE TRACKING'], type: 'tool' },
+    { title: 'Eyebrow Practice Tool', description: 'Use live facial-expression tracking to practice eyebrow movements for ASL sentences. Wrong attempts do not reduce your score.', url: 'eyebrowstool.html', icon: '🤨', tags: ['GRAMMAR', 'PRACTICE', 'FACE TRACKING'], type: 'game' },
     { title: 'Video Practice', description: 'Practice with the ASL video collection.', url: 'videos/videos.html', icon: '🎬', tags: ['PRACTICE'], type: 'tool' }
 ];
 
