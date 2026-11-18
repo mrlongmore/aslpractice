@@ -11309,5 +11309,70 @@
                 }
             }
         ]
+    },
+    "Clothing Opinion Words": {
+        "title": "Clothing Opinion Words",
+        "questions": [
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795026945/kc33ntrp7e80otfxetqe.gif",
+                "options": ["WEIRD", "CUTE", "UGLY", "SILLY"],
+                "correct": 0
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795026920/vc8wyxo56aa4ty6glo3n.gif",
+                "options": ["PRETTY/BEAUTIFUL", "CUTE", "LOOK/APPEARANCE", "ODD/STRANGE"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795026876/cam6qrxw91wdgrj4vpro.gif",
+                "options": ["UGLY", "WEIRD", "FANCY", "CUTE"],
+                "correct": 0
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795026841/f7ssu50waoswurqani0t.gif",
+                "options": ["FORMAL", "ODD/STRANGE", "SILLY", "PRETTY/BEAUTIFUL"],
+                "correct": 2
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795026795/ivyoq0ccjrmpfnqcwqga.gif",
+                "options": ["LOOK-LIKE", "ODD/STRANGE", "FANCY", "UGLY"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795026767/ig9fozai904lkgn0p5am.gif",
+                "options": ["SILLY", "LOOK/APPEARANCE", "WEIRD", "FORMAL"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795023016/h1vkadcw6w34drkpxkjc.gif",
+                "options": ["CUTE", "LOOK-LIKE", "PRETTY/BEAUTIFUL", "UGLY"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795022991/irupvkok5bilekqtezpk.gif",
+                "options": ["ODD/STRANGE", "FORMAL", "SILLY", "LOOK/APPEARANCE"],
+                "correct": 1
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795022965/pdzd6vfp1glzuhrhgdvv.gif",
+                "options": ["FANCY", "WEIRD", "CUTE", "FORMAL"],
+                "correct": 0
+            },
+            {
+                "question": "What is being signed?",
+                "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795022943/mjuxdvdx1harpnv7zaxb.gif",
+                "options": ["UGLY", "PRETTY/BEAUTIFUL", "ODD/STRANGE", "LOOK-LIKE"],
+                "correct": 1
+            }
+        ]
     }
 }

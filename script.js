@@ -13,6 +13,7 @@ let questions_correct = 0;
 let questions_incorrect = 0;
 let questions_total = 0;
 let percentage_correct = 0;
+let quiz_questions = [];
 
 name_modal.classList.add("active");
 
@@ -77,10 +78,14 @@ function shuffleArray(array) {
 // Event listeners for topic button
 document.querySelector('#topic-button').addEventListener('click', () => {
     const selected_topics = [...document.querySelectorAll('input[name="topics"]:checked')].map(checkbox => checkbox.value);
+    if (selected_topics.length === 0) {
+        alert('Please select at least one topic.');
+        return;
+    }
     topic_modal.classList.remove('active');
     quiz_modal.classList.add('active');
     console.log(selected_topics);
-    const quiz_questions = [];
+    quiz_questions = [];
     selected_topics.forEach(topic => {
         if (data[topic] && data[topic].questions) {
             quiz_questions.push(...data[topic].questions);
