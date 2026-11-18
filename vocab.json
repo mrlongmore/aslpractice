@@ -4230,7 +4230,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794858269/mffsibfmaifhhbmxjaji.gif",
-         "options": ["SKILL/SKILLED", "WATER", "SUNDAY", "PENCIL"],
+         "options": ["SKILL/SKILLED", "INEPT", "CHAMP", "BEST"],
          "correct": 0,
          "emoji": "🧠",
          "signParameters": {
@@ -4249,7 +4249,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794858228/xl2uvqnolxo3osy2vm3r.gif",
-         "options": ["MUSEUM", "SUGGEST/RECOMMEND", "COOKIE", "DAD"],
+         "options": ["WHY", "SUGGEST/RECOMMEND", "SERVE/SERVICE", "FINE"],
          "correct": 1,
          "emoji": "💡",
          "signParameters": {
@@ -4268,7 +4268,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794858185/m7vtt1cs48jelyj5fe02.gif",
-         "options": ["CHERRY", "WEDNESDAY", "SERVE/SERVICE", "STAIRS"],
+         "options": ["CHAMP", "WHY", "SERVE/SERVICE", "FAST"],
          "correct": 2,
          "emoji": "🛎️",
          "signParameters": {
@@ -4287,7 +4287,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794858153/jgtoae8bkzxjqmsdthev.gif",
-         "options": ["BLUE", "BOOK", "INEPT", "DINNER"],
+         "options": ["SKILL/SKILLED", "FINE", "INEPT", "CHAMP"],
          "correct": 2,
          "emoji": "🤦",
          "signParameters": {
@@ -4306,7 +4306,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794858101/mir8sd8pxzubucj8nuie.gif",
-         "options": ["SLOW", "HAMBURGER", "LIBRARY", "TUESDAY"],
+         "options": ["SLOW", "FAST", "FINE", "BEST"],
          "correct": 0,
          "emoji": "🐢",
          "signParameters": {
@@ -4325,7 +4325,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794858071/xr7tqwsqhaqxkoypcefd.gif",
-         "options": ["MILK", "FAST", "DOOR", "PUMPKIN"],
+         "options": ["SLOW", "FAST", "CHAMP", "INEPT"],
          "correct": 1,
          "emoji": "⚡",
          "signParameters": {
@@ -4344,7 +4344,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794858047/i8h7btywvkr2697aqmjh.gif",
-         "options": ["TURKEY", "DISGUSTING", "WINDOW", "MATH"],
+         "options": ["AWFUL/TERRIBLE", "DISGUSTING", "DELICIOUS", "SOUR"],
          "correct": 1,
          "emoji": "🤢",
          "signParameters": {
@@ -4363,7 +4363,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794858014/fu8gcaj6sn56sd0ggwde.gif",
-         "options": ["SCHOOL", "GREAT/AMAZING", "LEMON", "CHAIR"],
+         "options": ["BEST", "GREAT/AMAZING", "FINE", "CHAMP"],
          "correct": 1,
          "emoji": "⭐",
          "signParameters": {
@@ -4382,7 +4382,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794857990/i3jy0jf4b6ussvibt8gp.gif",
-         "options": ["CLOSET", "TENNIS", "DELICIOUS", "YELLOW"],
+         "options": ["DISGUSTING", "AWFUL/TERRIBLE", "DELICIOUS", "GREAT/AMAZING"],
          "correct": 2,
          "emoji": "😋",
          "signParameters": {
@@ -4401,7 +4401,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794857952/wbnnzd26nubpg5u8wwsc.gif",
-         "options": ["MIRROR", "AWFUL/TERRIBLE", "MONDAY", "APPLE"],
+         "options": ["WORST", "AWFUL/TERRIBLE", "DISGUSTING", "FINE"],
          "correct": 1,
          "emoji": "😖",
          "signParameters": {
@@ -4420,7 +4420,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794857929/ubhgdzu6uehhem83jepw.gif",
-         "options": ["CHAMP", "FISH", "FLOOR", "TEACHER"],
+         "options": ["CHAMP", "BEST", "GREAT/AMAZING", "SKILL/SKILLED"],
          "correct": 0,
          "emoji": "🏆",
          "signParameters": {
@@ -4439,7 +4439,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794857912/hwm1mhnuuu4at2yjon3o.gif",
-         "options": ["LIGHT", "DORM", "WORST", "SHRIMP"],
+         "options": ["BEST", "GREAT/AMAZING", "WORST", "AWFUL/TERRIBLE"],
          "correct": 2,
          "emoji": "👎",
          "signParameters": {
@@ -4458,7 +4458,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794857895/txz1pogaq7afbl9osvd0.gif",
-         "options": ["BEST", "SHOWER", "PAPER", "GOLF"],
+         "options": ["BEST", "WORST", "GREAT/AMAZING", "FINE"],
          "correct": 0,
          "emoji": "🥇",
          "signParameters": {
@@ -4477,7 +4477,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794867716/y93dl2mxcc8jjvoqxzlp.gif",
-         "options": ["SOUP", "WHY", "POTATO", "GARDEN"],
+         "options": ["SUGGEST/RECOMMEND", "WHY", "SERVE/SERVICE", "FINE"],
          "correct": 1,
          "emoji": "❓",
          "signParameters": {
@@ -4496,7 +4496,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794867849/zmg0kivudg0ucnomuqkd.gif",
-         "options": ["BLUE", "SPICY", "HOUSE", "LIBRARY"],
+         "options": ["SOUR", "SPICY", "DELICIOUS", "AWFUL/TERRIBLE"],
          "correct": 1,
          "emoji": "🌶️",
          "signParameters": {
@@ -4515,7 +4515,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1794867926/i45ziwhqdukgnmvjyoz1.gif",
-         "options": ["BOOK", "SHRIMP", "SOUR", "CHICKEN"],
+         "options": ["SPICY", "DELICIOUS", "SOUR", "DISGUSTING"],
          "correct": 2,
          "emoji": "🍋",
          "signParameters": {
@@ -4534,7 +4534,7 @@
        {
          "question": "What is being signed?",
          "image": "https://media.gimkit.com/image/upload/f_auto,fl_lossy,q_auto/v1795018019/cqche2tpmefyohphfadw.gif",
-         "options": ["FINE", "THURSDAY", "ORANGE", "LOCKER"],
+         "options": ["FINE", "GREAT/AMAZING", "AWFUL/TERRIBLE", "INEPT"],
          "correct": 0,
          "emoji": "👌",
          "signParameters": {
